@@ -97,11 +97,10 @@ document.addEventListener('DOMContentLoaded', () => {
             try {
                 const result = await createTicket(ticketData); // createTicket is from stackby-api.js
                 
-                if (result && result[COLUMN_NAMES.ROW_ID]) { // Check if result is valid and has a rowId (Stackby usually returns the created row object)
-                    // Stackby's response for create is often an array with one element, the created row.
-                    // The actual unique ID might be in a field like "Ticket ID" (if auto-incremented) or just the internal "rowId".
-                    // Let's assume result is the created row object and it might have a 'Ticket ID' field or use rowId.
-                    const displayId = result[COLUMN_NAMES.TICKET_ID] || result[COLUMN_NAMES.ROW_ID];
+                // Corrected check: Stackby returns the created row object directly, which has a top-level 'rowId'.
+                if (result && result.rowId) { 
+                    // For display, prefer a user-defined "Ticket ID" field if it exists in result.fields, otherwise fallback to rowId.
+                    const displayId = (result.fields && result.fields[COLUMN_NAMES.TICKET_ID]) || result.rowId;
                     showMessage(`Ticket submitted successfully! Your Ticket ID is: ${displayId}. You will receive an email confirmation shortly (placeholder).`, 'success');
                     ticketForm.reset(); // Clear the form
                     // Clear individual field errors as well
@@ -111,18 +110,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // Placeholder: Send email confirmation to user.
                     console.log(`Placeholder: Trigger email confirmation for ticket ID ${displayId} to the user.`);
-
-                } else if (result && result.message && result.message.includes("Mock ticket created successfully")) {
-                    // Handling for the mock success message if API is still in mock mode
-                    const displayId = result.id || 'N/A';
-                    showMessage(`Ticket submitted successfully (Mock)! Your Ticket ID is: ${displayId}. You will receive an email confirmation shortly (placeholder).`, 'success');
-                    ticketForm.reset();
-                    showFieldError('title', '');
-                    showFieldError('description', '');
-                    showFieldError('urgency', '');
-                    console.log(`Placeholder: Trigger email confirmation for MOCK ticket ID ${displayId} to the user.`);
                 }
-                
+                // Removed the specific "Mock ticket created successfully" check as API is live.
+                // The generic 'else' block will now handle cases where result is not as expected from a live API.
                 else {
                     console.error('Failed to create ticket or unexpected response:', result);
                     showMessage('Failed to submit ticket. The server returned an unexpected response. Please try again later.', 'error');
