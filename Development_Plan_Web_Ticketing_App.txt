@@ -1,0 +1,133 @@
+# Development Plan: Web Ticketing Application
+
+## 1. Introduction
+
+This document outlines the proposed development plan for the web ticketing application. It breaks down the project into major phases, details the key tasks within each phase, and provides high-level, indicative time estimates. This plan serves as a roadmap for the development lifecycle, from initial setup to deployment.
+
+## 2. Major Development Phases and Tasks
+
+### Phase 1: Project Setup & Backend API Integration (Stackby)
+
+*   **Description:** This foundational phase involves setting up the basic project structure and establishing communication with the Stackby backend for core data operations.
+*   **Key Tasks:**
+    *   Initialize project repository (e.g., Git).
+    *   Define and create the basic front-end project structure:
+        *   HTML files (index.html for user form, admin.html for dashboard).
+        *   CSS directory and initial stylesheets (e.g., `style.css`, `admin_style.css`).
+        *   JavaScript directory and initial script files (e.g., `main.js`, `admin.js`, `api_service.js`).
+    *   Research and understand Stackby API documentation thoroughly (authentication, endpoints for creating, reading, updating, deleting records).
+    *   Develop JavaScript functions/modules to securely connect to the Stackby API. This will involve:
+        *   Implementing API key management (consider using a proxy or serverless function for security if the app is purely client-side, or environment variables if a light backend is used).
+        *   Creating functions for CRUD (Create, Read, Update, Delete) operations for tickets in Stackby. These functions will handle API requests and responses.
+    *   Set up a basic Stackby table (stack) with the necessary columns (e.g., TicketID, Title, Description, Urgency, Status, SubmitterEmail, CreatedAt, UpdatedAt, AssignedTo).
+    *   Initial testing of API connectivity (e.g., create a test ticket, read it, update it, delete it via API calls from JavaScript).
+*   **High-Level Time Estimate:** 1.5 - 2.5 weeks
+
+### Phase 2: User Features Implementation
+
+*   **Description:** This phase focuses on developing the features directly used by end-users to submit and track their tickets.
+*   **Key Tasks:**
+    *   **Ticket Submission Form:**
+        *   Design and develop the HTML structure for the ticket creation form (fields: Request Title, Detailed Description, Urgency Level, Attachments input).
+        *   Style the form using CSS for a user-friendly layout.
+        *   Implement JavaScript to handle form submission:
+            *   Capture form data.
+            *   Perform client-side validation (e.g., required fields, data types, attachment size/type if applicable).
+            *   On successful validation, call the Stackby API function (from Phase 1) to create a new ticket.
+            *   Provide user feedback (e.g., success message, error messages).
+    *   **Automated Email Confirmation (Submission):**
+        *   Implement logic (likely client-side JavaScript initially, potentially moving to a serverless function for robustness or if complex templating/logging is needed) to trigger an email to the user upon successful ticket submission.
+        *   This might involve integrating with an email service API (e.g., SendGrid, Mailgun, or even a simple `mailto:` link if server-side processing is to be avoided, though less reliable for automated confirmations). For robust delivery, a server-side component or service is recommended.
+        *   Draft the content for the submission confirmation email.
+*   **High-Level Time Estimate:** 2 - 3 weeks
+
+### Phase 3: Admin Features Implementation
+
+*   **Description:** This phase involves building the interface and functionalities for administrators to manage tickets.
+*   **Key Tasks:**
+    *   **Ticket Management Dashboard UI:**
+        *   Design and develop the HTML structure for the admin dashboard.
+        *   Layout sections for displaying tickets (e.g., "In Progress," "Completed" or a unified list).
+        *   Style the dashboard using CSS.
+    *   **Ticket Visualization:**
+        *   Implement JavaScript to fetch all tickets from Stackby (using API functions from Phase 1) and display them in the dashboard.
+        *   Present key ticket information clearly (ID, Title, Submitter, Date, Status, Assignee, Urgency).
+    *   **Ticket Sorting:**
+        *   Implement UI elements (e.g., dropdowns, clickable table headers) to allow sorting of tickets by date, urgency, status, etc.
+        *   Add JavaScript logic to re-fetch or re-render the ticket list based on selected sort criteria.
+    *   **Ticket Search:**
+        *   Add a search input field to the dashboard.
+        *   Implement JavaScript logic to filter tickets based on search terms (querying Stackby API or client-side filtering for smaller datasets).
+    *   **Ticket Assignment Logic:**
+        *   Develop UI elements (e.g., a dropdown of collaborators, an "Assign" button) within the ticket detail view or list.
+        *   Implement JavaScript to update the `AssignedTo` field in Stackby for a specific ticket via an API call.
+    *   **Status Update Functionality:**
+        *   Allow admins to change the status of a ticket (e.g., from "New" to "In Progress", "Resolved").
+        *   Implement UI elements (e.g., dropdown menu for status change).
+        *   Update the ticket status in Stackby via an API call.
+*   **High-Level Time Estimate:** 3 - 4 weeks
+
+### Phase 4: Email Notification System (State Changes)
+
+*   **Description:** Develop the system to automatically send email notifications to users and relevant administrators/collaborators when a ticket's state changes.
+*   **Key Tasks:**
+    *   Define triggers for each notification based on ticket state changes (as outlined in the "Email Flow and Ticket State Document").
+    *   Develop back-end logic or serverless functions that:
+        *   Monitor or are triggered by ticket updates in Stackby (Stackby webhooks would be ideal here if available and suitable; otherwise, this logic might need to be integrated into the admin actions that change status).
+        *   Identify the type of status change and the relevant recipient(s).
+        *   Fetch necessary ticket and user data.
+        *   Construct and send the appropriate email using an email service API.
+    *   Draft email templates for each type of notification (e.g., "Ticket In Progress," "Ticket Resolved," "Ticket Assigned to You").
+    *   Ensure emails to users are triggered when admins update statuses (e.g., "Pris en charge," "En cours," "Résolu").
+    *   Ensure assigned collaborators are notified when a ticket is assigned to them.
+*   **High-Level Time Estimate:** 2 - 3 weeks (highly dependent on the chosen email service and complexity of trigger mechanisms)
+
+### Phase 5: Testing & Refinement
+
+*   **Description:** Thoroughly test the application for functionality, usability, and bugs, then refine based on findings.
+*   **Key Tasks:**
+    *   **Unit Testing:**
+        *   Write unit tests for critical JavaScript functions (e.g., API interaction, validation logic, utility functions).
+    *   **Integration Testing:**
+        *   Test the integration between the front-end and Stackby API (e.g., form submission creates a ticket, status updates reflect correctly).
+        *   Test the email notification system (ensure emails are sent correctly with the right content).
+    *   **User Acceptance Testing (UAT):**
+        *   Conduct UAT with a sample group of users (both end-users and administrators).
+        *   Gather feedback on usability, functionality, and overall experience.
+    *   **Bug Fixing:**
+        *   Address any bugs or issues identified during testing phases.
+    *   **Polishing:**
+        *   Refine UI/UX based on feedback.
+        *   Optimize performance if necessary.
+        *   Review code for clarity and maintainability.
+        *   Ensure cross-browser compatibility.
+*   **High-Level Time Estimate:** 2 - 4 weeks
+
+### Phase 6: Deployment
+
+*   **Description:** Prepare the application for live use and deploy it to a web server.
+*   **Key Tasks:**
+    *   **Preparation:**
+        *   Final code review and testing.
+        *   Configuration management (e.g., API keys for production, email service settings).
+        *   Minify JavaScript and CSS files.
+        *   Prepare documentation for deployment and maintenance.
+    *   **Deployment:**
+        *   Choose a hosting platform/web server (e.g., Netlify, Vercel for static sites; or a Node.js environment if a light backend/serverless functions are used extensively).
+        *   Deploy the front-end application files.
+        *   Deploy any serverless functions or backend components.
+        *   Configure domain names and SSL certificates.
+    *   **Post-Deployment Checks:**
+        *   Perform smoke tests on the live environment to ensure everything is working as expected.
+*   **High-Level Time Estimate:** 1 - 2 weeks
+
+## 3. Overall Indicative Timeline
+
+Adding up the lower and upper bounds of the phase estimates:
+
+*   **Lower Bound:** 1.5 + 2 + 3 + 2 + 2 + 1 = **11.5 weeks**
+*   **Upper Bound:** 2.5 + 3 + 4 + 3 + 4 + 2 = **18.5 weeks**
+
+This suggests an overall indicative project timeline of approximately **3 to 5 months**.
+
+**Disclaimer:** These time estimates are high-level and indicative. Actual timelines can vary significantly based on factors such as team size and experience, the complexity of specific features (especially around secure API key handling and the robustness of the email system), availability of Stackby features (like webhooks), the extent of testing required, and feedback received during UAT. A more detailed project plan with specific task breakdowns would be necessary for more accurate scheduling.

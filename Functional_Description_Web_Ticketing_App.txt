@@ -1,0 +1,63 @@
+# Functional Description: Web Ticketing Application
+
+## 1. Introduction
+
+This document outlines the functional specifications for a web-based ticketing application. The application will facilitate the creation, tracking, and management of user requests (tickets) and provide administrative tools for efficient ticket handling.
+
+## 2. User-Facing Features
+
+### 2.1. Ticket Creation Form
+
+Users will be able to submit new requests through a dedicated form with the following fields:
+
+*   **Request Title:** A concise summary of the issue or request.
+*   **Detailed Description:** A comprehensive explanation of the issue, including any relevant context or steps to reproduce.
+*   **Urgency Level:** A selection field to indicate the urgency of the request (e.g., Normal, Urgent). The specific options for urgency levels will be configurable.
+*   **Attachments:** An option to attach a supporting file, such as a screenshot (photo) or a relevant document/link.
+
+### 2.2. Automated Email Confirmations
+
+*   **Submission Confirmation:** Upon successful submission of a new ticket, the user will automatically receive an email confirming that their request has been received and is being processed. This email will typically include a unique ticket ID for future reference.
+
+### 2.3. Email Notifications for Status Changes
+
+*   Users will receive automated email notifications whenever the status of their submitted ticket changes (e.g., when it's assigned, when work begins, when it's resolved, or if more information is required).
+
+## 3. Admin-Facing Features
+
+### 3.1. Ticket Management Dashboard
+
+Administrators will have access to a comprehensive dashboard for managing all submitted tickets. This dashboard will include the following functionalities:
+
+*   **Ticket Visualization:**
+    *   Display of all tickets, categorized as "in progress" or "completed."
+    *   Clear presentation of key ticket information (ID, Title, Submitter, Submission Date, Current Status, Assigned Collaborator, Urgency).
+*   **Ticket Sorting:**
+    *   Ability to sort tickets based on various criteria, such as submission date, urgency level, status, or assigned collaborator.
+*   **Ticket Search:**
+    *   A robust search functionality allowing administrators to find specific tickets based on keywords (in title or description), ticket ID, submitter information, or other relevant fields.
+
+### 3.2. Ticket Status Tracking
+
+*   Administrators will be able to monitor the progress of each ticket through its lifecycle.
+*   The system will clearly indicate the current stage of each ticket (e.g., New, Assigned, In Progress, Awaiting User Response, Resolved, Closed). These stages will be configurable.
+
+### 3.3. Ticket Assignment
+
+*   Administrators will have the capability to assign each ticket to a specific collaborator or team member for handling and resolution.
+*   The system will record who is assigned to each ticket.
+
+### 3.4. Automated Email Notifications to User (Triggered by Admin Actions)
+
+*   When an administrator changes the status of a ticket (e.g., from "New" to "In Progress," or from "In Progress" to "Resolved"), the system will automatically generate and send an email notification to the original requester, informing them of this change in status. This ensures the user is kept up-to-date on the progress of their request.
+
+## 4. Non-Functional Requirements (To be detailed in a separate document)
+
+While this document focuses on functional aspects, non-functional requirements such as security, performance, scalability, and usability will be critical and detailed separately.
+
+## 5. Future Considerations (Optional)
+
+*   Knowledge base integration
+*   Reporting and analytics for ticket trends
+*   User satisfaction surveys post-resolution
+*   Service Level Agreement (SLA) tracking
