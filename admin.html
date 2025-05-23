@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Ticket Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="stylesheet" href="css/admin-style.css"> --> <!-- Optional: for separate admin styles -->
+</head>
+<body>
+    <div class="container dashboard-container">
+        <h1>Ticket Management Dashboard</h1>
+
+        <div id="adminMessageArea" class="message-area" style="display:none;">Loading tickets...</div>
+
+        <div class="controls-area">
+            <div class="filter-group">
+                <label for="statusFilter">Filter by Status:</label>
+                <select id="statusFilter">
+                    <option value="All">All</option>
+                    <option value="New">New</option>
+                    <option value="Acknowledged">Acknowledged</option>
+                    <option value="In Progress">In Progress</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Resolved">Resolved</option>
+                    <option value="Closed">Closed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="urgencyFilter">Filter by Urgency:</label>
+                <select id="urgencyFilter">
+                    <option value="All">All</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <label for="searchInput">Search:</label>
+                <input type="text" id="searchInput" placeholder="Search by title, description...">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table id="ticketTable">
+                <thead>
+                    <tr>
+                        <th data-sort-by="Ticket ID">Ticket ID</th>
+                        <th data-sort-by="Ticket Title">Title</th>
+                        <!-- Omit Submitter for now if not readily available -->
+                        <!-- <th data-sort-by="Submitter">Submitter</th> -->
+                        <th data-sort-by="created_at">Date Submitted</th>
+                        <th data-sort-by="Urgency Level">Urgency</th>
+                        <th data-sort-by="Status">Status</th>
+                        <th data-sort-by="Assigned Collaborator">Assigned To</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="ticketTableBody">
+                    <!-- Ticket rows will be inserted here by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Ticket Detail Modal -->
+    <div id="ticketDetailModal" class="modal" style="display:none;">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeTicketDetailModal()">&times;</span>
+            <h2>Ticket Details</h2>
+            <div id="modalBodyContent">
+                <!-- Content will be populated by JavaScript -->
+                <p><strong>Ticket ID:</strong> <span id="modalTicketId"></span></p>
+                <p><strong>Title:</strong> <span id="modalTicketTitle"></span></p>
+                <p><strong>Full Description:</strong></p>
+                <div id="modalTicketDescription" class="modal-description-box"></div>
+                <p><strong>Urgency:</strong> <span id="modalTicketUrgency"></span></p>
+                <p><strong>Status:</strong> <span id="modalTicketStatus"></span></p>
+                <p><strong>Assigned Collaborator:</strong> <span id="modalTicketAssignee"></span></p>
+                <p><strong>Submission Date:</strong> <span id="modalTicketSubmissionDate"></span></p>
+                <p><strong>Attachment:</strong> <span id="modalTicketAttachment"></span></p>
+                
+                <hr>
+                <h3>Update Ticket</h3>
+                <div class="form-group">
+                    <label for="modalChangeStatus">Change Status:</label>
+                    <select id="modalChangeStatus">
+                        <option value="">-- Select Status --</option>
+                        <option value="New">New</option>
+                        <option value="Acknowledged">Acknowledged (Pris en charge)</option>
+                        <option value="In Progress">In Progress (En cours)</option>
+                        <option value="Pending">Pending (En attente)</option>
+                        <option value="Resolved">Resolved (Résolu)</option>
+                        <option value="Closed">Closed (Fermé)</option>
+                    </select>
+                    <button id="modalSaveStatusButton" class="action-btn">Save Status</button>
+                </div>
+                <div class="form-group">
+                    <label for="modalAssignCollaborator">Assign Collaborator:</label>
+                    <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID">
+                    <button id="modalSaveAssigneeButton" class="action-btn">Save Assignment</button>
+                </div>
+                <div id="modalUserMessageArea" class="message-area" style="display:none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/stackby-api.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>
