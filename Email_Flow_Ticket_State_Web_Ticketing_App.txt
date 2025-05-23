@@ -1,0 +1,144 @@
+# Email Flow and Ticket State Document: Web Ticketing Application
+
+## 1. Introduction
+
+This document defines the lifecycle of a ticket within the web ticketing application, referred to as "Ticket States." It also outlines the automated email notification system designed to keep users and administrators informed about the progress and status of tickets.
+
+## 2. Ticket States
+
+The following states define the lifecycle of a ticket from submission to closure:
+
+*   **Nouveau (New)**
+    *   **Significance:** This is the initial state of a ticket immediately after a user submits it through the ticket creation form. The request has been logged in the system but has not yet been reviewed or assigned by an administrator.
+
+*   **Pris en charge (Acknowledged/Assigned)**
+    *   **Significance:** An administrator has reviewed the new ticket and has either acknowledged its receipt and validity or has assigned it to a specific collaborator or team for resolution. This state indicates that the ticket is now actively in the administrative queue.
+
+*   **En cours (In Progress)**
+    *   **Significance:** The assigned collaborator has commenced active work on resolving the issue or fulfilling the request described in the ticket.
+
+*   **En attente (Pending)**
+    *   **Significance:** The progression of the ticket is temporarily paused because it requires additional information from the user, or it is awaiting a response or action from an external party (e.g., a third-party vendor). The ticket remains open but is not actively being worked on by the collaborator.
+
+*   **Résolu (Resolved)**
+    *   **Significance:** The assigned collaborator has completed all necessary actions to address the issue or request. The solution or outcome should be documented in the ticket. The user will be notified that their issue is considered resolved.
+
+*   **Fermé (Closed)**
+    *   **Significance:** The ticket is considered fully concluded. This state typically follows "Résolu" after a confirmation from the user that they are satisfied with the resolution, or after a predefined period of inactivity if no further issues are reported by the user regarding the resolution. No further work is expected on a closed ticket.
+
+## 3. Email Notifications (User-Focused)
+
+Users (requesters) will receive the following automated email notifications:
+
+*   **3.1. Ticket Submission Confirmation**
+    *   **Trigger:** User successfully submits a new ticket.
+    *   **Recipient:** User who submitted the ticket.
+    *   **Purpose:** To confirm that the request has been successfully received and logged in the system.
+    *   **Content (Key Elements):**
+        *   Confirmation message.
+        *   Unique Ticket ID.
+        *   Summary of the request (Title).
+        *   Date and time of submission.
+        *   Link to view ticket status (if a user portal is available).
+        *   Information that they will be notified of status changes.
+    *   **Mandated by:** "Réception automatique d’un email de confirmation de prise en charge dès la soumission."
+
+*   **3.2. Ticket Status Change: Pris en charge (Acknowledged/Assigned)**
+    *   **Trigger:** An administrator changes the ticket status to "Pris en charge".
+    *   **Recipient:** User who submitted the ticket.
+    *   **Purpose:** To inform the user that their ticket has been acknowledged and is being assigned for action.
+    *   **Content (Key Elements):**
+        *   Notification of status change to "Pris en charge".
+        *   Ticket ID.
+        *   Name of the assigned collaborator/team (if applicable and desired).
+        *   Any initial comments from the admin.
+    *   **Mandated by:** "Réception d’emails de notifications à chaque changement d’étape dans le traitement du ticket" and "Lors de chaque changement d’étape (ex : prise en charge, en cours, résolu), génération automatique d’un email de notification envoyée au demandeur."
+
+*   **3.3. Ticket Status Change: En cours (In Progress)**
+    *   **Trigger:** An administrator or assigned collaborator changes the ticket status to "En cours".
+    *   **Recipient:** User who submitted the ticket.
+    *   **Purpose:** To inform the user that active work has begun on their ticket.
+    *   **Content (Key Elements):**
+        *   Notification of status change to "En cours".
+        *   Ticket ID.
+        *   Expected timeframe for next update or resolution (if available).
+    *   **Mandated by:** "Réception d’emails de notifications à chaque changement d’étape dans le traitement du ticket" and "Lors de chaque changement d’étape (ex : prise en charge, en cours, résolu), génération automatique d’un email de notification envoyée au demandeur."
+
+*   **3.4. Ticket Status Change: En attente (Pending)**
+    *   **Trigger:** An administrator or assigned collaborator changes the ticket status to "En attente".
+    *   **Recipient:** User who submitted the ticket.
+    *   **Purpose:** To inform the user that their ticket is paused, usually because input is required from them or an external entity.
+    *   **Content (Key Elements):**
+        *   Notification of status change to "En attente".
+        *   Ticket ID.
+        *   Reason for the pending state (e.g., "Awaiting your reply," "Waiting for vendor response").
+        *   Clear instructions on what is needed from the user, if anything.
+
+*   **3.5. Ticket Status Change: Résolu (Resolved)**
+    *   **Trigger:** An administrator or assigned collaborator changes the ticket status to "Résolu".
+    *   **Recipient:** User who submitted the ticket.
+    *   **Purpose:** To inform the user that the work on their ticket has been completed and the issue is considered resolved.
+    *   **Content (Key Elements):**
+        *   Notification of status change to "Résolu".
+        *   Ticket ID.
+        *   Summary of the resolution.
+        *   Request for confirmation of resolution or information on how to reopen the ticket if the issue persists.
+        *   Information about automatic closure after a certain period if no response.
+    *   **Mandated by:** "Réception d’emails de notifications à chaque changement d’étape dans le traitement du ticket" and "Lors de chaque changement d’étape (ex : prise en charge, en cours, résolu), génération automatique d’un email de notification envoyée au demandeur."
+
+*   **3.6. Ticket Status Change: Fermé (Closed)**
+    *   **Trigger:** Ticket status changes to "Fermé" (either automatically after a timeout post-resolution or manually by an admin).
+    *   **Recipient:** User who submitted the ticket.
+    *   **Purpose:** To inform the user that their ticket is now officially closed.
+    *   **Content (Key Elements):**
+        *   Notification of status change to "Fermé".
+        *   Ticket ID.
+        *   Final resolution summary (optional).
+        *   Information on how to submit a new ticket if new issues arise.
+
+## 4. Email Notifications (Admin/Collaborator-Focused)
+
+Administrators and assigned collaborators will receive the following automated email notifications:
+
+*   **4.1. New Ticket Created**
+    *   **Trigger:** A new ticket is submitted by a user.
+    *   **Recipient:** A designated admin group email address or specific administrators responsible for initial ticket triage.
+    *   **Purpose:** To promptly inform administrators of new incoming requests so they can be reviewed and assigned.
+    *   **Content (Key Elements):**
+        *   Notification of a new ticket.
+        *   Ticket ID.
+        *   Request Title.
+        *   Submitter information.
+        *   Urgency Level.
+        *   Link to the ticket in the admin dashboard.
+
+*   **4.2. Ticket Assigned to Collaborator**
+    *   **Trigger:** An administrator assigns a ticket to a specific collaborator.
+    *   **Recipient:** The collaborator to whom the ticket has been assigned.
+    *   **Purpose:** To notify the collaborator that a new ticket requires their attention and action.
+    *   **Content (Key Elements):**
+        *   Notification that a ticket has been assigned to them.
+        *   Ticket ID.
+        *   Request Title.
+        *   Submitter information.
+        *   Urgency Level.
+        *   Any notes from the assigning administrator.
+        *   Link to the ticket in the admin dashboard.
+
+*   **4.3. User Responded to a "Pending" Ticket (Optional but Recommended)**
+    *   **Trigger:** A user adds a comment or provides requested information to a ticket that is in the "En attente" state.
+    *   **Recipient:** The collaborator assigned to the ticket.
+    *   **Purpose:** To inform the collaborator that the user has responded, and the ticket may be ready to be moved back to "En cours."
+    *   **Content (Key Elements):**
+        *   Notification of user update.
+        *   Ticket ID.
+        *   Link to the ticket to view the user's update.
+
+## 5. Email Content and Branding
+
+All emails will:
+*   Have a clear and concise subject line, typically including the Ticket ID and a brief status (e.g., "Ticket #12345 - Status Updated to In Progress").
+*   Originate from a consistent, identifiable email address.
+*   Include basic branding elements (e.g., application name or company logo, if applicable).
+*   Provide clear context and necessary details without being overly verbose.
+*   Be professionally worded and free of jargon where possible, especially for user-facing emails.

@@ -1,0 +1,413 @@
+# Cahier des Charges Complet: Web Ticketing Application
+
+This document consolidates all individual specification documents for the Web Ticketing Application.
+
+---
+## Section 1: Functional_Description_Web_Ticketing_App.txt
+---
+
+# Functional Description: Web Ticketing Application
+
+## 1. Introduction
+
+This document outlines the functional specifications for a web-based ticketing application. The application will facilitate the creation, tracking, and management of user requests (tickets) and provide administrative tools for efficient ticket handling.
+
+## 2. User-Facing Features
+
+### 2.1. Ticket Creation Form
+
+Users will be able to submit new requests through a dedicated form with the following fields:
+
+*   **Request Title:** A concise summary of the issue or request.
+*   **Detailed Description:** A comprehensive explanation of the issue, including any relevant context or steps to reproduce.
+*   **Urgency Level:** A selection field to indicate the urgency of the request (e.g., Normal, Urgent). The specific options for urgency levels will be configurable.
+*   **Attachments:** An option to attach a supporting file, such as a screenshot (photo) or a relevant document/link.
+
+### 2.2. Automated Email Confirmations
+
+*   **Submission Confirmation:** Upon successful submission of a new ticket, the user will automatically receive an email confirming that their request has been received and is being processed. This email will typically include a unique ticket ID for future reference.
+
+### 2.3. Email Notifications for Status Changes
+
+*   Users will receive automated email notifications whenever the status of their submitted ticket changes (e.g., when it's assigned, when work begins, when it's resolved, or if more information is required).
+
+## 3. Admin-Facing Features
+
+### 3.1. Ticket Management Dashboard
+
+Administrators will have access to a comprehensive dashboard for managing all submitted tickets. This dashboard will include the following functionalities:
+
+*   **Ticket Visualization:**
+    *   Display of all tickets, categorized as "in progress" or "completed."
+    *   Clear presentation of key ticket information (ID, Title, Submitter, Submission Date, Current Status, Assigned Collaborator, Urgency).
+*   **Ticket Sorting:**
+    *   Ability to sort tickets based on various criteria, such as submission date, urgency level, status, or assigned collaborator.
+*   **Ticket Search:**
+    *   A robust search functionality allowing administrators to find specific tickets based on keywords (in title or description), ticket ID, submitter information, or other relevant fields.
+
+### 3.2. Ticket Status Tracking
+
+*   Administrators will be able to monitor the progress of each ticket through its lifecycle.
+*   The system will clearly indicate the current stage of each ticket (e.g., New, Assigned, In Progress, Awaiting User Response, Resolved, Closed). These stages will be configurable.
+
+### 3.3. Ticket Assignment
+
+*   Administrators will have the capability to assign each ticket to a specific collaborator or team member for handling and resolution.
+*   The system will record who is assigned to each ticket.
+
+### 3.4. Automated Email Notifications to User (Triggered by Admin Actions)
+
+*   When an administrator changes the status of a ticket (e.g., from "New" to "In Progress," or from "In Progress" to "Resolved"), the system will automatically generate and send an email notification to the original requester, informing them of this change in status. This ensures the user is kept up-to-date on the progress of their request.
+
+## 4. Non-Functional Requirements (To be detailed in a separate document)
+
+While this document focuses on functional aspects, non-functional requirements such as security, performance, scalability, and usability will be critical and detailed separately.
+
+## 5. Future Considerations (Optional)
+
+*   Knowledge base integration
+*   Reporting and analytics for ticket trends
+*   User satisfaction surveys post-resolution
+*   Service Level Agreement (SLA) tracking
+
+---
+## Section 2: Technical_Description_Web_Ticketing_App.txt
+---
+
+# Technical Description: Web Ticketing Application
+
+## 1. Introduction
+
+This document outlines the technical specifications for the web-based ticketing application. It details the technologies to be used for the front-end, back-end (data storage and management), and accessibility requirements, based on the "Contraintes techniques" provided.
+
+## 2. Front-End Technologies
+
+The user interface of the web ticketing application will be developed using the following standard web technologies:
+
+*   **JavaScript:** This will be the primary language for client-side scripting. It will handle dynamic content updates, user interactions (form submissions, button clicks, etc.), client-side validation, and asynchronous communication with the back-end API (Stackby).
+*   **HTML (HTML5):** The structure and content of all web pages within the application will be defined using the latest version of HTML. This includes forms, text display, and overall page layout.
+*   **CSS3:** Cascading Style Sheets version 3 will be used for styling the application. This includes visual presentation, layout, responsiveness, and ensuring a consistent and user-friendly design across different devices and screen sizes.
+
+## 3. Back-End: Data Storage and Management
+
+The persistence and management of ticket data will be handled using Stackby:
+
+*   **Stackby as a Database ("Utilisation de Stackby"):** Stackby will serve as the central repository for all data related to tickets. This includes information such as ticket ID, title, description, urgency, status, attachments, user details, timestamps, and assigned collaborator.
+*   **Stackby API Integration ("via API pour stockage et gestion des tickets"):** The front-end application will interact with Stackby exclusively through its official API. All operations such as creating new tickets, retrieving lists of tickets, updating ticket statuses, searching for tickets, and managing attachments will be performed by making authenticated API calls to the Stackby platform. This decouples the front-end logic from the direct data storage mechanism.
+
+## 4. Accessibility
+
+The application must be accessible and usable via a standard web browser ("L’application doit être accessible et utilisable via un navigateur web standard"). This implies:
+
+*   **Cross-Browser Compatibility:** The application will be tested and ensured to function correctly on the latest stable versions of major web browsers (e.g., Google Chrome, Mozilla Firefox, Apple Safari, Microsoft Edge).
+*   **Standard Web Protocols:** The application will operate over standard HTTP/HTTPS protocols.
+*   **No Specialized Plugins:** Users should not be required to install any specialized browser plugins or extensions to use the application. Basic browser capabilities (HTML, CSS, JavaScript enabled) will be sufficient.
+*   **Responsive Design (Recommended):** To enhance usability, the application should ideally incorporate responsive design principles, allowing the interface to adapt gracefully to different screen sizes and orientations (desktop, tablet, mobile). This aligns with the spirit of being "utilisable via un navigateur web standard" in modern web contexts.
+
+## 5. Security Considerations (High-Level)
+
+While detailed security measures will be part of a dedicated design phase, the chosen technologies imply certain considerations:
+
+*   **API Key Management:** Secure storage and handling of the Stackby API key will be crucial. Since the front-end is client-side, directly embedding the API key is not recommended. An intermediary serverless function or a lightweight back-end might be needed to protect the API key.
+*   **HTTPS:** All communication between the client (browser) and Stackby API should be over HTTPS to encrypt data in transit.
+*   **Input Validation:** Both client-side (JavaScript) and potentially server-side (if an intermediary back-end is introduced) validation of user inputs will be necessary to prevent common web vulnerabilities (e.g., Cross-Site Scripting - XSS).
+
+## 6. Development Environment and Tools (To be defined)
+
+Specific development tools, frameworks (if any, e.g., a JavaScript framework/library like React, Vue, or Angular for the front-end, though not explicitly mandated), and version control systems (e.g., Git) will be chosen by the development team. This document focuses on the core technologies mandated by the "Contraintes techniques".
+
+---
+## Section 3: Development_Plan_Web_Ticketing_App.txt
+---
+
+# Development Plan: Web Ticketing Application
+
+## 1. Introduction
+
+This document outlines the proposed development plan for the web ticketing application. It breaks down the project into major phases, details the key tasks within each phase, and provides high-level, indicative time estimates. This plan serves as a roadmap for the development lifecycle, from initial setup to deployment.
+
+## 2. Major Development Phases and Tasks
+
+### Phase 1: Project Setup & Backend API Integration (Stackby)
+
+*   **Description:** This foundational phase involves setting up the basic project structure and establishing communication with the Stackby backend for core data operations.
+*   **Key Tasks:**
+    *   Initialize project repository (e.g., Git).
+    *   Define and create the basic front-end project structure:
+        *   HTML files (index.html for user form, admin.html for dashboard).
+        *   CSS directory and initial stylesheets (e.g., `style.css`, `admin_style.css`).
+        *   JavaScript directory and initial script files (e.g., `main.js`, `admin.js`, `api_service.js`).
+    *   Research and understand Stackby API documentation thoroughly (authentication, endpoints for creating, reading, updating, deleting records).
+    *   Develop JavaScript functions/modules to securely connect to the Stackby API. This will involve:
+        *   Implementing API key management (consider using a proxy or serverless function for security if the app is purely client-side, or environment variables if a light backend is used).
+        *   Creating functions for CRUD (Create, Read, Update, Delete) operations for tickets in Stackby. These functions will handle API requests and responses.
+    *   Set up a basic Stackby table (stack) with the necessary columns (e.g., TicketID, Title, Description, Urgency, Status, SubmitterEmail, CreatedAt, UpdatedAt, AssignedTo).
+    *   Initial testing of API connectivity (e.g., create a test ticket, read it, update it, delete it via API calls from JavaScript).
+*   **High-Level Time Estimate:** 1.5 - 2.5 weeks
+
+### Phase 2: User Features Implementation
+
+*   **Description:** This phase focuses on developing the features directly used by end-users to submit and track their tickets.
+*   **Key Tasks:**
+    *   **Ticket Submission Form:**
+        *   Design and develop the HTML structure for the ticket creation form (fields: Request Title, Detailed Description, Urgency Level, Attachments input).
+        *   Style the form using CSS for a user-friendly layout.
+        *   Implement JavaScript to handle form submission:
+            *   Capture form data.
+            *   Perform client-side validation (e.g., required fields, data types, attachment size/type if applicable).
+            *   On successful validation, call the Stackby API function (from Phase 1) to create a new ticket.
+            *   Provide user feedback (e.g., success message, error messages).
+    *   **Automated Email Confirmation (Submission):**
+        *   Implement logic (likely client-side JavaScript initially, potentially moving to a serverless function for robustness or if complex templating/logging is needed) to trigger an email to the user upon successful ticket submission.
+        *   This might involve integrating with an email service API (e.g., SendGrid, Mailgun, or even a simple `mailto:` link if server-side processing is to be avoided, though less reliable for automated confirmations). For robust delivery, a server-side component or service is recommended.
+        *   Draft the content for the submission confirmation email.
+*   **High-Level Time Estimate:** 2 - 3 weeks
+
+### Phase 3: Admin Features Implementation
+
+*   **Description:** This phase involves building the interface and functionalities for administrators to manage tickets.
+*   **Key Tasks:**
+    *   **Ticket Management Dashboard UI:**
+        *   Design and develop the HTML structure for the admin dashboard.
+        *   Layout sections for displaying tickets (e.g., "In Progress," "Completed" or a unified list).
+        *   Style the dashboard using CSS.
+    *   **Ticket Visualization:**
+        *   Implement JavaScript to fetch all tickets from Stackby (using API functions from Phase 1) and display them in the dashboard.
+        *   Present key ticket information clearly (ID, Title, Submitter, Date, Status, Assignee, Urgency).
+    *   **Ticket Sorting:**
+        *   Implement UI elements (e.g., dropdowns, clickable table headers) to allow sorting of tickets by date, urgency, status, etc.
+        *   Add JavaScript logic to re-fetch or re-render the ticket list based on selected sort criteria.
+    *   **Ticket Search:**
+        *   Add a search input field to the dashboard.
+        *   Implement JavaScript logic to filter tickets based on search terms (querying Stackby API or client-side filtering for smaller datasets).
+    *   **Ticket Assignment Logic:**
+        *   Develop UI elements (e.g., a dropdown of collaborators, an "Assign" button) within the ticket detail view or list.
+        *   Implement JavaScript to update the `AssignedTo` field in Stackby for a specific ticket via an API call.
+    *   **Status Update Functionality:**
+        *   Allow admins to change the status of a ticket (e.g., from "New" to "In Progress", "Resolved").
+        *   Implement UI elements (e.g., dropdown menu for status change).
+        *   Update the ticket status in Stackby via an API call.
+*   **High-Level Time Estimate:** 3 - 4 weeks
+
+### Phase 4: Email Notification System (State Changes)
+
+*   **Description:** Develop the system to automatically send email notifications to users and relevant administrators/collaborators when a ticket's state changes.
+*   **Key Tasks:**
+    *   Define triggers for each notification based on ticket state changes (as outlined in the "Email Flow and Ticket State Document").
+    *   Develop back-end logic or serverless functions that:
+        *   Monitor or are triggered by ticket updates in Stackby (Stackby webhooks would be ideal here if available and suitable; otherwise, this logic might need to be integrated into the admin actions that change status).
+        *   Identify the type of status change and the relevant recipient(s).
+        *   Fetch necessary ticket and user data.
+        *   Construct and send the appropriate email using an email service API.
+    *   Draft email templates for each type of notification (e.g., "Ticket In Progress," "Ticket Resolved," "Ticket Assigned to You").
+    *   Ensure emails to users are triggered when admins update statuses (e.g., "Pris en charge," "En cours," "Résolu").
+    *   Ensure assigned collaborators are notified when a ticket is assigned to them.
+*   **High-Level Time Estimate:** 2 - 3 weeks (highly dependent on the chosen email service and complexity of trigger mechanisms)
+
+### Phase 5: Testing & Refinement
+
+*   **Description:** Thoroughly test the application for functionality, usability, and bugs, then refine based on findings.
+*   **Key Tasks:**
+    *   **Unit Testing:**
+        *   Write unit tests for critical JavaScript functions (e.g., API interaction, validation logic, utility functions).
+    *   **Integration Testing:**
+        *   Test the integration between the front-end and Stackby API (e.g., form submission creates a ticket, status updates reflect correctly).
+        *   Test the email notification system (ensure emails are sent correctly with the right content).
+    *   **User Acceptance Testing (UAT):**
+        *   Conduct UAT with a sample group of users (both end-users and administrators).
+        *   Gather feedback on usability, functionality, and overall experience.
+    *   **Bug Fixing:**
+        *   Address any bugs or issues identified during testing phases.
+    *   **Polishing:**
+        *   Refine UI/UX based on feedback.
+        *   Optimize performance if necessary.
+        *   Review code for clarity and maintainability.
+        *   Ensure cross-browser compatibility.
+*   **High-Level Time Estimate:** 2 - 4 weeks
+
+### Phase 6: Deployment
+
+*   **Description:** Prepare the application for live use and deploy it to a web server.
+*   **Key Tasks:**
+    *   **Preparation:**
+        *   Final code review and testing.
+        *   Configuration management (e.g., API keys for production, email service settings).
+        *   Minify JavaScript and CSS files.
+        *   Prepare documentation for deployment and maintenance.
+    *   **Deployment:**
+        *   Choose a hosting platform/web server (e.g., Netlify, Vercel for static sites; or a Node.js environment if a light backend/serverless functions are used extensively).
+        *   Deploy the front-end application files.
+        *   Deploy any serverless functions or backend components.
+        *   Configure domain names and SSL certificates.
+    *   **Post-Deployment Checks:**
+        *   Perform smoke tests on the live environment to ensure everything is working as expected.
+*   **High-Level Time Estimate:** 1 - 2 weeks
+
+## 3. Overall Indicative Timeline
+
+Adding up the lower and upper bounds of the phase estimates:
+
+*   **Lower Bound:** 1.5 + 2 + 3 + 2 + 2 + 1 = **11.5 weeks**
+*   **Upper Bound:** 2.5 + 3 + 4 + 3 + 4 + 2 = **18.5 weeks**
+
+This suggests an overall indicative project timeline of approximately **3 to 5 months**.
+
+**Disclaimer:** These time estimates are high-level and indicative. Actual timelines can vary significantly based on factors such as team size and experience, the complexity of specific features (especially around secure API key handling and the robustness of the email system), availability of Stackby features (like webhooks), the extent of testing required, and feedback received during UAT. A more detailed project plan with specific task breakdowns would be necessary for more accurate scheduling.
+
+---
+## Section 4: Mockup_Wireframe_Descriptions_Web_Ticketing_App.txt
+---
+
+# Mockup/Wireframe Descriptions: Web Ticketing Application
+
+## 1. Introduction
+
+This document provides a textual description of the mockups/wireframes for the key interfaces of the web ticketing application. These descriptions serve as a blueprint for the visual layout and user interaction elements of the application, focusing on clarity and functionality.
+
+## 2. User - Ticket Submission Form
+
+*   **Page Title:** "Submit a New Support Ticket"
+    *   *Description:* Clearly displayed at the top of the page, e.g., using an `<h1>` tag.
+
+*   **Form Layout:**
+    *   A clean, user-friendly, single-column layout for simplicity.
+    *   Each form field will have a distinct label positioned directly above its corresponding input element.
+    *   Mandatory fields will be clearly indicated with a visual marker (e.g., an asterisk "*") next to the label.
+    *   Helpful placeholder text will guide the user within input fields where appropriate.
+
+*   **Fields:**
+
+    *   **1. Titre de la demande (Ticket Title) \***
+        *   **Label:** "Titre de la demande *"
+        *   **Input Type:** Standard single-line text input field (`<input type="text">`).
+        *   **Placeholder Text (Example):** "e.g., Unable to access user account"
+        *   **Constraints:** Mandatory. Recommended maximum length of 150 characters to ensure conciseness.
+
+    *   **2. Description détaillée (Detailed Description) \***
+        *   **Label:** "Description détaillée *"
+        *   **Input Type:** Multi-line text area (`<textarea>`).
+        *   **Sizing:** Initial display of approximately 6-8 rows high, with vertical resizing enabled for the user.
+        *   **Formatting:**
+            *   *Specification:* Support for Markdown syntax is specified. A small note or link to Markdown syntax guide can be provided below the text area (e.g., "You can use Markdown for formatting."). The application will be responsible for rendering this Markdown when the ticket is viewed by an admin.
+        *   **Placeholder Text (Example):** "Please provide a full description of your issue. Include any steps you've already tried, error messages encountered, and any other relevant details."
+        *   **Constraints:** Mandatory.
+
+    *   **3. Caractère d’urgence (Urgency Level) \***
+        *   **Label:** "Caractère d’urgence *"
+        *   **Input Type:** Dropdown select menu (`<select>`).
+        *   **Options:**
+            *   "Normal" (Selected by default)
+            *   "Urgent"
+        *   **Constraints:** Mandatory.
+
+    *   **4. Pièce jointe (Attachment)**
+        *   **Label:** "Pièce jointe (Photo or Link)"
+        *   **Input Type:** File input field (`<input type="file">`).
+        *   **Button Text (Rendered by browser):** Typically "Choose File" or "Browse...".
+        *   **Helper Text (Positioned below the input field):**
+            "You can attach one photo (e.g., .jpg, .png, .gif; max 5MB). If you have a relevant link, please paste it directly into the 'Detailed Description' field above."
+        *   **Constraints:**
+            *   **File Types (for photo):** Primarily images (e.g., `image/jpeg`, `image/png`, `image/gif`). Client-side filtering via the `accept` attribute on the input field.
+            *   **Max File Size (for photo):** e.g., 5MB. This will require client-side validation (JavaScript) and potentially server-side validation if a direct upload to a service is involved.
+            *   **Single File:** The interface will be designed for a single file attachment per ticket submission.
+            *   **Links:** Users are instructed to paste links into the description field.
+
+*   **Button:**
+    *   **Text:** "Submit Ticket"
+    *   **Type:** `<button type="submit">`
+    *   **Position:** Clearly visible below all form fields, typically centered or aligned to the right of the form container.
+    *   **Action:**
+        *   Client-side validation is triggered on click.
+        *   If validation fails, appropriate error messages are displayed near the invalid fields.
+        *   If validation passes, the form data (including any file) is prepared for submission to the backend (Stackby API).
+        *   Upon successful submission, a confirmation message is displayed to the user (e.g., "Your ticket has been submitted successfully. Your Ticket ID is [ID]. You will receive an email confirmation shortly.").
+
+## 3. Administrator - Ticket Management View
+
+*   **Page Title:** "Ticket Dashboard"
+    *   *Description:* Prominently displayed at the top of the admin interface, e.g., using an `<h1>` tag.
+
+*   **Overall Layout:**
+    *   The top section will feature controls for filtering and searching tickets.
+    *   The main content area below will display the list of tickets in a tabular format.
+    *   A modal dialog or a dedicated separate view/pane will be used for the "Detailed Ticket View."
+
+*   **Main Sections/Features:**
+
+    *   **3.1. Filters and Search Area**
+        *   **Layout:** A horizontal bar or section located directly above the ticket list table.
+        *   **Filter Controls:**
+            *   **Status Filter:**
+                *   **Label:** "Status:" (or visually implied by grouping)
+                *   **Input Type:** Dropdown select menu (`<select>`) or a set of toggle buttons.
+                *   **Options:** "All", "New", "Assigned", "In Progress", "Pending", "Resolved", "Closed". "All" is the default selected option.
+            *   **Urgency Filter:**
+                *   **Label:** "Urgency:" (or visually implied)
+                *   **Input Type:** Dropdown select menu (`<select>`) or a set of toggle buttons.
+                *   **Options:** "All", "Normal", "Urgent". "All" is the default selected option.
+        *   **Search Bar:**
+            *   **Input Type:** Standard text input field (`<input type="search">` or `type="text"`).
+            *   **Placeholder Text:** "Search by Title, Description, Ticket ID..."
+            *   **Associated Button (Optional):** A "Search" button, or search can be triggered dynamically as the admin types (debounced for performance).
+            *   **Action:** Filters the displayed ticket list based on matching keywords in the specified fields.
+
+    *   **3.2. Ticket List Table**
+        *   **Layout:** A clear, responsive HTML table (`<table>`).
+        *   **Columns (Table Headers `<th>` will allow sorting):**
+            *   **Ticket ID:** (e.g., "ID") - Text. Sortable.
+            *   **Title:** (e.g., "Titre") - Text, potentially truncated with an ellipsis if too long. This title will be a clickable link to open the "Detailed Ticket View".
+            *   **Submitter:** (e.g., "Demandeur") - Text (User's name or email).
+            *   **Date Submitted:** (e.g., "Date Soumission") - Date and Time. Sortable (default sort should be by this column, newest first).
+            *   **Urgency:** (e.g., "Urgence") - Text ("Normal", "Urgent"). Sortable.
+            *   **Status:** (e.g., "Statut") - Text (e.g., "New", "In Progress"). Sortable.
+            *   **Assigned To:** (e.g., "Assigné à") - Text (Collaborator's name or "Unassigned"). Sortable.
+        *   **Sorting Indicators:** Visual cues (e.g., up/down arrows) on sortable column headers to indicate current sort column and direction.
+        *   **Actions per ticket:**
+            *   These will be presented as a group of small icon buttons or a dropdown menu within a dedicated "Actions" column for each row. This keeps the table clean.
+            *   **1. View Details:** (Icon: e.g., an eye, magnifying glass).
+                *   *Action:* Opens the "Detailed Ticket View" for that ticket. (Alternative to clicking the ticket title).
+            *   **2. Assign Collaborator:** (Icon: e.g., a user-plus icon).
+                *   *Action:* Opens a small modal or an inline dropdown list.
+                *   *Interface:* Dropdown select populated with available collaborators. An "Assign" or "Update" button confirms the selection.
+            *   **3. Change Status:** (Icon: e.g., an edit/pencil icon).
+                *   *Action:* Opens a small modal or an inline dropdown list.
+                *   *Interface:* Dropdown select populated with available ticket statuses. A "Change" or "Update" button confirms the selection.
+        *   **Pagination:** If the number of tickets is large, pagination controls (e.g., "Previous", "Next", page numbers) will be displayed below the table.
+
+    *   **3.3. Detailed Ticket View**
+        *   **Trigger:** Accessed by clicking a ticket's title or the "View Details" action icon from the ticket list.
+        *   **Layout:** Typically a modal dialog that overlays the dashboard, or it could be a master-detail view where the list remains visible. The modal will have a clear "Close" (X) button.
+        *   **Content Display:**
+            *   **Static Information (clearly labeled):**
+                *   Ticket ID
+                *   Title
+                *   Detailed Description (Markdown rendered as HTML)
+                *   Urgency Level
+                *   Attachment(s):
+                    *   If a photo: Display a thumbnail of the photo. Clicking the thumbnail opens the photo in a larger preview or new tab.
+                    *   If a link was intended (pasted in description): This part of the description should be clearly visible.
+                *   Submitter Information (Name/Email)
+                *   Submission Date
+                *   Last Updated Date
+            *   **History of Status Changes:**
+                *   A chronological log displayed in a section (e.g., "Ticket History").
+                *   Each entry shows: Timestamp, Old Status -> New Status, and name of Admin/Collaborator who made the change (if tracked).
+        *   **Interactive Elements/Interfaces:**
+            *   **Assign/Reassign Collaborator:**
+                *   **Label:** "Assigned Collaborator:"
+                *   **Interface:** A dropdown select menu (`<select>`) pre-filled with the current assignee. Contains a list of all available collaborators and an "Unassigned" option.
+                *   **Action:** An "Update Assignment" button next to the dropdown to save the change.
+            *   **Change Ticket Status:**
+                *   **Label:** "Ticket Status:"
+                *   **Interface:** A dropdown select menu (`<select>`) pre-filled with the current status. Contains all possible ticket statuses.
+                *   **Action:** An "Update Status" button next to the dropdown to save the change.
+            *   **Interface to Add Internal Notes (Admin/Collaborator Only):**
+                *   **Section Title:** "Internal Notes"
+                *   **Display Area:** Previously added notes are displayed in reverse chronological order. Each note shows the note content, author (Admin/Collaborator name), and timestamp.
+                *   **Input:** A text area (`<textarea>`) for adding new notes.
+                *   **Button:** "Add Note" button below the text area to submit the new note. Notes are not visible to the end-user.
+
+This textual description of mockups/wireframes is intended to guide the UI/UX design and front-end development, ensuring all required features are accounted for in the visual structure.
+---
+End of Cahier des Charges Complet.
+---

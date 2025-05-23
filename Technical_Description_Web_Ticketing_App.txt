@@ -1,0 +1,41 @@
+# Technical Description: Web Ticketing Application
+
+## 1. Introduction
+
+This document outlines the technical specifications for the web-based ticketing application. It details the technologies to be used for the front-end, back-end (data storage and management), and accessibility requirements, based on the "Contraintes techniques" provided.
+
+## 2. Front-End Technologies
+
+The user interface of the web ticketing application will be developed using the following standard web technologies:
+
+*   **JavaScript:** This will be the primary language for client-side scripting. It will handle dynamic content updates, user interactions (form submissions, button clicks, etc.), client-side validation, and asynchronous communication with the back-end API (Stackby).
+*   **HTML (HTML5):** The structure and content of all web pages within the application will be defined using the latest version of HTML. This includes forms, text display, and overall page layout.
+*   **CSS3:** Cascading Style Sheets version 3 will be used for styling the application. This includes visual presentation, layout, responsiveness, and ensuring a consistent and user-friendly design across different devices and screen sizes.
+
+## 3. Back-End: Data Storage and Management
+
+The persistence and management of ticket data will be handled using Stackby:
+
+*   **Stackby as a Database ("Utilisation de Stackby"):** Stackby will serve as the central repository for all data related to tickets. This includes information such as ticket ID, title, description, urgency, status, attachments, user details, timestamps, and assigned collaborator.
+*   **Stackby API Integration ("via API pour stockage et gestion des tickets"):** The front-end application will interact with Stackby exclusively through its official API. All operations such as creating new tickets, retrieving lists of tickets, updating ticket statuses, searching for tickets, and managing attachments will be performed by making authenticated API calls to the Stackby platform. This decouples the front-end logic from the direct data storage mechanism.
+
+## 4. Accessibility
+
+The application must be accessible and usable via a standard web browser ("L’application doit être accessible et utilisable via un navigateur web standard"). This implies:
+
+*   **Cross-Browser Compatibility:** The application will be tested and ensured to function correctly on the latest stable versions of major web browsers (e.g., Google Chrome, Mozilla Firefox, Apple Safari, Microsoft Edge).
+*   **Standard Web Protocols:** The application will operate over standard HTTP/HTTPS protocols.
+*   **No Specialized Plugins:** Users should not be required to install any specialized browser plugins or extensions to use the application. Basic browser capabilities (HTML, CSS, JavaScript enabled) will be sufficient.
+*   **Responsive Design (Recommended):** To enhance usability, the application should ideally incorporate responsive design principles, allowing the interface to adapt gracefully to different screen sizes and orientations (desktop, tablet, mobile). This aligns with the spirit of being "utilisable via un navigateur web standard" in modern web contexts.
+
+## 5. Security Considerations (High-Level)
+
+While detailed security measures will be part of a dedicated design phase, the chosen technologies imply certain considerations:
+
+*   **API Key Management:** Secure storage and handling of the Stackby API key will be crucial. Since the front-end is client-side, directly embedding the API key is not recommended. An intermediary serverless function or a lightweight back-end might be needed to protect the API key.
+*   **HTTPS:** All communication between the client (browser) and Stackby API should be over HTTPS to encrypt data in transit.
+*   **Input Validation:** Both client-side (JavaScript) and potentially server-side (if an intermediary back-end is introduced) validation of user inputs will be necessary to prevent common web vulnerabilities (e.g., Cross-Site Scripting - XSS).
+
+## 6. Development Environment and Tools (To be defined)
+
+Specific development tools, frameworks (if any, e.g., a JavaScript framework/library like React, Vue, or Angular for the front-end, though not explicitly mandated), and version control systems (e.g., Git) will be chosen by the development team. This document focuses on the core technologies mandated by the "Contraintes techniques".

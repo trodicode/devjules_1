@@ -1,0 +1,150 @@
+# Mockup/Wireframe Descriptions: Web Ticketing Application
+
+## 1. Introduction
+
+This document provides a textual description of the mockups/wireframes for the key interfaces of the web ticketing application. These descriptions serve as a blueprint for the visual layout and user interaction elements of the application, focusing on clarity and functionality.
+
+## 2. User - Ticket Submission Form
+
+*   **Page Title:** "Submit a New Support Ticket"
+    *   *Description:* Clearly displayed at the top of the page, e.g., using an `<h1>` tag.
+
+*   **Form Layout:**
+    *   A clean, user-friendly, single-column layout for simplicity.
+    *   Each form field will have a distinct label positioned directly above its corresponding input element.
+    *   Mandatory fields will be clearly indicated with a visual marker (e.g., an asterisk "*") next to the label.
+    *   Helpful placeholder text will guide the user within input fields where appropriate.
+
+*   **Fields:**
+
+    *   **1. Titre de la demande (Ticket Title) \***
+        *   **Label:** "Titre de la demande *"
+        *   **Input Type:** Standard single-line text input field (`<input type="text">`).
+        *   **Placeholder Text (Example):** "e.g., Unable to access user account"
+        *   **Constraints:** Mandatory. Recommended maximum length of 150 characters to ensure conciseness.
+
+    *   **2. Description détaillée (Detailed Description) \***
+        *   **Label:** "Description détaillée *"
+        *   **Input Type:** Multi-line text area (`<textarea>`).
+        *   **Sizing:** Initial display of approximately 6-8 rows high, with vertical resizing enabled for the user.
+        *   **Formatting:**
+            *   *Specification:* Support for Markdown syntax is specified. A small note or link to Markdown syntax guide can be provided below the text area (e.g., "You can use Markdown for formatting."). The application will be responsible for rendering this Markdown when the ticket is viewed by an admin.
+        *   **Placeholder Text (Example):** "Please provide a full description of your issue. Include any steps you've already tried, error messages encountered, and any other relevant details."
+        *   **Constraints:** Mandatory.
+
+    *   **3. Caractère d’urgence (Urgency Level) \***
+        *   **Label:** "Caractère d’urgence *"
+        *   **Input Type:** Dropdown select menu (`<select>`).
+        *   **Options:**
+            *   "Normal" (Selected by default)
+            *   "Urgent"
+        *   **Constraints:** Mandatory.
+
+    *   **4. Pièce jointe (Attachment)**
+        *   **Label:** "Pièce jointe (Photo or Link)"
+        *   **Input Type:** File input field (`<input type="file">`).
+        *   **Button Text (Rendered by browser):** Typically "Choose File" or "Browse...".
+        *   **Helper Text (Positioned below the input field):**
+            "You can attach one photo (e.g., .jpg, .png, .gif; max 5MB). If you have a relevant link, please paste it directly into the 'Detailed Description' field above."
+        *   **Constraints:**
+            *   **File Types (for photo):** Primarily images (e.g., `image/jpeg`, `image/png`, `image/gif`). Client-side filtering via the `accept` attribute on the input field.
+            *   **Max File Size (for photo):** e.g., 5MB. This will require client-side validation (JavaScript) and potentially server-side validation if a direct upload to a service is involved.
+            *   **Single File:** The interface will be designed for a single file attachment per ticket submission.
+            *   **Links:** Users are instructed to paste links into the description field.
+
+*   **Button:**
+    *   **Text:** "Submit Ticket"
+    *   **Type:** `<button type="submit">`
+    *   **Position:** Clearly visible below all form fields, typically centered or aligned to the right of the form container.
+    *   **Action:**
+        *   Client-side validation is triggered on click.
+        *   If validation fails, appropriate error messages are displayed near the invalid fields.
+        *   If validation passes, the form data (including any file) is prepared for submission to the backend (Stackby API).
+        *   Upon successful submission, a confirmation message is displayed to the user (e.g., "Your ticket has been submitted successfully. Your Ticket ID is [ID]. You will receive an email confirmation shortly.").
+
+## 3. Administrator - Ticket Management View
+
+*   **Page Title:** "Ticket Dashboard"
+    *   *Description:* Prominently displayed at the top of the admin interface, e.g., using an `<h1>` tag.
+
+*   **Overall Layout:**
+    *   The top section will feature controls for filtering and searching tickets.
+    *   The main content area below will display the list of tickets in a tabular format.
+    *   A modal dialog or a dedicated separate view/pane will be used for the "Detailed Ticket View."
+
+*   **Main Sections/Features:**
+
+    *   **3.1. Filters and Search Area**
+        *   **Layout:** A horizontal bar or section located directly above the ticket list table.
+        *   **Filter Controls:**
+            *   **Status Filter:**
+                *   **Label:** "Status:" (or visually implied by grouping)
+                *   **Input Type:** Dropdown select menu (`<select>`) or a set of toggle buttons.
+                *   **Options:** "All", "New", "Assigned", "In Progress", "Pending", "Resolved", "Closed". "All" is the default selected option.
+            *   **Urgency Filter:**
+                *   **Label:** "Urgency:" (or visually implied)
+                *   **Input Type:** Dropdown select menu (`<select>`) or a set of toggle buttons.
+                *   **Options:** "All", "Normal", "Urgent". "All" is the default selected option.
+        *   **Search Bar:**
+            *   **Input Type:** Standard text input field (`<input type="search">` or `type="text"`).
+            *   **Placeholder Text:** "Search by Title, Description, Ticket ID..."
+            *   **Associated Button (Optional):** A "Search" button, or search can be triggered dynamically as the admin types (debounced for performance).
+            *   **Action:** Filters the displayed ticket list based on matching keywords in the specified fields.
+
+    *   **3.2. Ticket List Table**
+        *   **Layout:** A clear, responsive HTML table (`<table>`).
+        *   **Columns (Table Headers `<th>` will allow sorting):**
+            *   **Ticket ID:** (e.g., "ID") - Text. Sortable.
+            *   **Title:** (e.g., "Titre") - Text, potentially truncated with an ellipsis if too long. This title will be a clickable link to open the "Detailed Ticket View".
+            *   **Submitter:** (e.g., "Demandeur") - Text (User's name or email).
+            *   **Date Submitted:** (e.g., "Date Soumission") - Date and Time. Sortable (default sort should be by this column, newest first).
+            *   **Urgency:** (e.g., "Urgence") - Text ("Normal", "Urgent"). Sortable.
+            *   **Status:** (e.g., "Statut") - Text (e.g., "New", "In Progress"). Sortable.
+            *   **Assigned To:** (e.g., "Assigné à") - Text (Collaborator's name or "Unassigned"). Sortable.
+        *   **Sorting Indicators:** Visual cues (e.g., up/down arrows) on sortable column headers to indicate current sort column and direction.
+        *   **Actions per ticket:**
+            *   These will be presented as a group of small icon buttons or a dropdown menu within a dedicated "Actions" column for each row. This keeps the table clean.
+            *   **1. View Details:** (Icon: e.g., an eye, magnifying glass).
+                *   *Action:* Opens the "Detailed Ticket View" for that ticket. (Alternative to clicking the ticket title).
+            *   **2. Assign Collaborator:** (Icon: e.g., a user-plus icon).
+                *   *Action:* Opens a small modal or an inline dropdown list.
+                *   *Interface:* Dropdown select populated with available collaborators. An "Assign" or "Update" button confirms the selection.
+            *   **3. Change Status:** (Icon: e.g., an edit/pencil icon).
+                *   *Action:* Opens a small modal or an inline dropdown list.
+                *   *Interface:* Dropdown select populated with available ticket statuses. A "Change" or "Update" button confirms the selection.
+        *   **Pagination:** If the number of tickets is large, pagination controls (e.g., "Previous", "Next", page numbers) will be displayed below the table.
+
+    *   **3.3. Detailed Ticket View**
+        *   **Trigger:** Accessed by clicking a ticket's title or the "View Details" action icon from the ticket list.
+        *   **Layout:** Typically a modal dialog that overlays the dashboard, or it could be a master-detail view where the list remains visible. The modal will have a clear "Close" (X) button.
+        *   **Content Display:**
+            *   **Static Information (clearly labeled):**
+                *   Ticket ID
+                *   Title
+                *   Detailed Description (Markdown rendered as HTML)
+                *   Urgency Level
+                *   Attachment(s):
+                    *   If a photo: Display a thumbnail of the photo. Clicking the thumbnail opens the photo in a larger preview or new tab.
+                    *   If a link was intended (pasted in description): This part of the description should be clearly visible.
+                *   Submitter Information (Name/Email)
+                *   Submission Date
+                *   Last Updated Date
+            *   **History of Status Changes:**
+                *   A chronological log displayed in a section (e.g., "Ticket History").
+                *   Each entry shows: Timestamp, Old Status -> New Status, and name of Admin/Collaborator who made the change (if tracked).
+        *   **Interactive Elements/Interfaces:**
+            *   **Assign/Reassign Collaborator:**
+                *   **Label:** "Assigned Collaborator:"
+                *   **Interface:** A dropdown select menu (`<select>`) pre-filled with the current assignee. Contains a list of all available collaborators and an "Unassigned" option.
+                *   **Action:** An "Update Assignment" button next to the dropdown to save the change.
+            *   **Change Ticket Status:**
+                *   **Label:** "Ticket Status:"
+                *   **Interface:** A dropdown select menu (`<select>`) pre-filled with the current status. Contains all possible ticket statuses.
+                *   **Action:** An "Update Status" button next to the dropdown to save the change.
+            *   **Interface to Add Internal Notes (Admin/Collaborator Only):**
+                *   **Section Title:** "Internal Notes"
+                *   **Display Area:** Previously added notes are displayed in reverse chronological order. Each note shows the note content, author (Admin/Collaborator name), and timestamp.
+                *   **Input:** A text area (`<textarea>`) for adding new notes.
+                *   **Button:** "Add Note" button below the text area to submit the new note. Notes are not visible to the end-user.
+
+This textual description of mockups/wireframes is intended to guide the UI/UX design and front-end development, ensuring all required features are accounted for in the visual structure.
