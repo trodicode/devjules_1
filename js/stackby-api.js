@@ -38,94 +38,14 @@ const COLUMN_NAMES = {
  */
 async function _fetchStackbyAPI(endpoint, method, body = null) {
     const url = `${STACKBY_API_BASE_URL}/${STACKBY_STACK_ID}/${STACKBY_TABLE_NAME}${endpoint}`;
-    console.log(`SIMULATING API Call: ${method} ${url}`, body);
+    // console.log(`SIMULATING API Call: ${method} ${url}`, body); // Keep for debugging if needed, but remove "SIMULATING"
+    console.log(`Making API Call: ${method} ${url}`, body);
 
-    // --- SIMULATION LOGIC ---
-    return new Promise((resolve, reject) => {
-        setTimeout(() => { // Simulate network delay
-            // CREATE TICKET (POST to /)
-            if (method === 'POST' && endpoint === '') {
-                if (body && body.fields && body.fields[COLUMN_NAMES.TICKET_TITLE]?.toLowerCase().includes("fail")) {
-                    console.log("Simulating createTicket FAILURE");
-                    reject(new Error("Simulated network error during creation."));
-                    return;
-                }
-                const newRowId = 'simRow' + Date.now();
-                const newTicket = { 
-                    ...body.fields, 
-                    [COLUMN_NAMES.TICKET_ID]: 'SimTID-' + Math.floor(Math.random() * 1000),
-                    'created_at': new Date().toISOString(), // Stackby usually adds this
-                     // [COLUMN_NAMES.STATUS] is already set by createTicket function
-                };
-                console.log("Simulating createTicket SUCCESS");
-                // Stackby returns an array of created rows
-                resolve([{ rowId: newRowId, fields: newTicket }]); 
-                return;
-            }
+    // --- SIMULATION LOGIC (REMOVED) ---
+    // The simulation block that was here has been removed.
+    // --- END SIMULATION LOGIC (REMOVED) ---
 
-            // GET ALL TICKETS (GET to /)
-            if (method === 'GET' && endpoint === '') {
-                if (STACKBY_TABLE_NAME.includes("empty")) { // Test case for no tickets
-                     console.log("Simulating getAllTickets SUCCESS (empty)");
-                    resolve([]);
-                    return;
-                }
-                if (STACKBY_TABLE_NAME.includes("error")) { // Test case for error
-                     console.log("Simulating getAllTickets FAILURE");
-                    reject(new Error("Simulated error fetching all tickets."));
-                    return;
-                }
-                console.log("Simulating getAllTickets SUCCESS (with data)");
-                resolve([
-                    { rowId: 'simRow1', fields: { [COLUMN_NAMES.TICKET_ID]: 'TID-001', [COLUMN_NAMES.TICKET_TITLE]: 'Login Issue Sim', [COLUMN_NAMES.DETAILED_DESCRIPTION]: 'User cannot log in to the sim portal.', [COLUMN_NAMES.URGENCY_LEVEL]: 'Urgent', [COLUMN_NAMES.STATUS]: 'New', 'created_at': new Date(Date.now() - 7200000).toISOString(), [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: 'Alice', [COLUMN_NAMES.ATTACHMENT]: 'screenshot.png' } },
-                    { rowId: 'simRow2', fields: { [COLUMN_NAMES.TICKET_ID]: 'TID-002', [COLUMN_NAMES.TICKET_TITLE]: 'Page loading slow Sim', [COLUMN_NAMES.DETAILED_DESCRIPTION]: 'The main dashboard is very slow to load after login.', [COLUMN_NAMES.URGENCY_LEVEL]: 'Normal', [COLUMN_NAMES.STATUS]: 'In Progress', 'created_at': new Date(Date.now() - 86400000).toISOString(), [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: 'Bob', [COLUMN_NAMES.ATTACHMENT]: 'https://example.com/trace.log' } },
-                    { rowId: 'simRow3', fields: { [COLUMN_NAMES.TICKET_ID]: 'TID-003', [COLUMN_NAMES.TICKET_TITLE]: 'Feature Request: Dark Mode Sim', [COLUMN_NAMES.DETAILED_DESCRIPTION]: 'Please add a dark mode option to the application for better viewing at night.', [COLUMN_NAMES.URGENCY_LEVEL]: 'Normal', [COLUMN_NAMES.STATUS]: 'Acknowledged', 'created_at': new Date(Date.now() - 172800000).toISOString(), [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: null, [COLUMN_NAMES.ATTACHMENT]: null } }
-                ]);
-                return;
-            }
-
-            // GET TICKET BY ID (GET to /{rowId})
-            if (method === 'GET' && endpoint.startsWith('/')) {
-                const rowId = endpoint.substring(1);
-                const allSimulatedTickets = [ // Re-declare for this scope or access globally
-                    { rowId: 'simRow1', fields: { [COLUMN_NAMES.TICKET_ID]: 'TID-001', [COLUMN_NAMES.TICKET_TITLE]: 'Login Issue Sim', [COLUMN_NAMES.DETAILED_DESCRIPTION]: 'User cannot log in to the sim portal.', [COLUMN_NAMES.URGENCY_LEVEL]: 'Urgent', [COLUMN_NAMES.STATUS]: 'New', 'created_at': new Date(Date.now() - 7200000).toISOString(), [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: 'Alice', [COLUMN_NAMES.ATTACHMENT]: 'screenshot.png' } },
-                    { rowId: 'simRow2', fields: { [COLUMN_NAMES.TICKET_ID]: 'TID-002', [COLUMN_NAMES.TICKET_TITLE]: 'Page loading slow Sim', [COLUMN_NAMES.DETAILED_DESCRIPTION]: 'The main dashboard is very slow to load after login.', [COLUMN_NAMES.URGENCY_LEVEL]: 'Normal', [COLUMN_NAMES.STATUS]: 'In Progress', 'created_at': new Date(Date.now() - 86400000).toISOString(), [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: 'Bob', [COLUMN_NAMES.ATTACHMENT]: 'https://example.com/trace.log' } },
-                    { rowId: 'simRow3', fields: { [COLUMN_NAMES.TICKET_ID]: 'TID-003', [COLUMN_NAMES.TICKET_TITLE]: 'Feature Request: Dark Mode Sim', [COLUMN_NAMES.DETAILED_DESCRIPTION]: 'Please add a dark mode option to the application for better viewing at night.', [COLUMN_NAMES.URGENCY_LEVEL]: 'Normal', [COLUMN_NAMES.STATUS]: 'Acknowledged', 'created_at': new Date(Date.now() - 172800000).toISOString(), [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: null, [COLUMN_NAMES.ATTACHMENT]: null } }
-                ];
-                const ticket = allSimulatedTickets.find(t => t.rowId === rowId);
-                if (ticket) {
-                    console.log(`Simulating getTicketById SUCCESS for ${rowId}`);
-                    resolve(ticket); // Stackby returns the single row object directly
-                } else {
-                    console.log(`Simulating getTicketById FAILURE (not found) for ${rowId}`);
-                    reject(new Error(`Simulated: Ticket with rowId ${rowId} not found.`));
-                }
-                return;
-            }
-
-            // UPDATE TICKET (PATCH to /{rowId})
-            if (method === 'PATCH' && endpoint.startsWith('/')) {
-                const rowId = endpoint.substring(1);
-                 if (body && body.fields && body.fields[COLUMN_NAMES.STATUS]?.toLowerCase().includes("fail")) {
-                    console.log(`Simulating updateTicket FAILURE for ${rowId}`);
-                    reject(new Error("Simulated error during update."));
-                    return;
-                }
-                console.log(`Simulating updateTicket SUCCESS for ${rowId}`);
-                // For simplicity, just return the updated fields merged with an ID.
-                // A more accurate simulation would find the existing ticket and merge.
-                resolve({ rowId: rowId, fields: { ...body.fields } }); // Stackby returns the updated row object
-                return;
-            }
-
-            console.warn(`SIMULATION NOT HANDLED for ${method} ${url}`);
-            reject(new Error(`Simulation not handled for ${method} ${url}`));
-        }, 500); // 500ms delay
-    });
-    // --- END SIMULATION LOGIC ---
-
-    /* Original Fetch Call (commented out for simulation)
-    const url = `${STACKBY_API_BASE_URL}/${STACKBY_STACK_ID}/${STACKBY_TABLE_NAME}${endpoint}`;
+    // Original Fetch Call (Now Active)
     const headers = {
         'Authorization': `Bearer ${STACKBY_API_KEY}`,
         'Content-Type': 'application/json'
@@ -155,7 +75,6 @@ async function _fetchStackbyAPI(endpoint, method, body = null) {
         console.error(`Error during API call to ${url}:`, error);
         throw error; // Re-throw to be caught by the calling function
     }
-    */
 }
 
 // --- Core API Functions ---
