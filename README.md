@@ -65,3 +65,4 @@ For instructions on how to deploy this application to a web hosting service, ple
 
 ---
 *This README was generated based on the project context.*
+[![Netlify Status](https://api.netlify.com/api/v1/badges/d4b673e1-49f9-4734-9eb1-9ee0871664dc/deploy-status)](https://app.netlify.com/projects/ticketyx/deploys)
