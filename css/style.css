@@ -1,0 +1,351 @@
+/* Basic Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #333;
+    padding: 20px;
+}
+
+h1 {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+
+/* Form Styling */
+form {
+    /* background: #fff; */ /* Moved to .container */
+    /* padding: 20px; */ /* Moved to .container */
+    /* border-radius: 8px; */ /* Moved to .container */
+    margin-bottom: 20px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 16px;
+}
+
+.form-group textarea {
+    resize: vertical;
+}
+
+.form-group small {
+    display: block;
+    margin-top: 3px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+button[type="submit"] {
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+/* User Message Area */
+.message-area {
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    text-align: center;
+}
+
+.message-area.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message-area.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Error messages for individual fields */
+.error-message {
+    color: #721c24; /* Similar to .message-area.error */
+    font-size: 0.9em;
+    margin-top: 3px;
+}
+
+
+/* Admin Dashboard Specific Styles */
+.dashboard-container {
+    max-width: 1200px; /* Wider container for dashboard */
+    margin: 20px auto; /* More margin for dashboard */
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0,0,0,0.1);
+}
+
+.controls-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 6px;
+    border: 1px solid #eee;
+}
+
+.filter-group, .search-group {
+    display: flex;
+    flex-direction: column; /* Stack label on top of input/select */
+}
+
+.filter-group label, .search-group label {
+    margin-bottom: 5px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.filter-group select, .search-group input[type="text"] {
+    padding: 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 15px;
+}
+
+.search-group input[type="text"] {
+    min-width: 250px; /* Provide ample space for search input */
+}
+
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; /* Allows horizontal scrolling on smaller screens */
+}
+
+#ticketTable {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+#ticketTable th, #ticketTable td {
+    border: 1px solid #ddd;
+    padding: 10px 12px; /* Increased padding for better readability */
+    text-align: left;
+    font-size: 15px; /* Slightly larger font for table content */
+}
+
+#ticketTable th {
+    background-color: #f0f0f0;
+    font-weight: bold;
+    cursor: pointer; /* Indicate sortable columns */
+}
+
+#ticketTable th:hover {
+    background-color: #e0e0e0;
+}
+
+#ticketTable th.sorted {
+    background-color: #d0d0d0; /* Slightly darker to indicate active sort */
+    font-weight: bold;
+}
+
+#ticketTable th .sort-arrow {
+    float: right; /* Or use flexbox/grid on th for better alignment */
+    margin-left: 5px;
+}
+
+
+#ticketTable tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+#ticketTable tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+#ticketTable td .action-btn {
+    padding: 5px 8px;
+    margin-right: 5px;
+    font-size: 0.85em;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background-color: #fff;
+    color: #333;
+}
+
+#ticketTable td .action-btn:hover {
+    background-color: #eee;
+    border-color: #bbb;
+}
+
+#ticketTable td .action-btn.edit {
+    border-color: #ffc107; /* Yellow for edit */
+    color: #856404;
+}
+#ticketTable td .action-btn.edit:hover {
+    background-color: #ffc107;
+    color: #fff;
+}
+
+#ticketTable td .action-btn.delete {
+    border-color: #dc3545; /* Red for delete */
+    color: #721c24;
+}
+#ticketTable td .action-btn.delete:hover {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+/* Ensure general .container styles don't conflict too much with .dashboard-container */
+.container {
+    /* This was for the form page, dashboard uses .dashboard-container */
+    /* max-width: 600px; */ 
+}
+
+/* Remove the old .dashboard placeholder if it exists */
+/* .dashboard { ... } */
+
+
+/* Modal Styles */
+.modal {
+    position: fixed; /* Stay in place */
+    z-index: 1000; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+    display: flex; /* Used to center the modal content */
+    align-items: center; /* Vertically center */
+    justify-content: center; /* Horizontally center */
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: auto; /* Auto margin for older browsers, flex handles centering now */
+    padding: 25px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    max-width: 700px; /* Maximum width */
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    position: relative;
+    max-height: 90vh; /* Max height to prevent overflow on small screens */
+    overflow-y: auto; /* Enable vertical scroll within modal if content is too long */
+}
+
+.close-button {
+    color: #aaa;
+    float: right; /* Position to the top right */
+    font-size: 28px;
+    font-weight: bold;
+    position: absolute; /* Position relative to modal-content */
+    top: 10px;
+    right: 20px;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
+}
+
+.modal-description-box {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    padding: 10px;
+    border-radius: 4px;
+    min-height: 80px;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    white-space: pre-wrap; /* Preserve line breaks and spaces */
+    word-wrap: break-word;
+}
+
+.modal .form-group { /* Specificity for form groups within modal */
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between label, input/select, and button */
+    margin-bottom: 15px;
+}
+
+.modal .form-group label {
+    flex-basis: 150px; /* Fixed width for labels */
+    margin-bottom: 0; /* Remove bottom margin as items are inline */
+}
+
+.modal .form-group input[type="text"],
+.modal .form-group select {
+    flex-grow: 1; /* Input/select takes remaining space */
+    width: auto; /* Override 100% width from general form styles */
+}
+
+.modal .action-btn { /* Style for save buttons in modal */
+    padding: 8px 12px;
+    font-size: 0.9em;
+}
+
+.modal hr {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    border: 0;
+    border-top: 1px solid #eee;
+}
+
+#modalTicketAttachment a {
+    color: #007bff;
+    text-decoration: none;
+}
+#modalTicketAttachment a:hover {
+    text-decoration: underline;
+}

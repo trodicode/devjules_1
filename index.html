@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Support Ticket Submission</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Submit a New Support Ticket</h1>
+        
+        <div id="userMessageArea" class="message-area" style="display:none;"></div>
+
+        <form id="ticketForm">
+            <div class="form-group">
+                <label for="ticketTitle">Ticket Title *</label>
+                <input type="text" id="ticketTitle" name="ticketTitle" required>
+                <div class="error-message" id="titleError" style="display:none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="detailedDescription">Detailed Description *</label>
+                <textarea id="detailedDescription" name="detailedDescription" rows="6" required></textarea>
+                <div class="error-message" id="descriptionError" style="display:none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="urgencyLevel">Urgency Level *</label>
+                <select id="urgencyLevel" name="urgencyLevel" required>
+                    <option value="">-- Select Urgency --</option>
+                    <option value="Normal">Normal</option>
+                    <option value="Urgent">Urgent</option>
+                </select>
+                <div class="error-message" id="urgencyError" style="display:none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="attachment">Attachment (Photo or Link)</label>
+                <input type="file" id="attachment" name="attachment">
+                <small>You can attach one photo or provide a link in the description.</small>
+            </div>
+
+            <button type="submit">Submit Ticket</button>
+        </form>
+    </div>
+
+    <script src="js/stackby-api.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
