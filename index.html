@@ -36,16 +36,22 @@
             </div>
 
             <div class="form-group">
-                <label for="attachment">Attachment (Photo or Link)</label>
-                <input type="file" id="attachment" name="attachment">
-                <small>You can attach one photo or provide a link in the description.</small>
+                <label for="requesterEmail">Votre Email *</label>
+                <input type="email" id="requesterEmail" name="requesterEmail" placeholder="e.g., you@example.com" required>
+                <div class="error-message" id="emailError" style="display:none;"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="attachmentUrl">Attachment URL (Optional)</label>
+                <input type="url" id="attachmentUrl" name="attachmentUrl" placeholder="e.g., https://example.com/image.png">
+                <small>Enter the full, publicly accessible URL for your attachment.</small>
             </div>
 
             <button type="submit">Submit Ticket</button>
         </form>
     </div>
 
-    <script src="js/stackby-api.js"></script>
+    <script src="js/airtable-api.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>
