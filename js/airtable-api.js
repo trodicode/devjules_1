@@ -219,8 +219,9 @@ async function getAllTickets() {
 
     try {
         // Airtable returns records in a 'records' array
-        // Example: May want to add query params like sort: `?sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc`
-        const response = await _fetchAirtableAPI('?view=All%20Tickets', 'GET'); // Assuming a view named 'All Tickets' or adapt
+        // Removed the '?view=All%20Tickets' parameter to fetch all records without specifying a view.
+        // Other query parameters like sort can be added here if needed, e.g., '?sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc'
+        const response = await _fetchAirtableAPI('', 'GET'); 
         if (response && response.records) {
             console.log('[Airtable API] getAllTickets: Tickets fetched successfully. Count:', response.records.length);
             // Adapt each record to have 'id' and 'fields' at top level, and 'created_at' from 'createdTime'
