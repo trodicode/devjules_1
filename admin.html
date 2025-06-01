@@ -3,23 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V0.1.1 - Admin Ticket Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>V0.2.0 - Admin Ticket Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              // example custom color
+              // 'brand-blue': '#007ace',
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="css/style.css"> <!-- Keep for non-Tailwind styles or overrides -->
     <!-- <link rel="stylesheet" href="css/admin-style.css"> --> <!-- Optional: for separate admin styles -->
 </head>
-<body>
-    <div class="container dashboard-container">
-        <div class="dashboard-header">
-            <h1>Ticket Management Dashboard</h1>
-            <span class="version-number">V0.1.1</span>
+<body class="bg-gray-100 p-4">
+    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <div class="flex justify-between items-center mb-6">
+            <h1 class="text-3xl font-bold text-gray-700">Ticket Management Dashboard</h1>
+            <span class="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">V0.2.0</span>
         </div>
 
-        <div id="adminMessageArea" class="message-area" style="display:none;">Loading tickets...</div>
+        <!-- Message Area: Will be styled with Tailwind classes directly in JS or kept if custom styles are preferred -->
+        <div id="adminMessageArea" class="message-area my-4 p-3 rounded-md text-center" style="display:none;">Loading tickets...</div>
 
-        <div class="controls-area">
-            <div class="filter-group">
-                <label for="statusFilter">Filter by Status:</label>
-                <select id="statusFilter">
+        <div class="bg-gray-50 p-4 rounded-md mb-6 flex flex-wrap gap-4 items-end">
+            <div>
+                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Status:</label>
+                <select id="statusFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                     <option value="All">All</option>
                     <option value="New">New</option>
                     <option value="Acknowledged">Acknowledged</option>
@@ -29,80 +43,118 @@
                     <option value="Closed">Closed</option>
                 </select>
             </div>
-            <div class="filter-group">
-                <label for="urgencyFilter">Filter by Urgency:</label>
-                <select id="urgencyFilter">
+            <div>
+                <label for="urgencyFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Urgency:</label>
+                <select id="urgencyFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
                     <option value="All">All</option>
                     <option value="Normal">Normal</option>
                     <option value="Urgent">Urgent</option>
                 </select>
             </div>
-            <div class="search-group">
-                <label for="searchInput">Search:</label>
-                <input type="text" id="searchInput" placeholder="Search by title, description...">
+            <div class="flex-grow">
+                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search:</label>
+                <input type="text" id="searchInput" placeholder="Search by title, description..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
             </div>
         </div>
 
-        <div class="table-responsive">
-            <table id="ticketTable">
-                <thead>
+        <div class="overflow-x-auto">
+            <table id="ticketTable" class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
                     <tr>
-                        <th data-sort-by="Ticket ID">Ticket ID</th>
-                        <th data-sort-by="Ticket Title">Title</th>
-                        <!-- Omit Submitter for now if not readily available -->
-                        <!-- <th data-sort-by="Submitter">Submitter</th> -->
-                        <th data-sort-by="created_at">Date Submitted</th>
-                        <th data-sort-by="Urgency Level">Urgency</th>
-                        <th data-sort-by="Status">Status</th>
-                        <th data-sort-by="Assigned Collaborator">Assigned To</th>
-                        <th>Actions</th>
+                        <th scope="col" data-sort-by="Ticket ID" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Ticket ID</th>
+                        <th scope="col" data-sort-by="Ticket Title" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Title</th>
+                        <th scope="col" data-sort-by="created_at" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Date Submitted</th>
+                        <th scope="col" data-sort-by="Urgency Level" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Urgency</th>
+                        <th scope="col" data-sort-by="Status" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Status</th>
+                        <th scope="col" data-sort-by="Assigned Collaborator" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Assigned To</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="ticketTableBody">
-                    <!-- Ticket rows will be inserted here by JavaScript -->
+                <tbody id="ticketTableBody" class="bg-white divide-y divide-gray-200">
+                    <!-- Rows will be styled with Tailwind classes like: -->
+                    <!-- <tr class="hover:bg-gray-50"> -->
+                    <!--   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TID-001</td> -->
+                    <!--   <td class="px-6 py-4 whitespace-nowrap text-sm text-blue-600 hover:underline cursor-pointer">Login Issue</td> -->
+                    <!--   ... -->
+                    <!--   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"> -->
+                    <!--     <button class="text-indigo-600 hover:text-indigo-900">View/Edit</button> -->
+                    <!--   </td> -->
+                    <!-- </tr> -->
                 </tbody>
             </table>
         </div>
     </div>
 
     <!-- Ticket Detail Modal -->
-    <div id="ticketDetailModal" class="modal" style="display:none;">
-        <div class="modal-content">
-            <span class="close-button" onclick="closeTicketDetailModal()">&times;</span>
-            <h2>Ticket Details</h2>
-            <div id="modalBodyContent">
-                <!-- Content will be populated by JavaScript -->
-                <p><strong>Ticket ID:</strong> <span id="modalTicketId"></span></p>
-                <p><strong>Title:</strong> <span id="modalTicketTitle"></span></p>
-                <p><strong>Full Description:</strong></p>
-                <div id="modalTicketDescription" class="modal-description-box"></div>
-                <p><strong>Urgency:</strong> <span id="modalTicketUrgency"></span></p>
-                <p><strong>Status:</strong> <span id="modalTicketStatus"></span></p>
-                <p><strong>Assigned Collaborator:</strong> <span id="modalTicketAssignee"></span></p>
-                <p><strong>Submission Date:</strong> <span id="modalTicketSubmissionDate"></span></p>
-                <p><strong>Attachment:</strong> <span id="modalTicketAttachment"></span></p>
+    <div id="ticketDetailModal" class="fixed z-10 inset-0 overflow-y-auto" style="display:none;">
+        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <!-- Modal panel -->
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">
+                                Ticket Details
+                            </h3>
+                            <button onclick="closeTicketDetailModal()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-500">
+                                <span class="sr-only">Close</span>
+                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                            <div class="space-y-3 text-sm text-gray-700">
+                                <p><strong>Ticket ID:</strong> <span id="modalTicketId" class="text-gray-900"></span></p>
+                                <p><strong>Title:</strong> <span id="modalTicketTitle" class="text-gray-900"></span></p>
+                                <p><strong>Full Description:</strong></p>
+                                <div id="modalTicketDescription" class="bg-gray-50 p-3 rounded-md border max-h-40 overflow-y-auto"></div>
+                                <p><strong>Urgency:</strong> <span id="modalTicketUrgency" class="font-semibold"></span></p>
+                                <p><strong>Status:</strong> <span id="modalTicketStatus" class="font-semibold"></span></p>
+                                <p><strong>Assigned Collaborator:</strong> <span id="modalTicketAssignee" class="text-gray-900"></span></p>
+                                <p><strong>Submission Date:</strong> <span id="modalTicketSubmissionDate" class="text-gray-900"></span></p>
+                                <p><strong>Attachment:</strong> <span id="modalTicketAttachment"></span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 space-y-4">
+                    <h4 class="text-md font-semibold text-gray-800">Update Ticket</h4>
+                    <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
+                        <div class="sm:col-span-3">
+                            <label for="modalChangeStatus" class="block text-sm font-medium text-gray-700">Change Status:</label>
+                            <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                                <option value="">-- Select Status --</option>
+                                <option value="New">New</option>
+                                <option value="Acknowledged">Acknowledged (Pris en charge)</option>
+                                <option value="In Progress">In Progress (En cours)</option>
+                                <option value="Pending">Pending (En attente)</option>
+                                <option value="Resolved">Resolved (Résolu)</option>
+                                <option value="Closed">Closed (Fermé)</option>
+                            </select>
+                        </div>
+                        <div class="sm:col-span-3 flex items-end">
+                             <button id="modalSaveStatusButton" type="button"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm disabled:opacity-50">
+                                Save Status
+                            </button>
+                        </div>
 
-                <hr>
-                <h3>Update Ticket</h3>
-                <div class="form-group">
-                    <label for="modalChangeStatus">Change Status:</label>
-                    <select id="modalChangeStatus">
-                        <option value="">-- Select Status --</option>
-                        <option value="New">New</option>
-                        <option value="Acknowledged">Acknowledged (Pris en charge)</option>
-                        <option value="In Progress">In Progress (En cours)</option>
-                        <option value="Pending">Pending (En attente)</option>
-                        <option value="Resolved">Resolved (Résolu)</option>
-                        <option value="Closed">Closed (Fermé)</option>
-                    </select>
-                    <button id="modalSaveStatusButton" class="action-btn">Save Status</button>
+                        <div class="sm:col-span-3">
+                            <label for="modalAssignCollaborator" class="block text-sm font-medium text-gray-700">Assign Collaborator:</label>
+                            <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID"
+                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        </div>
+                         <div class="sm:col-span-3 flex items-end">
+                            <button id="modalSaveAssigneeButton" type="button"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm disabled:opacity-50">
+                                Save Assignment
+                            </button>
+                        </div>
+                    </div>
+                    <div id="modalUserMessageArea" class="message-area mt-3" style="display:none;"></div>
                 </div>
-                <div class="form-group">
-                    <label for="modalAssignCollaborator">Assign Collaborator:</label>
-                    <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID">
-                    <button id="modalSaveAssigneeButton" class="action-btn">Save Assignment</button>
-                </div>
-                <div id="modalUserMessageArea" class="message-area" style="display:none;"></div>
             </div>
         </div>
     </div>
