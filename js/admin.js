@@ -3,9 +3,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('admin.js loaded for admin dashboard.');
 
-    // Ensure stackby-api.js and its functions are loaded
+    // Ensure airtable-api.js and its functions are loaded
     if (typeof getAllTickets !== 'function' || typeof getTicketById !== 'function' || typeof updateTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
-        console.error('Stackby API functions or COLUMN_NAMES are not available. Ensure stackby-api.js is loaded correctly before admin.js.');
+        console.error('Airtable API functions or COLUMN_NAMES are not available. Ensure airtable-api.js is loaded correctly before admin.js.');
         showMessageOnPage('Critical error: Cannot connect to ticketing system. (API script not loaded)', 'error');
         return;
     }
@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilter = document.getElementById('statusFilter');
     const urgencyFilter = document.getElementById('urgencyFilter');
     const searchInput = document.getElementById('searchInput');
-    const tableHeaders = document.querySelectorAll('#ticketTable th[data-sort-by]');
+    let tableHeaders = document.querySelectorAll('#ticketTable th[data-sort-by]'); // Will be re-queried after dynamic header text update
 
     // Modal elements
     const ticketDetailModal = document.getElementById('ticketDetailModal');
@@ -30,13 +30,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTicketAttachment = document.getElementById('modalTicketAttachment');
     const modalChangeStatusSelect = document.getElementById('modalChangeStatus');
     const modalSaveStatusButton = document.getElementById('modalSaveStatusButton');
-    const modalAssignCollaboratorInput = document.getElementById('modalAssignCollaborator');
+    const modalAssignCollaboratorSelect = document.getElementById('modalAssignCollaborator'); // Changed from Input
     const modalSaveAssigneeButton = document.getElementById('modalSaveAssigneeButton');
     const modalUserMessageArea = document.getElementById('modalUserMessageArea');
 
     let allTickets = [];
     let currentSort = { column: null, ascending: true };
     let currentlySelectedTicketRowId = null;
+
+    const HARDCODED_COLLABORATORS = ["Admin User 1", "Support Tech A", "Support Tech B", "Specialist C", "Unassigned"];
 
     // --- Message Display ---
     function showMessageOnPage(message, type = 'info') {
@@ -88,17 +90,22 @@ document.addEventListener('DOMContentLoaded', () => {
         ticketsToRender.forEach(ticket => {
             const row = ticketTableBody.insertRow();
             const fields = ticket.fields || {};
-            const rowId = ticket.rowId;
+            // Use ticket.id (Airtable record ID) instead of ticket.rowId
+            const recordId = ticket.id;
 
-            row.insertCell().textContent = fields[COLUMN_NAMES.TICKET_ID] || rowId || 'N/A';
+            row.insertCell().textContent = fields[COLUMN_NAMES.TICKET_ID] || recordId || 'N/A';
             
             const titleCell = row.insertCell();
             titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
             titleCell.style.cursor = 'pointer';
             titleCell.style.color = '#007bff';
-            titleCell.onclick = () => openTicketDetailModal(rowId);
+            // Pass recordId to openTicketDetailModal
+            titleCell.onclick = () => openTicketDetailModal(recordId);
 
-            row.insertCell().textContent = fields.created_at ? new Date(fields.created_at).toLocaleDateString() : 'Unknown Date';
+            // Add Requester Email cell
+            row.insertCell().textContent = fields[COLUMN_NAMES.REQUESTER_EMAIL] || 'N/A';
+
+            row.insertCell().textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date';
             row.insertCell().textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal';
             row.insertCell().textContent = fields[COLUMN_NAMES.STATUS] || 'New';
             row.insertCell().textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
@@ -107,7 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const viewDetailsButton = document.createElement('button');
             viewDetailsButton.textContent = 'View/Edit';
             viewDetailsButton.className = 'action-btn edit';
-            viewDetailsButton.onclick = () => openTicketDetailModal(rowId);
+            // Pass recordId to openTicketDetailModal
+            viewDetailsButton.onclick = () => openTicketDetailModal(recordId);
             actionsCell.appendChild(viewDetailsButton);
         });
     }
@@ -154,24 +162,31 @@ document.addEventListener('DOMContentLoaded', () => {
             filteredTickets = filteredTickets.filter(t => {
                 const title = (t.fields && t.fields[COLUMN_NAMES.TICKET_TITLE] || '').toLowerCase();
                 const description = (t.fields && t.fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || '').toLowerCase();
-                return title.includes(searchTerm) || description.includes(searchTerm);
+                const requesterEmail = (t.fields && t.fields[COLUMN_NAMES.REQUESTER_EMAIL] || '').toLowerCase();
+                const ticketId = (t.fields && t.fields[COLUMN_NAMES.TICKET_ID] || t.id || '').toLowerCase();
+                return title.includes(searchTerm) || description.includes(searchTerm) || requesterEmail.includes(searchTerm) || ticketId.includes(searchTerm);
             });
         }
         return filteredTickets;
     }
 
-    function sortTickets(tickets, columnKey, ascending) {
-        const fieldName = COLUMN_NAMES[columnKey] || columnKey;
+    function sortTickets(tickets, sortKey, ascending) {
+        // sortKey is now directly from data-sort-by, e.g., "TICKET_TITLE", "REQUESTER_EMAIL", or "created_at"
+        const fieldName = COLUMN_NAMES[sortKey] || sortKey; // Get actual field name if mapped, else use sortKey
+
         const sortedTickets = [...tickets].sort((a, b) => {
-            let valA = (a.fields && a.fields[fieldName]) || '';
-            let valB = (b.fields && b.fields[fieldName]) || '';
-            if (fieldName === 'created_at') {
-                valA = valA ? new Date(valA).getTime() : 0;
-                valB = valB ? new Date(valB).getTime() : 0;
+            let valA, valB;
+
+            if (sortKey === 'created_at') {
+                valA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                valB = b.created_at ? new Date(b.created_at).getTime() : 0;
             } else {
+                valA = (a.fields && a.fields[fieldName]) || '';
+                valB = (b.fields && b.fields[fieldName]) || '';
                 valA = String(valA).toLowerCase();
                 valB = String(valB).toLowerCase();
             }
+
             if (valA < valB) return ascending ? -1 : 1;
             if (valA > valB) return ascending ? 1 : -1;
             return 0;
@@ -195,27 +210,27 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Modal Functionality ---
-    async function openTicketDetailModal(rowId) {
-        currentlySelectedTicketRowId = rowId;
+    async function openTicketDetailModal(recordId) { // Parameter changed from rowId to recordId
+        currentlySelectedTicketRowId = recordId; // Store recordId
         showMessageInModal('Loading ticket details...', 'info');
-        // Disable save buttons while loading details
         modalSaveStatusButton.disabled = true;
         modalSaveAssigneeButton.disabled = true;
         ticketDetailModal.style.display = 'flex';
 
         try {
-            const ticket = await getTicketById(rowId);
+            const ticket = await getTicketById(recordId); // Use recordId
             if (ticket && ticket.fields) {
                 const fields = ticket.fields;
-                modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.rowId || 'N/A';
+                modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || recordId || 'N/A'; // Use recordId as fallback
                 modalTicketTitle.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'N/A';
                 modalTicketDescription.textContent = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || 'N/A';
                 modalTicketUrgency.textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'N/A';
                 modalTicketStatus.textContent = fields[COLUMN_NAMES.STATUS] || 'N/A';
                 modalTicketAssignee.textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
-                modalTicketSubmissionDate.textContent = fields.created_at ? new Date(fields.created_at).toLocaleString() : 'N/A';
+                modalTicketSubmissionDate.textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A';
                 const attachmentValue = fields[COLUMN_NAMES.ATTACHMENT];
                 if (attachmentValue) {
+                    // Existing attachment handling logic...
                     if (typeof attachmentValue === 'string' && (attachmentValue.startsWith('http://') || attachmentValue.startsWith('https://'))) {
                         modalTicketAttachment.innerHTML = `<a href="${attachmentValue}" target="_blank" rel="noopener noreferrer">${attachmentValue}</a>`;
                     } else if (Array.isArray(attachmentValue) && attachmentValue.length > 0 && attachmentValue[0].url) {
@@ -226,8 +241,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     modalTicketAttachment.textContent = 'None';
                 }
+
+                // Populate Status Dropdown
                 modalChangeStatusSelect.value = fields[COLUMN_NAMES.STATUS] || "";
-                modalAssignCollaboratorInput.value = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "";
+
+                // Populate Collaborator Dropdown
+                modalAssignCollaboratorSelect.innerHTML = ''; // Clear existing options
+                HARDCODED_COLLABORATORS.forEach(collab => {
+                    const option = document.createElement('option');
+                    option.value = collab === "Unassigned" ? "" : collab; // Store empty value for "Unassigned"
+                    option.textContent = collab;
+                    modalAssignCollaboratorSelect.appendChild(option);
+                });
+                const currentAssignee = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "";
+                modalAssignCollaboratorSelect.value = currentAssignee;
+
                 showMessageInModal('', 'info'); // Clear loading message
                 modalUserMessageArea.style.display = 'none';
             } else {
@@ -267,10 +295,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 modalTicketStatus.textContent = newStatusDisplay;
                 const ticketIndex = allTickets.findIndex(t => t.rowId === currentlySelectedTicketRowId);
                 if (ticketIndex > -1) {
+                    // Update the local cache of tickets
                     allTickets[ticketIndex].fields[COLUMN_NAMES.STATUS] = newStatusDisplay;
+                    if(updatedTicket.fields[COLUMN_NAMES.TICKET_ID]) { // If Airtable returns the Ticket ID field
+                         allTickets[ticketIndex].fields[COLUMN_NAMES.TICKET_ID] = updatedTicket.fields[COLUMN_NAMES.TICKET_ID];
+                    }
                     applyFiltersAndSort();
                 } else {
-                     loadAndDisplayTickets();
+                     loadAndDisplayTickets(); // Fallback to reload all if not found (should not happen)
                 }
                 const userNotifyStatuses = ["Acknowledged", "In Progress", "Resolved", "Acknowledged (Pris en charge)", "In Progress (En cours)", "Resolved (Résolu)"];
                 if (userNotifyStatuses.includes(newStatusDisplay)) {
@@ -289,23 +321,30 @@ document.addEventListener('DOMContentLoaded', () => {
 
     modalSaveAssigneeButton.addEventListener('click', async () => {
         if (!currentlySelectedTicketRowId) return;
-        const newAssignee = modalAssignCollaboratorInput.value.trim();
+        const newAssignee = modalAssignCollaboratorSelect.value; // Read from select
         showMessageInModal('Updating assignment...', 'info');
         modalSaveAssigneeButton.disabled = true;
         modalSaveAssigneeButton.textContent = 'Saving...';
         try {
+            // Pass newAssignee (which is "" if "Unassigned" was selected)
             const updatedTicket = await updateTicket(currentlySelectedTicketRowId, { [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: newAssignee });
             if (updatedTicket && updatedTicket.fields) {
+                // Airtable might return empty if field is cleared, or the value itself.
+                // Default to "Unassigned" for display if the field is empty or not present.
                 const newAssigneeDisplay = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
                 showMessageInModal('Collaborator assigned successfully!', 'success');
                 modalTicketAssignee.textContent = newAssigneeDisplay;
-                modalAssignCollaboratorInput.value = newAssigneeDisplay === 'Unassigned' ? "" : newAssigneeDisplay;
-                const ticketIndex = allTickets.findIndex(t => t.rowId === currentlySelectedTicketRowId);
+                modalAssignCollaboratorSelect.value = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || ""; // Set select to new value
+
+                const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedTicketRowId);
                 if (ticketIndex > -1) {
                     allTickets[ticketIndex].fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR];
+                     if(updatedTicket.fields[COLUMN_NAMES.TICKET_ID]) {
+                         allTickets[ticketIndex].fields[COLUMN_NAMES.TICKET_ID] = updatedTicket.fields[COLUMN_NAMES.TICKET_ID];
+                    }
                     applyFiltersAndSort();
                 } else {
-                    loadAndDisplayTickets();
+                    loadAndDisplayTickets(); // Fallback to reload all if not found
                 }
                 if (newAssignee.trim() !== "") {
                     showMessageOnPage(`Ticket assigned to ${newAssigneeDisplay}. REMINDER: Manually notify the collaborator.`, 'info');
@@ -332,11 +371,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tableHeaders.forEach(header => {
         header.addEventListener('click', () => {
-            const sortColumnKey = header.getAttribute('data-sort-by'); 
-            if (currentSort.column === sortColumnKey) {
+            const sortKey = header.getAttribute('data-sort-by');
+            if (currentSort.column === sortKey) {
                 currentSort.ascending = !currentSort.ascending;
             } else {
-                currentSort.column = sortColumnKey;
+                currentSort.column = sortKey;
                 currentSort.ascending = true;
             }
             updateSortIndicators();
@@ -344,30 +383,38 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
-    function getHeaderDisplayName(columnKey) {
-        // Prioritize COLUMN_NAMES mapping
-        if (COLUMN_NAMES[columnKey]) {
-            return COLUMN_NAMES[columnKey];
+    // This function might not be strictly necessary if headers are static HTML
+    // but useful if headers could be dynamically generated or need complex display names.
+    function getHeaderDisplayName(sortKey) {
+        // sortKey is directly from data-sort-by, e.g., "TICKET_TITLE"
+        if (COLUMN_NAMES[sortKey]) {
+            return COLUMN_NAMES[sortKey]; // Returns "Ticket Title"
         }
-        // Handle special cases like 'created_at'
-        if (columnKey === 'created_at') {
+        if (sortKey === 'created_at') {
             return 'Date Submitted';
         }
-        // Default transformation for other keys (e.g., from data-sort-by attributes)
-        return columnKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+        // Fallback for keys not in COLUMN_NAMES (should ideally not happen for sortable columns)
+        return sortKey.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
 
-
     function updateSortIndicators() {
+        // Re-query tableHeaders in case they are dynamically added or changed, though not in current setup.
+        // If headers are static, this could be done once.
+        tableHeaders = document.querySelectorAll('#ticketTable th[data-sort-by]');
         tableHeaders.forEach(header => {
-            const columnKey = header.getAttribute('data-sort-by');
-            const headerText = getHeaderDisplayName(columnKey); // Use helper to get display name
+            const sortKey = header.getAttribute('data-sort-by');
+            // Get the original text from the TH element itself if it's set, or generate it.
+            // For this setup, the original HTML text in admin.html is the source of truth for display.
+            // The getHeaderDisplayName can be used if a more dynamic mapping is needed.
+            // For now, let's assume the HTML text is what we want to preserve.
+            let headerText = header.textContent.replace(/ [▲▼]$/, '').trim(); // Remove old arrows
 
-            if (columnKey === currentSort.column) {
+            if (sortKey === currentSort.column) {
                 header.classList.add('sorted');
-                header.innerHTML = `${headerText} ${currentSort.ascending ? '&#9650;' : '&#9660;'}`; // ▲ or ▼
+                header.innerHTML = `${headerText} <span class="sort-arrow">${currentSort.ascending ? '&#9650;' : '&#9660;'}</span>`;
             } else {
                 header.classList.remove('sorted');
+                // Ensure no arrows if not sorted, using original text
                 header.innerHTML = headerText;
             }
         });
@@ -385,6 +432,10 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // --- Initial Load ---
-    loadAndDisplayTickets();
-    updateSortIndicators(); // Initialize header text correctly
+    loadAndDisplayTickets(); // This will also call updateSortIndicators via applyFiltersAndSort
+    // updateSortIndicators(); // Call once at load to set initial header text without arrows, if not done by applyFiltersAndSort
 });
+
+// Ensure the tableHeaders are initialized correctly with their display names for updateSortIndicators
+// This can be done by setting their textContent explicitly in HTML or ensuring updateSortIndicators
+// correctly fetches the desired display name. The current updateSortIndicators tries to preserve existing text.

@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Ticket Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
-    <!-- <link rel="stylesheet" href="css/admin-style.css"> --> <!-- Optional: for separate admin styles -->
+    <link rel="stylesheet" href="css/admin_style.css"> <!-- Admin specific styles -->
 </head>
-<body>
+<body class="admin-dashboard">
     <div class="container dashboard-container">
         <h1>Ticket Management Dashboard</h1>
 
@@ -44,14 +44,13 @@
             <table id="ticketTable">
                 <thead>
                     <tr>
-                        <th data-sort-by="Ticket ID">Ticket ID</th>
-                        <th data-sort-by="Ticket Title">Title</th>
-                        <!-- Omit Submitter for now if not readily available -->
-                        <!-- <th data-sort-by="Submitter">Submitter</th> -->
+                        <th data-sort-by="TICKET_ID">Ticket ID</th>
+                        <th data-sort-by="TICKET_TITLE">Title</th>
+                        <th data-sort-by="REQUESTER_EMAIL">Requester Email</th>
                         <th data-sort-by="created_at">Date Submitted</th>
-                        <th data-sort-by="Urgency Level">Urgency</th>
-                        <th data-sort-by="Status">Status</th>
-                        <th data-sort-by="Assigned Collaborator">Assigned To</th>
+                        <th data-sort-by="URGENCY_LEVEL">Urgency</th>
+                        <th data-sort-by="STATUS">Status</th>
+                        <th data-sort-by="ASSIGNED_COLLABORATOR">Assigned To</th>
                         <th>Actions</th>
                     </tr>
                 </thead>
@@ -96,7 +95,10 @@
                 </div>
                 <div class="form-group">
                     <label for="modalAssignCollaborator">Assign Collaborator:</label>
-                    <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID">
+                    <select id="modalAssignCollaborator">
+                        <!-- Options will be populated by JS -->
+                        <option value="">-- Select Collaborator --</option>
+                    </select>
                     <button id="modalSaveAssigneeButton" class="action-btn">Save Assignment</button>
                 </div>
                 <div id="modalUserMessageArea" class="message-area" style="display:none;"></div>

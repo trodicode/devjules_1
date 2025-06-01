@@ -3,24 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Ticket Submission</title>
+    <title>Submit Ticket</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
     <div class="container">
-        <h1>Submit a New Support Ticket</h1>
+        <h1>Submit a New Ticket</h1>
         
         <div id="userMessageArea" class="message-area" style="display:none;"></div>
 
         <form id="ticketForm">
             <div class="form-group">
-                <label for="ticketTitle">Ticket Title *</label>
-                <input type="text" id="ticketTitle" name="ticketTitle" required>
+                <label for="requestTitle">Request Title *</label>
+                <input type="text" id="requestTitle" name="requestTitle" required>
                 <div class="error-message" id="titleError" style="display:none;"></div>
             </div>
 
             <div class="form-group">
-                <label for="detailedDescription">Detailed Description *</label>
+                <label for="detailedDescription">Detailed Description (Markdown supported) *</label>
                 <textarea id="detailedDescription" name="detailedDescription" rows="6" required></textarea>
                 <div class="error-message" id="descriptionError" style="display:none;"></div>
             </div>
@@ -42,9 +42,9 @@
             </div>
 
             <div class="form-group">
-                <label for="attachmentUrl">Attachment URL (Optional)</label>
-                <input type="url" id="attachmentUrl" name="attachmentUrl" placeholder="e.g., https://example.com/image.png">
-                <small>Enter the full, publicly accessible URL for your attachment.</small>
+                <label for="attachments">Attachments (Photo or Link)</label>
+                <input type="file" id="attachments" name="attachments">
+                <small>Upload a file or provide a link if the attachment is hosted elsewhere.</small>
             </div>
 
             <button type="submit">Submit Ticket</button>

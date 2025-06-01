@@ -1,0 +1,90 @@
+/* css/admin_style.css */
+
+body.admin-dashboard {
+    background-color: #f0f2f5; /* Slightly different background for admin area */
+}
+
+/* Use the existing .dashboard-container from style.css for overall structure */
+/* If .dashboard-container needs admin-specific tweaks, add them here */
+/* For example:
+.dashboard-container {
+    max-width: 1600px;
+}
+*/
+
+header h1 {
+    color: #333;
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 2px solid #007bff;
+    margin-bottom: 20px;
+}
+
+/* .controls-area is already styled in style.css, can add overrides if needed */
+.controls-area {
+    background-color: #e9ecef; /* Lighter background for controls */
+    padding: 20px;
+    border-radius: 6px;
+    margin-bottom: 25px;
+}
+
+.filter-group label, .search-group label {
+    font-weight: 600; /* Slightly bolder labels */
+    color: #495057;
+}
+
+.filter-group select, .search-group input[type="text"] {
+    border: 1px solid #ced4da;
+    font-size: 1rem; /* Ensure consistent font size */
+}
+
+/* .table-responsive and #ticketTable are styled in style.css */
+/* Add admin-specific table tweaks if necessary */
+#ticketTable th {
+    background-color: #007bff; /* Primary color for table headers */
+    color: white;
+    font-weight: 600;
+}
+
+#ticketTable th:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+#ticketTable th .sort-arrow {
+    margin-left: 5px;
+    font-size: 0.8em; /* Smaller arrow */
+}
+
+#ticketTable tbody tr:hover {
+    background-color: #f1f1f1; /* Hover effect for rows */
+}
+
+#ticketTable td .action-btn {
+    padding: 6px 10px; /* Slightly larger buttons */
+    font-size: 0.9em;
+}
+
+/* Modal styles are in style.css, specific overrides for admin modal if needed */
+/* For example:
+.modal-content {
+    border-top: 5px solid #007bff;
+}
+*/
+
+#adminMessageArea { /* Specific styling for admin message area if needed */
+    margin-bottom: 15px;
+    padding: 12px;
+    border-radius: 5px;
+}
+
+footer {
+    text-align: center;
+    padding: 20px 0;
+    margin-top: 30px;
+    border-top: 1px solid #dee2e6;
+    color: #6c757d;
+    font-size: 0.9em;
+}
+
+/* Add a class to body in admin.html if you want to use body.admin-dashboard */
+/* e.g. <body class="admin-dashboard"> */

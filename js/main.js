@@ -3,9 +3,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('main.js loaded for user form.');
 
-    // Ensure stackby-api.js and its functions are loaded
+    // Ensure airtable-api.js and its functions are loaded
     if (typeof createTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
-        console.error('Stackby API functions or COLUMN_NAMES are not available. Ensure stackby-api.js is loaded correctly before main.js and functions are globally accessible.');
+        console.error('Airtable API functions or COLUMN_NAMES are not available. Ensure airtable-api.js is loaded correctly before main.js and functions are globally accessible.');
         // Display a critical error to the user on the page as well, as the form won't work.
         const userMessageArea = document.getElementById('userMessageArea');
         if (userMessageArea) {
@@ -20,14 +20,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const userMessageArea = document.getElementById('userMessageArea');
 
     // Helper to display messages
-    function showMessage(message, type = 'success') {
+    function showMessage(message, type = 'success', isHTML = false) {
         if (userMessageArea) {
-            userMessageArea.textContent = message;
+            if (isHTML) {
+                userMessageArea.innerHTML = message;
+            } else {
+                userMessageArea.textContent = message;
+            }
             userMessageArea.className = `message-area ${type}`;
             userMessageArea.style.display = 'block';
         } else {
-            // Fallback if message area is not found (should not happen with correct HTML)
-            type === 'success' ? alert(message) : console.error(message);
+            // Fallback if message area is not found
+            isHTML ? console.log(`HTML Message (${type}): ${message}`) : (type === 'success' ? alert(message) : console.error(message));
         }
     }
 
@@ -44,13 +48,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function validateForm(data) {
         let isValid = true;
         // Clear previous field errors
-        showFieldError('title', '');
+        showFieldError('requestTitle', ''); // Adjusted for requestTitle
         showFieldError('description', '');
         showFieldError('urgency', '');
         showFieldError('email', ''); // Clear email error
 
-        if (!data[COLUMN_NAMES.TICKET_TITLE]?.trim()) {
-            showFieldError('title', 'Ticket Title is required.');
+        if (!data[COLUMN_NAMES.TICKET_TITLE]?.trim()) { // Still uses COLUMN_NAMES.TICKET_TITLE for the data key
+            showFieldError('requestTitle', 'Request Title is required.'); // Error message for requestTitle
             isValid = false;
         }
         if (!data[COLUMN_NAMES.DETAILED_DESCRIPTION]?.trim()) {
@@ -81,61 +85,71 @@ document.addEventListener('DOMContentLoaded', () => {
             userMessageArea.style.display = 'none'; // Hide previous general messages
             console.log('Ticket form submission initiated.');
 
-            const titleInput = document.getElementById('ticketTitle');
+            const titleInput = document.getElementById('requestTitle'); // Changed from ticketTitle
             const descriptionInput = document.getElementById('detailedDescription');
             const urgencyInput = document.getElementById('urgencyLevel');
-            const requesterEmailInput = document.getElementById('requesterEmail'); // New email input
-            const attachmentUrlInput = document.getElementById('attachmentUrl');
+            const requesterEmailInput = document.getElementById('requesterEmail');
+            const attachmentsInput = document.getElementById('attachments');
 
             const ticketData = {
                 [COLUMN_NAMES.TICKET_TITLE]: titleInput.value,
                 [COLUMN_NAMES.DETAILED_DESCRIPTION]: descriptionInput.value,
                 [COLUMN_NAMES.URGENCY_LEVEL]: urgencyInput.value,
-                [COLUMN_NAMES.REQUESTER_EMAIL]: requesterEmailInput.value.trim(), // Add email to ticketData
+                [COLUMN_NAMES.REQUESTER_EMAIL]: requesterEmailInput.value.trim(),
+                // Attachment will be handled below
             };
 
-            const attachmentUrlValue = attachmentUrlInput.value.trim();
-            if (attachmentUrlValue) {
-                // Airtable expects attachments to be an array of objects, each with a url property.
-                ticketData[COLUMN_NAMES.ATTACHMENT] = [{ url: attachmentUrlValue }];
+            // Handle file input for API
+            if (attachmentsInput.files.length > 0) {
+                const file = attachmentsInput.files[0];
+                console.log('File selected for attachment:', file.name);
+                // Pass the filename to be handled by airtable-api.js
+                // It will be formatted as { url: `file://${filename}` } by the API script
+                ticketData[COLUMN_NAMES.ATTACHMENT] = file.name;
+            } else {
+                ticketData[COLUMN_NAMES.ATTACHMENT] = null; // Or omit if API handles missing field gracefully
             }
-            // If attachmentUrlValue is empty, the ATTACHMENT field will be omitted from ticketData.
             
-            // Perform validation (Note: Attachment URL is optional, so not validated here for presence)
-            if (!validateForm(ticketData)) {
+            // Perform validation
+            if (!validateForm(ticketData)) { // validateForm now uses requestTitle for field error
                 showMessage('Please correct the errors in the form.', 'error');
                 return; // Stop submission if validation fails
             }
 
-            console.log('Form validated successfully. Preparing data for Stackby:', ticketData);
+            console.log('Form validated successfully. Preparing data for Airtable:', ticketData);
             
             // Disable button to prevent multiple submissions
             const submitButton = ticketForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
             submitButton.textContent = 'Submitting...';
 
+            // ACTUAL API CALL
             try {
-                const result = await createTicket(ticketData); // createTicket is from stackby-api.js
-                
-                // Corrected check: Stackby returns the created row object directly, which has a top-level 'rowId'.
-                // The success check now uses 'id' which is what Airtable returns as the record ID.
+                const result = await createTicket(ticketData);
                 if (result && result.id) { 
-                    // For display, prefer a user-defined "Ticket ID" field if it exists in result.fields, otherwise fallback to Airtable record ID.
-                    const displayId = (result.fields && result.fields[COLUMN_NAMES.TICKET_ID]) || result.id;
-                    showMessage(`Ticket submitted successfully! Your Ticket ID is: ${displayId}. You will receive an email confirmation shortly (placeholder).`, 'success');
-                    ticketForm.reset(); // Clear the form
-                    // Clear individual field errors as well
-                    showFieldError('title', '');
+                    const ticketIdFromAirtable = result.fields && result.fields[COLUMN_NAMES.TICKET_ID] ? result.fields[COLUMN_NAMES.TICKET_ID] : result.id;
+                    const userEmail = requesterEmailInput.value.trim();
+                    const ticketTitle = titleInput.value;
+
+                    let successMessage = `Ticket submitted successfully! Your Ticket ID is: <strong>${ticketIdFromAirtable}</strong>.`;
+                    if (ticketData[COLUMN_NAMES.ATTACHMENT]) {
+                        successMessage += `<br>Attachment filename "${ticketData[COLUMN_NAMES.ATTACHMENT]}" has been noted (actual file upload functionality is separate).`;
+                    }
+
+                    const mailtoSubject = `Ticket Confirmation - ID: ${ticketIdFromAirtable}`;
+                    const mailtoBody = `Dear User,\n\nThank you for your submission.\nYour ticket titled "${ticketTitle}" has been received.\n\nTicket ID: ${ticketIdFromAirtable}\nStatus: New\n\nWe will get back to you shortly.`;
+                    const mailtoLink = `mailto:${userEmail}?subject=${encodeURIComponent(mailtoSubject)}&body=${encodeURIComponent(mailtoBody)}`;
+
+                    successMessage += `<br><br>A confirmation email draft has been prepared: <a href="${mailtoLink}" target="_blank">Click here to open email draft</a>`;
+
+                    showMessage(successMessage, 'success', true); // true for isHTML
+                    ticketForm.reset();
+                    showFieldError('requestTitle', '');
                     showFieldError('description', '');
                     showFieldError('urgency', '');
-                    showFieldError('email', ''); // Clear email error on success
-
-                    // Placeholder: Send email confirmation to user.
-                    console.log(`Placeholder: Trigger email confirmation for ticket ID ${displayId} to the user.`);
-                }
-                // Removed the specific "Mock ticket created successfully" check as API is live.
-                // The generic 'else' block will now handle cases where result is not as expected from a live API.
-                else {
+                    showFieldError('email', '');
+                    console.log(`Mailto link generated for ticket ID ${ticketIdFromAirtable} to ${userEmail}.`);
+                } else {
                     console.error('Failed to create ticket or unexpected response:', result);
                     showMessage('Failed to submit ticket. The server returned an unexpected response. Please try again later.', 'error');
                 }
@@ -143,7 +157,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error during ticket submission:', error);
                 showMessage(`An error occurred while submitting your ticket: ${error.message || 'Unknown error'}. Please try again.`, 'error');
             } finally {
-                // Re-enable button
                 submitButton.disabled = false;
                 submitButton.textContent = 'Submit Ticket';
             }
