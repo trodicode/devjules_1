@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V0.2.1 - Admin Ticket Dashboard</title>
+    <title>V0.2.2 - Admin Ticket Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
@@ -24,7 +24,7 @@
     <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-bold text-gray-700">Ticket Management Dashboard</h1>
-            <span class="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">V0.2.1</span>
+            <span class="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">V0.2.2</span>
         </div>
 
         <!-- Message Area: Will be styled with Tailwind classes directly in JS or kept if custom styles are preferred -->
@@ -86,7 +86,7 @@
     </div>
 
     <!-- Ticket Detail Modal -->
-    <div id="ticketDetailModal" class="fixed z-10 inset-0 overflow-y-auto" style="display:none;">
+    <div id="ticketDetailModal" class="fixed z-10 inset-0 overflow-y-auto hidden"> <!-- MODIFIED: style="display:none;" to class="hidden" -->
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!-- Background overlay -->
             <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
