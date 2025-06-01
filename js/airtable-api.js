@@ -161,29 +161,12 @@ async function createTicket(ticketDataFromForm) {
     }
 
     // Handle attachment: Airtable expects an array of attachment objects [{url: "..."}]
-    // Since we only have a filename, we can't directly upload.
-    // We'll store the filename as text, or if it's a URL, format it correctly.
-    const attachmentValue = ticketDataFromForm[COLUMN_NAMES.ATTACHMENT];
-    if (attachmentValue) {
-        if (attachmentValue.startsWith('http://') || attachmentValue.startsWith('https://')) {
-            fieldsToCreate[COLUMN_NAMES.ATTACHMENT] = [{ url: attachmentValue }];
-        } else {
-            // If it's just a filename, and your Airtable field is an "Attachment" type,
-            // this won't work directly. You'd typically need to upload the file elsewhere
-            // and provide that URL. For now, if it's a text field, store the filename.
-            // If it's an attachment field, this will likely fail or do nothing.
-            // Let's assume for now it's a text field in Airtable for simplicity if not a URL.
-            // Or, if the Airtable column is an Attachment type, it's better to pass [{url: "placeholder_or_filename_as_text"}]
-            // but this won't make it a real attachment.
-            // For this exercise, let's assume if it's not a URL, we are storing the filename as text
-            // in a text field, OR if the field is an attachment type, we provide a placeholder URL structure.
-            // Given the requirement: "Attachment" field should be formatted as [{"url": "URL_FROM_FORM"}]
-            // We will assume if it's not a URL, we create a dummy URL structure with the filename.
-            // This won't make it a usable attachment but fulfills the format.
-            // A better approach is to ensure only valid URLs are passed or use a file upload service.
-            fieldsToCreate[COLUMN_NAMES.ATTACHMENT] = [{ url: `file://${attachmentValue}` }]; // Placeholder-like URL
-            console.warn(`[Airtable API] createTicket: Attachment "${attachmentValue}" is not a URL. Formatting as placeholder URL for Airtable.`);
-        }
+    // js/main.js already formats ticketDataFromForm[COLUMN_NAMES.ATTACHMENT] into this structure if a URL is provided.
+    const attachmentData = ticketDataFromForm[COLUMN_NAMES.ATTACHMENT];
+    if (attachmentData) { // attachmentData is already [{url: "..."}] or undefined
+        fieldsToCreate[COLUMN_NAMES.ATTACHMENT] = attachmentData;
+        // No need to check startsWith here as it's already an object/array.
+        // The console.warn for non-URL filenames would be better placed in main.js if strict URL validation is needed there.
     }
 
     const requestBody = { fields: fieldsToCreate, typecast: true };
@@ -287,24 +270,29 @@ async function updateTicket(recordId, updatedDataFromApp) {
     const fieldsToUpdate = { ...updatedDataFromApp };
 
     // Handle attachment if present in updatedDataFromApp
-    if (fieldsToUpdate.hasOwnProperty(COLUMN_NAMES.ATTACHMENT)) {
-        const attachmentValue = fieldsToUpdate[COLUMN_NAMES.ATTACHMENT];
-        if (attachmentValue && (typeof attachmentValue === 'string')) {
-            if (attachmentValue.startsWith('http://') || attachmentValue.startsWith('https://')) {
-                fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = [{ url: attachmentValue }];
+    // updatedDataFromApp is expected to come directly from the application logic,
+    // so if an attachment URL is being updated, js/admin.js (or similar) should format it
+    // as [{url: "new_url"}] before calling updateTicket.
+    // If clearing, it should send { [COLUMN_NAMES.ATTACHMENT]: null } or an empty array.
+    if (updatedDataFromApp.hasOwnProperty(COLUMN_NAMES.ATTACHMENT)) {
+        const attachmentUpdateValue = updatedDataFromApp[COLUMN_NAMES.ATTACHMENT];
+        // If attachmentUpdateValue is a string (a new URL), format it.
+        // If it's null or an empty array (for clearing), it's already fine.
+        // If it's already [{url: "..."}], it's also fine.
+        if (typeof attachmentUpdateValue === 'string' && attachmentUpdateValue.trim() !== '') {
+            if (attachmentUpdateValue.startsWith('http://') || attachmentUpdateValue.startsWith('https://')) {
+                 fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = [{ url: attachmentUpdateValue }];
             } else {
-                // Filename only, create placeholder URL for Airtable attachment field
-                fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = [{ url: `file://${attachmentValue}` }];
-                 console.warn(`[Airtable API] updateTicket: Attachment "${attachmentValue}" is not a URL. Formatting as placeholder URL.`);
+                // If it's a filename or invalid URL string, create placeholder.
+                // However, for updates, it's more likely this should be pre-validated or handled by calling code.
+                fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = [{ url: `file://${attachmentUpdateValue}` }];
+                console.warn(`[Airtable API] updateTicket: Attachment string "${attachmentUpdateValue}" is not a valid URL. Formatting as placeholder URL.`);
             }
-        } else if (attachmentValue === '' || attachmentValue === null) {
-            // To clear an attachment field in Airtable, you might need to pass null or an empty array
-            // depending on the field type and API behavior. For attachment fields, null is often used.
-            fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = null;
+        } else {
+            // If it's null, an empty array, or already formatted, pass it as is.
+            fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = attachmentUpdateValue;
         }
-        // If attachmentValue is already an array of objects, assume it's correctly formatted
     }
-
 
     const requestBody = { fields: fieldsToUpdate, typecast: true };
 
