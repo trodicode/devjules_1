@@ -3,13 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Ticket Dashboard</title>
+    <title>V0.1.1 - Admin Ticket Dashboard</title>
     <link rel="stylesheet" href="css/style.css">
     <!-- <link rel="stylesheet" href="css/admin-style.css"> --> <!-- Optional: for separate admin styles -->
 </head>
 <body>
     <div class="container dashboard-container">
-        <h1>Ticket Management Dashboard</h1>
+        <div class="dashboard-header">
+            <h1>Ticket Management Dashboard</h1>
+            <span class="version-number">V0.1.1</span>
+        </div>
 
         <div id="adminMessageArea" class="message-area" style="display:none;">Loading tickets...</div>
 
@@ -78,7 +81,7 @@
                 <p><strong>Assigned Collaborator:</strong> <span id="modalTicketAssignee"></span></p>
                 <p><strong>Submission Date:</strong> <span id="modalTicketSubmissionDate"></span></p>
                 <p><strong>Attachment:</strong> <span id="modalTicketAttachment"></span></p>
-                
+
                 <hr>
                 <h3>Update Ticket</h3>
                 <div class="form-group">

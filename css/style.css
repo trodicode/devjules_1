@@ -112,6 +112,26 @@ button[type="submit"]:hover {
 
 
 /* Admin Dashboard Specific Styles */
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Pushes version number to the right */
+    margin-bottom: 20px; /* Same as h1 original margin-bottom */
+}
+
+.dashboard-header h1 {
+    margin-bottom: 0; /* Remove bottom margin as it's now on dashboard-header */
+}
+
+.version-number {
+    font-size: 0.85em;
+    color: #666;
+    background-color: #f0f0f0;
+    padding: 3px 6px;
+    border-radius: 4px;
+    align-self: flex-start; /* Align with top of h1 if h1 is larger */
+}
+
 .dashboard-container {
     max-width: 1200px; /* Wider container for dashboard */
     margin: 20px auto; /* More margin for dashboard */
@@ -239,7 +259,7 @@ button[type="submit"]:hover {
 /* Ensure general .container styles don't conflict too much with .dashboard-container */
 .container {
     /* This was for the form page, dashboard uses .dashboard-container */
-    /* max-width: 600px; */ 
+    /* max-width: 600px; */
 }
 
 /* Remove the old .dashboard placeholder if it exists */

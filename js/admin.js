@@ -3,9 +3,9 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('admin.js loaded for admin dashboard.');
 
-    // Ensure stackby-api.js and its functions are loaded
+    // Ensure airtable-api.js and its functions are loaded
     if (typeof getAllTickets !== 'function' || typeof getTicketById !== 'function' || typeof updateTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
-        console.error('Stackby API functions or COLUMN_NAMES are not available. Ensure stackby-api.js is loaded correctly before admin.js.');
+        console.error('Airtable API functions or COLUMN_NAMES are not available. Ensure airtable-api.js is loaded correctly before admin.js.');
         showMessageOnPage('Critical error: Cannot connect to ticketing system. (API script not loaded)', 'error');
         return;
     }
@@ -34,9 +34,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalSaveAssigneeButton = document.getElementById('modalSaveAssigneeButton');
     const modalUserMessageArea = document.getElementById('modalUserMessageArea');
 
-    let allTickets = [];
+    let allTickets = []; // This will store the tickets as returned by airtable-api.js (with .id and .fields)
     let currentSort = { column: null, ascending: true };
-    let currentlySelectedTicketRowId = null;
+    let currentlySelectedRecordId = null; // Stores the Airtable record ID for the modal
 
     // --- Message Display ---
     function showMessageOnPage(message, type = 'info') {
@@ -44,9 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
             adminMessageArea.textContent = message;
             adminMessageArea.className = `message-area ${type}`;
             adminMessageArea.style.display = 'block';
-            // Hide table if it's not an info message about loading or no results
             if (type === 'error' || (type === 'info' && message !== 'Loading tickets...' && !message.includes("No tickets"))) {
-                 if(ticketTableBody) ticketTableBody.innerHTML = ''; // Clear table on error
+                 if(ticketTableBody) ticketTableBody.innerHTML = '';
             }
         } else {
             type === 'error' ? console.error(message) : console.log(message);
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessageInModal(message, type = 'info') {
         if (modalUserMessageArea) {
             modalUserMessageArea.textContent = message;
-            modalUserMessageArea.className = `message-area ${type}`; // Make sure CSS for .message-area.info exists or is handled
+            modalUserMessageArea.className = `message-area ${type}`;
             modalUserMessageArea.style.display = 'block';
         } else {
             type === 'error' ? console.error(message) : console.log(message);
@@ -66,11 +65,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Ticket Rendering ---
     function renderTickets(ticketsToRender) {
         if (!ticketTableBody) return;
-        ticketTableBody.innerHTML = ''; // Clear existing rows first
+        ticketTableBody.innerHTML = '';
 
         if (!ticketsToRender || ticketsToRender.length === 0) {
-            // Message handled by loadAndDisplayTickets or applyFiltersAndSort
-            // showMessageOnPage('No tickets found matching your criteria.', 'info');
             const row = ticketTableBody.insertRow();
             const cell = row.insertCell();
             cell.colSpan = tableHeaders.length;
@@ -78,27 +75,36 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.style.textAlign = 'center';
             return;
         }
-        
-        // Clear general messages if tickets are present
+
         if(adminMessageArea.textContent === 'Loading tickets...' || adminMessageArea.textContent.includes("No tickets")) {
             adminMessageArea.style.display = 'none';
         }
 
-
-        ticketsToRender.forEach(ticket => {
+        ticketsToRender.forEach(ticket => { // 'ticket' here is an object like {id: "recXXXX", fields: {...}, created_at: "..."}
             const row = ticketTableBody.insertRow();
             const fields = ticket.fields || {};
-            const rowId = ticket.rowId;
+            const recordId = ticket.id; // **FIX**: Use ticket.id which is the Airtable record ID
 
-            row.insertCell().textContent = fields[COLUMN_NAMES.TICKET_ID] || rowId || 'N/A';
-            
+            // Ensure recordId is valid before creating clickable elements
+            if (!recordId) {
+                console.error("Ticket object is missing an 'id' property:", ticket);
+                // Potentially skip this row or display an error in the row
+                row.insertCell().textContent = 'Error: Missing ID';
+                row.insertCell().textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'Error: Missing Title';
+                row.insertCell().colSpan = 5; // Adjust colspan based on your table structure
+                row.insertCell().textContent = 'Invalid ticket data';
+                return; // Skip this iteration
+            }
+
+            row.insertCell().textContent = fields[COLUMN_NAMES.TICKET_ID] || recordId || 'N/A';
+
             const titleCell = row.insertCell();
             titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
             titleCell.style.cursor = 'pointer';
             titleCell.style.color = '#007bff';
-            titleCell.onclick = () => openTicketDetailModal(rowId);
+            titleCell.onclick = () => openTicketDetailModal(recordId); // Pass recordId
 
-            row.insertCell().textContent = fields.created_at ? new Date(fields.created_at).toLocaleDateString() : 'Unknown Date';
+            row.insertCell().textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date';
             row.insertCell().textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal';
             row.insertCell().textContent = fields[COLUMN_NAMES.STATUS] || 'New';
             row.insertCell().textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
@@ -107,7 +113,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const viewDetailsButton = document.createElement('button');
             viewDetailsButton.textContent = 'View/Edit';
             viewDetailsButton.className = 'action-btn edit';
-            viewDetailsButton.onclick = () => openTicketDetailModal(rowId);
+            viewDetailsButton.onclick = () => openTicketDetailModal(recordId); // Pass recordId
             actionsCell.appendChild(viewDetailsButton);
         });
     }
@@ -115,26 +121,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Data Fetching & Processing ---
     async function loadAndDisplayTickets() {
         showMessageOnPage('Loading tickets...', 'info');
-        if(ticketTableBody) ticketTableBody.innerHTML = ''; // Clear table while loading
+        if(ticketTableBody) ticketTableBody.innerHTML = '';
         try {
-            const tickets = await getAllTickets();
+            const tickets = await getAllTickets(); // This now returns [{id, fields, created_at}, ...]
             if (tickets && Array.isArray(tickets)) {
                 allTickets = tickets;
-                applyFiltersAndSort(); // This will call renderTickets
+                applyFiltersAndSort();
                 if (allTickets.length === 0) {
                     showMessageOnPage('No tickets currently in the system.', 'info');
                 } else {
-                     adminMessageArea.style.display = 'none'; // Hide loading/info message if tickets are shown
+                     adminMessageArea.style.display = 'none';
                 }
             } else {
                 showMessageOnPage('Could not retrieve tickets. Data format unexpected.', 'error');
                 allTickets = [];
-                renderTickets([]); // Ensure "No tickets to display" is shown
+                renderTickets([]);
             }
         } catch (error) {
             showMessageOnPage(`Error loading tickets: ${error.message || 'Unknown error'}.`, 'error');
             allTickets = [];
-            renderTickets([]); // Ensure "No tickets to display" is shown
+            renderTickets([]);
         }
     }
 
@@ -165,9 +171,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedTickets = [...tickets].sort((a, b) => {
             let valA = (a.fields && a.fields[fieldName]) || '';
             let valB = (b.fields && b.fields[fieldName]) || '';
-            if (fieldName === 'created_at') {
-                valA = valA ? new Date(valA).getTime() : 0;
-                valB = valB ? new Date(valB).getTime() : 0;
+            if (fieldName === 'created_at') { // Note: 'created_at' is top-level, not in fields after mapping
+                valA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                valB = b.created_at ? new Date(b.created_at).getTime() : 0;
             } else {
                 valA = String(valA).toLowerCase();
                 valB = String(valB).toLowerCase();
@@ -178,65 +184,63 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return sortedTickets;
     }
-    
+
     function applyFiltersAndSort() {
         let processedTickets = filterTickets();
         if (currentSort.column) {
             processedTickets = sortTickets(processedTickets, currentSort.column, currentSort.ascending);
         }
-        if (processedTickets.length === 0 && allTickets.length > 0) { // Check if filters/search resulted in no tickets
+        if (processedTickets.length === 0 && allTickets.length > 0) {
             showMessageOnPage('No tickets found matching your criteria.', 'info');
         } else if (allTickets.length === 0 && processedTickets.length === 0) {
-            // This case is handled by loadAndDisplayTickets initially
-            // but if filters are applied to an empty set, this ensures the message stays correct.
             showMessageOnPage('No tickets currently in the system.', 'info');
         }
         renderTickets(processedTickets);
     }
 
     // --- Modal Functionality ---
-    async function openTicketDetailModal(rowId) {
-        currentlySelectedTicketRowId = rowId;
+    async function openTicketDetailModal(recordId) { // **FIX**: Parameter name changed for clarity
+        if (!recordId) {
+            console.error("openTicketDetailModal called with undefined or null recordId");
+            showMessageOnPage("Could not open ticket details: Missing ticket ID.", "error");
+            return;
+        }
+        currentlySelectedRecordId = recordId; // **FIX**: Store the Airtable record ID
         showMessageInModal('Loading ticket details...', 'info');
-        // Disable save buttons while loading details
         modalSaveStatusButton.disabled = true;
         modalSaveAssigneeButton.disabled = true;
         ticketDetailModal.style.display = 'flex';
 
         try {
-            const ticket = await getTicketById(rowId);
-            if (ticket && ticket.fields) {
+            const ticket = await getTicketById(recordId); // **FIX**: Use the correct recordId
+            if (ticket && ticket.fields) { // 'ticket' is {id, fields, created_at}
                 const fields = ticket.fields;
-                modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.rowId || 'N/A';
+                modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.id || 'N/A'; // Use ticket.id as fallback
                 modalTicketTitle.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'N/A';
                 modalTicketDescription.textContent = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || 'N/A';
                 modalTicketUrgency.textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'N/A';
                 modalTicketStatus.textContent = fields[COLUMN_NAMES.STATUS] || 'N/A';
                 modalTicketAssignee.textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
-                modalTicketSubmissionDate.textContent = fields.created_at ? new Date(fields.created_at).toLocaleString() : 'N/A';
+                modalTicketSubmissionDate.textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A'; // Use ticket.created_at
+
                 const attachmentValue = fields[COLUMN_NAMES.ATTACHMENT];
-                if (attachmentValue) {
-                    if (typeof attachmentValue === 'string' && (attachmentValue.startsWith('http://') || attachmentValue.startsWith('https://'))) {
-                        modalTicketAttachment.innerHTML = `<a href="${attachmentValue}" target="_blank" rel="noopener noreferrer">${attachmentValue}</a>`;
-                    } else if (Array.isArray(attachmentValue) && attachmentValue.length > 0 && attachmentValue[0].url) {
-                        modalTicketAttachment.innerHTML = `<a href="${attachmentValue[0].url}" target="_blank" rel="noopener noreferrer">${attachmentValue[0].filename || 'View Attachment'}</a>`;
-                    } else {
-                        modalTicketAttachment.textContent = String(attachmentValue);
-                    }
+                if (attachmentValue && Array.isArray(attachmentValue) && attachmentValue.length > 0 && attachmentValue[0].url) {
+                     modalTicketAttachment.innerHTML = `<a href="${attachmentValue[0].url}" target="_blank" rel="noopener noreferrer">${attachmentValue[0].filename || 'View Attachment'}</a>`;
+                } else if (typeof attachmentValue === 'string' && attachmentValue.startsWith('file://')) {
+                    modalTicketAttachment.textContent = `File: ${attachmentValue.substring('file://'.length)} (Not a direct link)`;
                 } else {
                     modalTicketAttachment.textContent = 'None';
                 }
                 modalChangeStatusSelect.value = fields[COLUMN_NAMES.STATUS] || "";
                 modalAssignCollaboratorInput.value = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "";
-                showMessageInModal('', 'info'); // Clear loading message
+                showMessageInModal('', 'info');
                 modalUserMessageArea.style.display = 'none';
             } else {
-                showMessageInModal('Could not load ticket details.', 'error');
+                showMessageInModal('Could not load ticket details or ticket has no fields.', 'error');
             }
         } catch (error) {
-            showMessageInModal(`Error: ${error.message || 'Could not fetch details.'}`, 'error');
+            showMessageInModal(`Error fetching ticket details: ${error.message || 'Unknown error'}.`, 'error');
         } finally {
-            // Re-enable save buttons after details are loaded or if an error occurs
             modalSaveStatusButton.disabled = false;
             modalSaveAssigneeButton.disabled = false;
         }
@@ -244,13 +248,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.closeTicketDetailModal = function() {
         ticketDetailModal.style.display = 'none';
-        currentlySelectedTicketRowId = null;
+        currentlySelectedRecordId = null; // **FIX**: Use correct variable
         modalUserMessageArea.style.display = 'none';
     }
 
     // --- Update Ticket Functionality (Modal) ---
     modalSaveStatusButton.addEventListener('click', async () => {
-        if (!currentlySelectedTicketRowId) return;
+        if (!currentlySelectedRecordId) return; // **FIX**: Use correct variable
         const newStatus = modalChangeStatusSelect.value;
         if (!newStatus) {
             showMessageInModal('Please select a status.', 'error');
@@ -260,12 +264,12 @@ document.addEventListener('DOMContentLoaded', () => {
         modalSaveStatusButton.disabled = true;
         modalSaveStatusButton.textContent = 'Saving...';
         try {
-            const updatedTicket = await updateTicket(currentlySelectedTicketRowId, { [COLUMN_NAMES.STATUS]: newStatus });
+            const updatedTicket = await updateTicket(currentlySelectedRecordId, { [COLUMN_NAMES.STATUS]: newStatus }); // **FIX**
             if (updatedTicket && updatedTicket.fields) {
                 const newStatusDisplay = updatedTicket.fields[COLUMN_NAMES.STATUS];
                 showMessageInModal('Status updated successfully!', 'success');
                 modalTicketStatus.textContent = newStatusDisplay;
-                const ticketIndex = allTickets.findIndex(t => t.rowId === currentlySelectedTicketRowId);
+                const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId); // **FIX**: Compare with ticket.id
                 if (ticketIndex > -1) {
                     allTickets[ticketIndex].fields[COLUMN_NAMES.STATUS] = newStatusDisplay;
                     applyFiltersAndSort();
@@ -288,19 +292,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     modalSaveAssigneeButton.addEventListener('click', async () => {
-        if (!currentlySelectedTicketRowId) return;
+        if (!currentlySelectedRecordId) return; // **FIX**: Use correct variable
         const newAssignee = modalAssignCollaboratorInput.value.trim();
         showMessageInModal('Updating assignment...', 'info');
         modalSaveAssigneeButton.disabled = true;
         modalSaveAssigneeButton.textContent = 'Saving...';
         try {
-            const updatedTicket = await updateTicket(currentlySelectedTicketRowId, { [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: newAssignee });
+            const updatedTicket = await updateTicket(currentlySelectedRecordId, { [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: newAssignee }); // **FIX**
             if (updatedTicket && updatedTicket.fields) {
                 const newAssigneeDisplay = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
                 showMessageInModal('Collaborator assigned successfully!', 'success');
                 modalTicketAssignee.textContent = newAssigneeDisplay;
                 modalAssignCollaboratorInput.value = newAssigneeDisplay === 'Unassigned' ? "" : newAssigneeDisplay;
-                const ticketIndex = allTickets.findIndex(t => t.rowId === currentlySelectedTicketRowId);
+                const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId); // **FIX**: Compare with ticket.id
                 if (ticketIndex > -1) {
                     allTickets[ticketIndex].fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR];
                     applyFiltersAndSort();
@@ -332,7 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     tableHeaders.forEach(header => {
         header.addEventListener('click', () => {
-            const sortColumnKey = header.getAttribute('data-sort-by'); 
+            const sortColumnKey = header.getAttribute('data-sort-by');
             if (currentSort.column === sortColumnKey) {
                 currentSort.ascending = !currentSort.ascending;
             } else {
@@ -343,29 +347,25 @@ document.addEventListener('DOMContentLoaded', () => {
             applyFiltersAndSort();
         });
     });
-    
+
     function getHeaderDisplayName(columnKey) {
-        // Prioritize COLUMN_NAMES mapping
         if (COLUMN_NAMES[columnKey]) {
             return COLUMN_NAMES[columnKey];
         }
-        // Handle special cases like 'created_at'
         if (columnKey === 'created_at') {
             return 'Date Submitted';
         }
-        // Default transformation for other keys (e.g., from data-sort-by attributes)
         return columnKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
     }
-
 
     function updateSortIndicators() {
         tableHeaders.forEach(header => {
             const columnKey = header.getAttribute('data-sort-by');
-            const headerText = getHeaderDisplayName(columnKey); // Use helper to get display name
+            const headerText = getHeaderDisplayName(columnKey);
 
             if (columnKey === currentSort.column) {
                 header.classList.add('sorted');
-                header.innerHTML = `${headerText} ${currentSort.ascending ? '&#9650;' : '&#9660;'}`; // ▲ or ▼
+                header.innerHTML = `${headerText} ${currentSort.ascending ? '&#9650;' : '&#9660;'}`;
             } else {
                 header.classList.remove('sorted');
                 header.innerHTML = headerText;
@@ -386,5 +386,5 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Initial Load ---
     loadAndDisplayTickets();
-    updateSortIndicators(); // Initialize header text correctly
+    updateSortIndicators();
 });

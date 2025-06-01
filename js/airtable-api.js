@@ -51,7 +51,7 @@ async function _fetchAirtableAPI(recordIdOrQuery = '', method, body = null) {
              url += `/${recordIdOrQuery}`;
         }
     }
-    
+
     const headers = {
         'Authorization': `Bearer ${AIRTABLE_API_TOKEN}`,
         'Content-Type': 'application/json'
@@ -99,9 +99,9 @@ async function _fetchAirtableAPI(recordIdOrQuery = '', method, body = null) {
 
         if (response.status === 204 || response.headers.get("content-length") === "0") {
             console.log("[Airtable API] Response is 204 No Content or empty.");
-            return null; 
+            return null;
         }
-        
+
         const jsonData = await response.json();
         console.log("[Airtable API] Parsed JSON Data from response:", jsonData);
         return jsonData;
@@ -192,7 +192,7 @@ async function createTicket(ticketDataFromForm) {
         console.log('[Airtable API] createTicket: Attempting to create record with data:', JSON.stringify(requestBody, null, 2));
         // Airtable returns the created record object directly (not in an array like Stackby for single creation)
         const createdRecord = await _fetchAirtableAPI('', 'POST', requestBody);
-        
+
         if (createdRecord && createdRecord.id) {
             console.log('[Airtable API] createTicket: Ticket created successfully. Result:', JSON.stringify(createdRecord, null, 2));
             // Adapt to expected structure (id instead of rowId, fields object)
@@ -221,7 +221,7 @@ async function getAllTickets() {
         // Airtable returns records in a 'records' array
         // Removed the '?view=All%20Tickets' parameter to fetch all records without specifying a view.
         // Other query parameters like sort can be added here if needed, e.g., '?sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc'
-        const response = await _fetchAirtableAPI('', 'GET'); 
+        const response = await _fetchAirtableAPI('', 'GET');
         if (response && response.records) {
             console.log('[Airtable API] getAllTickets: Tickets fetched successfully. Count:', response.records.length);
             // Adapt each record to have 'id' and 'fields' at top level, and 'created_at' from 'createdTime'
@@ -283,7 +283,7 @@ async function updateTicket(recordId, updatedDataFromApp) {
         console.error('[Airtable API] updateTicket: Record ID is required.');
         return null;
     }
-    
+
     const fieldsToUpdate = { ...updatedDataFromApp };
 
     // Handle attachment if present in updatedDataFromApp
@@ -300,7 +300,7 @@ async function updateTicket(recordId, updatedDataFromApp) {
         } else if (attachmentValue === '' || attachmentValue === null) {
             // To clear an attachment field in Airtable, you might need to pass null or an empty array
             // depending on the field type and API behavior. For attachment fields, null is often used.
-            fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = null; 
+            fieldsToUpdate[COLUMN_NAMES.ATTACHMENT] = null;
         }
         // If attachmentValue is already an array of objects, assume it's correctly formatted
     }

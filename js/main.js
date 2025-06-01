@@ -100,7 +100,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ticketData[COLUMN_NAMES.ATTACHMENT] = [{ url: attachmentUrlValue }];
             }
             // If attachmentUrlValue is empty, the ATTACHMENT field will be omitted from ticketData.
-            
+
             // Perform validation (Note: Attachment URL is optional, so not validated here for presence)
             if (!validateForm(ticketData)) {
                 showMessage('Please correct the errors in the form.', 'error');
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             console.log('Form validated successfully. Preparing data for Stackby:', ticketData);
-            
+
             // Disable button to prevent multiple submissions
             const submitButton = ticketForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
@@ -116,10 +116,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
             try {
                 const result = await createTicket(ticketData); // createTicket is from stackby-api.js
-                
+
                 // Corrected check: Stackby returns the created row object directly, which has a top-level 'rowId'.
                 // The success check now uses 'id' which is what Airtable returns as the record ID.
-                if (result && result.id) { 
+                if (result && result.id) {
                     // For display, prefer a user-defined "Ticket ID" field if it exists in result.fields, otherwise fallback to Airtable record ID.
                     const displayId = (result.fields && result.fields[COLUMN_NAMES.TICKET_ID]) || result.id;
                     showMessage(`Ticket submitted successfully! Your Ticket ID is: ${displayId}. You will receive an email confirmation shortly (placeholder).`, 'success');
