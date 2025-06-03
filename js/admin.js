@@ -61,11 +61,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessageInModal(message, type = 'info') {
         if (modalUserMessageArea) {
             modalUserMessageArea.textContent = message;
-            modalUserMessageArea.className = `mt-3 p-2 rounded text-center ${
-                type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
-                type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
-                'bg-blue-100 border border-blue-400 text-blue-700'
-            }`;
+            let baseClasses = 'p-3 rounded-md mt-3'; // Common classes
+            if (type === 'success') {
+                modalUserMessageArea.className = `${baseClasses} bg-green-100 border-green-500 text-green-700`;
+            } else if (type === 'error') {
+                modalUserMessageArea.className = `${baseClasses} bg-red-100 border-red-500 text-red-700`;
+            } else { // 'info' or default
+                modalUserMessageArea.className = `${baseClasses} bg-blue-100 border-blue-500 text-blue-700`;
+            }
             modalUserMessageArea.style.display = message ? 'block' : 'none';
         } else {
             type === 'error' ? console.error(message) : console.log(message);
@@ -117,8 +120,39 @@ document.addEventListener('DOMContentLoaded', () => {
             titleCell.onclick = () => openTicketDetailModal(recordId);
 
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date'}</td>`;
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal'}</td>`;
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${fields[COLUMN_NAMES.STATUS] === 'New' ? 'bg-blue-100 text-blue-800' : fields[COLUMN_NAMES.STATUS] === 'In Progress' ? 'bg-yellow-100 text-yellow-800' :  fields[COLUMN_NAMES.STATUS] === 'Acknowledged' ? 'bg-purple-100 text-purple-800' : fields[COLUMN_NAMES.STATUS] === 'Resolved' ? 'bg-green-100 text-green-800' :  fields[COLUMN_NAMES.STATUS] === 'Closed' ? 'bg-gray-300 text-gray-800' : 'bg-gray-100 text-gray-800'}">${fields[COLUMN_NAMES.STATUS] || 'New'}</span></td>`;
+
+            // Urgency Level visual cue
+            let urgencyIcon = '';
+            let urgencyClass = 'text-gray-700'; // Default for Normal
+            const urgencyValue = fields[COLUMN_NAMES.URGENCY_LEVEL];
+            if (urgencyValue === 'Urgent') {
+                urgencyIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.216 3.031-1.742 3.031H4.42c-1.526 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1.75-2.75a.75.75 0 000 1.5h3.5a.75.75 0 000-1.5h-3.5z" clip-rule="evenodd" /></svg>';
+                urgencyClass = 'text-red-600 font-semibold';
+            } else if (urgencyValue === 'Normal') {
+                // Optional: Add a specific icon or class for Normal if desired
+                // urgencyIcon = '<span>N</span>'; // Example
+                urgencyClass = 'text-gray-700'; // Explicitly set for clarity, though it's the default
+            }
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyClass}">${urgencyIcon}${urgencyValue || 'Normal'}</span></td>`;
+
+            // Status display with colored badges - Added "Pending"
+            let statusClass = 'bg-gray-100 text-gray-800'; // Default
+            const statusValue = fields[COLUMN_NAMES.STATUS];
+            if (statusValue === 'New') {
+                statusClass = 'bg-blue-100 text-blue-800';
+            } else if (statusValue === 'In Progress') {
+                statusClass = 'bg-yellow-100 text-yellow-800';
+            } else if (statusValue === 'Acknowledged') {
+                statusClass = 'bg-purple-100 text-purple-800';
+            } else if (statusValue === 'Pending') { // Added Pending
+                statusClass = 'bg-orange-100 text-orange-800';
+            } else if (statusValue === 'Resolved') {
+                statusClass = 'bg-green-100 text-green-800';
+            } else if (statusValue === 'Closed') {
+                statusClass = 'bg-gray-300 text-gray-800';
+            }
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${statusValue || 'New'}</span></td>`;
+
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned'}</td>`;
 
             const actionsCell = row.insertCell();
@@ -256,8 +290,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 modalChangeStatusSelect.value = fields[COLUMN_NAMES.STATUS] || "";
                 modalAssignCollaboratorInput.value = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "";
-                showMessageInModal('', 'info');
-                modalUserMessageArea.style.display = 'none';
+                showMessageInModal('', 'info'); // Clear any loading messages
+                modalUserMessageArea.style.display = 'none'; // Ensure it's hidden if no message
+
+                // Set focus to the first interactive element in the modal
+                if (modalChangeStatusSelect) {
+                    modalChangeStatusSelect.focus();
+                }
             } else {
                 showMessageInModal('Could not load ticket details or ticket has no fields.', 'error');
             }
@@ -294,7 +333,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
             if (updatedTicket && updatedTicket.fields) {
                 const newStatusDisplay = updatedTicket.fields[COLUMN_NAMES.STATUS];
-                showMessageInModal('Status updated successfully!', 'success');
+                showMessageInModal(`Status successfully updated to "${newStatusDisplay}".`, 'success');
                 modalTicketStatus.textContent = newStatusDisplay;
                 const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
                 if (ticketIndex > -1) {
@@ -312,10 +351,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     showMessageOnPage(`Status updated to ${newStatusDisplay}. REMINDER: Manually notify the user.`, 'info');
                 }
             } else {
-                showMessageInModal('Failed to update status. Unexpected response.', 'error');
+                showMessageInModal('Failed to update status. The server returned an unexpected response. Please try again.', 'error');
             }
         } catch (error) {
-            showMessageInModal(`Error updating status: ${error.message || 'Unknown error'}.`, 'error');
+            showMessageInModal(`Error updating status: ${error.message || 'An unknown error occurred'}. Please try again.`, 'error');
         } finally {
             modalSaveStatusButton.disabled = false;
             modalSaveStatusButton.textContent = 'Save Status';
@@ -335,7 +374,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
             if (updatedTicket && updatedTicket.fields) {
                 const newAssigneeDisplay = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
-                showMessageInModal('Collaborator assigned successfully!', 'success');
+                showMessageInModal(`Collaborator successfully assigned: "${newAssigneeDisplay}".`, 'success');
                 modalTicketAssignee.textContent = newAssigneeDisplay;
                 modalAssignCollaboratorInput.value = newAssigneeDisplay === 'Unassigned' ? "" : newAssigneeDisplay;
                 const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
@@ -353,10 +392,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     showMessageOnPage(`Ticket assigned to ${newAssigneeDisplay}. REMINDER: Manually notify the collaborator.`, 'info');
                 }
             } else {
-                showMessageInModal('Failed to assign collaborator. Unexpected response.', 'error');
+                showMessageInModal('Failed to assign collaborator. The server returned an unexpected response. Please try again.', 'error');
             }
         } catch (error) {
-            showMessageInModal(`Error assigning collaborator: ${error.message || 'Unknown error'}.`, 'error');
+            showMessageInModal(`Error assigning collaborator: ${error.message || 'An unknown error occurred'}. Please try again.`, 'error');
         } finally {
             modalSaveAssigneeButton.disabled = false;
             modalSaveAssigneeButton.textContent = 'Save Assignment';
@@ -399,14 +438,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function updateSortIndicators() {
         tableHeaders.forEach(header => {
             const columnKey = header.getAttribute('data-sort-by');
-            const headerText = getHeaderDisplayName(columnKey);
+            const headerText = getHeaderDisplayName(columnKey); // Use the helper to get original text
+
+            // Clear existing content first to avoid duplicating text or arrows
+            header.innerHTML = headerText; // Reset to base text
 
             if (columnKey === currentSort.column) {
-                header.classList.add('sorted');
-                header.innerHTML = `${headerText} ${currentSort.ascending ? '&#9650;' : '&#9660;'}`;
+                header.classList.add('sorted', 'text-indigo-600'); // Add class for active sort, e.g., highlight color
+                // Append arrow span for better control if needed, or keep simple text
+                const arrow = currentSort.ascending ? '&#9650;' : '&#9660;';
+                header.innerHTML = `${headerText} <span class="sort-arrow">${arrow}</span>`;
             } else {
-                header.classList.remove('sorted');
-                header.innerHTML = headerText;
+                header.classList.remove('sorted', 'text-indigo-600');
+                // header.innerHTML = headerText; // Already reset above
             }
         });
     }

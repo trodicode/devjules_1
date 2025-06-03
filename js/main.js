@@ -23,7 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessage(message, type = 'success') {
         if (userMessageArea) {
             userMessageArea.textContent = message;
-            userMessageArea.className = `message-area ${type}`;
+            // Default classes
+            let classes = 'p-4 rounded-md mb-4'; // Added mb-4 for spacing
+            if (type === 'success') {
+                // More prominent success styling
+                classes += ' bg-green-100 border border-green-400 text-green-700 text-lg p-6'; // Larger font, more padding, distinct colors
+            } else if (type === 'error') {
+                classes += ' bg-red-100 border border-red-400 text-red-700';
+            } else { // For any other type, or a generic info
+                classes += ' bg-blue-100 border border-blue-400 text-blue-700';
+            }
+            userMessageArea.className = classes;
             userMessageArea.style.display = 'block';
         } else {
             // Fallback if message area is not found (should not happen with correct HTML)
@@ -130,6 +140,34 @@ document.addEventListener('DOMContentLoaded', () => {
                     showFieldError('urgency', '');
                     showFieldError('email', ''); // Clear email error on success
 
+                    // Create and append the "Submit Another Ticket" button
+                    const submitAnotherButton = document.createElement('button');
+                    submitAnotherButton.type = 'button';
+                    submitAnotherButton.id = 'submitAnotherTicket';
+                    submitAnotherButton.className = 'mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500';
+                    submitAnotherButton.textContent = 'Submit Another Ticket';
+
+                    // Insert the new button after the message area
+                    userMessageArea.parentNode.insertBefore(submitAnotherButton, userMessageArea.nextSibling);
+
+                    submitAnotherButton.addEventListener('click', () => {
+                        userMessageArea.style.display = 'none'; // Hide success message
+                        submitAnotherButton.remove(); // Remove the button itself
+
+                        // Ensure the main submit button is re-enabled and reset to its original text
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Submit Ticket';
+                        }
+                        // Optionally clear lingering field errors if ticketForm.reset() didn't (though it usually does)
+                        // This is more of a safeguard.
+                        showFieldError('title', '');
+                        showFieldError('description', '');
+                        showFieldError('urgency', '');
+                        showFieldError('email', '');
+                    });
+
+
                     // Placeholder: Send email confirmation to user.
                     console.log(`Placeholder: Trigger email confirmation for ticket ID ${displayId} to the user.`);
                 }
@@ -143,9 +181,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Error during ticket submission:', error);
                 showMessage(`An error occurred while submitting your ticket: ${error.message || 'Unknown error'}. Please try again.`, 'error');
             } finally {
-                // Re-enable button
-                submitButton.disabled = false;
-                submitButton.textContent = 'Submit Ticket';
+                // Re-enable button - only if not a success case where new button handles it
+                // or if an error occurred.
+                const submitAnotherButtonExists = document.getElementById('submitAnotherTicket');
+                if (!submitAnotherButtonExists) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = 'Submit Ticket';
+                } else {
+                    // If "Submit Another Ticket" button exists, the main submit button should remain disabled
+                    // until "Submit Another Ticket" is clicked.
+                    submitButton.disabled = true;
+                }
             }
         });
     } else {
