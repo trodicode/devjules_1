@@ -4,46 +4,57 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Support Ticket Submission</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              // example custom color
-              // 'brand-blue': '#007ace',
+              'dark-bg': '#1A1A2E',
+              'neon-pink': '#F900F9',
+              'neon-blue': '#00F0F0',
+              'neon-green': '#39FF14',
+              'text-light': '#E0E0E0',
+              'text-medium': '#A9A9A9',
+            },
+            fontFamily: {
+              'sans': ['Montserrat', 'sans-serif'],
+              'title': ['Orbitron', 'sans-serif'],
             }
           }
         }
       }
     </script>
-    <link rel="stylesheet" href="css/style.css"> <!-- Keep for non-Tailwind styles or overrides for admin page -->
+    <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-lg">
-        <h1 class="text-2xl font-bold text-center text-gray-700 mb-6">Submit a New Support Ticket</h1>
+<body class="bg-dark-bg text-text-light font-sans flex items-center justify-center min-h-screen">
+    <div class="bg-slate-900 p-8 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue w-full max-w-lg">
+        <h1 class="text-2xl font-title text-neon-pink font-bold text-center mb-6">Submit a New Support Ticket</h1>
 
-        <div id="userMessageArea" class="message-area" style="display:none;"></div> <!-- Will style this with Tailwind if needed, or keep custom -->
+        <div id="userMessageArea" class="message-area" style="display:none;"></div>
 
         <form id="ticketForm" class="space-y-6">
             <div>
-                <label for="ticketTitle" class="block text-sm font-medium text-gray-700">Ticket Title *</label>
+                <label for="ticketTitle" class="block text-sm font-medium text-neon-blue font-title">Ticket Title *</label>
                 <input type="text" id="ticketTitle" name="ticketTitle" required
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                       class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
                 <div class="error-message text-red-500 text-xs mt-1" id="titleError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="detailedDescription" class="block text-sm font-medium text-gray-700">Detailed Description *</label>
+                <label for="detailedDescription" class="block text-sm font-medium text-neon-blue font-title">Detailed Description *</label>
                 <textarea id="detailedDescription" name="detailedDescription" rows="4" required
-                          class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"></textarea>
+                          class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm"></textarea>
                 <div class="error-message text-red-500 text-xs mt-1" id="descriptionError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="urgencyLevel" class="block text-sm font-medium text-gray-700">Urgency Level *</label>
+                <label for="urgencyLevel" class="block text-sm font-medium text-neon-blue font-title">Urgency Level *</label>
                 <select id="urgencyLevel" name="urgencyLevel" required
-                        class="mt-1 block w-full px-3 py-2 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
                     <option value="">-- Select Urgency --</option>
                     <option value="Normal">Normal</option>
                     <option value="Urgent">Urgent</option>
@@ -52,21 +63,21 @@
             </div>
 
             <div>
-                <label for="requesterEmail" class="block text-sm font-medium text-gray-700">Votre Email *</label>
+                <label for="requesterEmail" class="block text-sm font-medium text-neon-blue font-title">Votre Email *</label>
                 <input type="email" id="requesterEmail" name="requesterEmail" placeholder="e.g., you@example.com" required
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                       class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
                 <div class="error-message text-red-500 text-xs mt-1" id="emailError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="attachmentUrl" class="block text-sm font-medium text-gray-700">Attachment URL (Optional)</label>
+                <label for="attachmentUrl" class="block text-sm font-medium text-neon-blue font-title">Attachment URL (Optional)</label>
                 <input type="url" id="attachmentUrl" name="attachmentUrl" placeholder="e.g., https://example.com/image.png"
-                       class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                <small class="text-xs text-gray-500 mt-1">Enter the full, publicly accessible URL for your attachment.</small>
+                       class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
+                <small class="text-xs text-text-medium mt-1">Enter the full, publicly accessible URL for your attachment.</small>
             </div>
 
             <button type="submit"
-                    class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50">
+                    class="w-full flex justify-center py-2 px-4 font-title border-2 border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-pink focus:ring-offset-dark-bg disabled:opacity-50">
                 Submit Ticket
             </button>
         </form>

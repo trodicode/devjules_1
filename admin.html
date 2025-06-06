@@ -4,36 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>V0.2.4 - Admin Ticket Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              // example custom color
-              // 'brand-blue': '#007ace',
+              'dark-bg': '#1A1A2E',
+              'neon-pink': '#F900F9',
+              'neon-blue': '#00F0F0',
+              'neon-green': '#39FF14',
+              'text-light': '#E0E0E0',
+              'text-medium': '#A9A9A9',
+            },
+            fontFamily: {
+              'sans': ['Montserrat', 'sans-serif'],
+              'title': ['Orbitron', 'sans-serif'],
             }
           }
         }
       }
     </script>
-    <link rel="stylesheet" href="css/style.css"> <!-- Keep for non-Tailwind styles or overrides -->
-    <!-- <link rel="stylesheet" href="css/admin-style.css"> --> <!-- Optional: for separate admin styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <!-- <link rel="stylesheet" href="css/admin-style.css"> -->
 </head>
-<body class="bg-gray-100 p-4">
-    <div class="max-w-6xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+<body class="bg-dark-bg text-text-light font-sans p-4">
+    <div class="max-w-6xl mx-auto bg-slate-900 p-6 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-bold text-gray-700">Ticket Management Dashboard</h1>
-            <span class="text-sm text-gray-500 bg-gray-200 px-2 py-1 rounded-full">V0.2.4</span>
+            <h1 class="text-3xl font-title text-neon-pink font-bold">Ticket Management Dashboard</h1>
+            <span class="text-xs font-semibold text-dark-bg bg-neon-blue px-2 py-1 rounded-full">V0.2.4</span>
         </div>
 
-        <!-- Message Area: Will be styled with Tailwind classes directly in JS or kept if custom styles are preferred -->
         <div id="adminMessageArea" class="message-area my-4 p-3 rounded-md text-center" style="display:none;">Loading tickets...</div>
 
-        <div class="bg-gray-50 p-4 rounded-md mb-6 flex flex-wrap gap-4 items-end">
+        <div class="bg-slate-800 rounded-md p-4 mb-6 flex flex-wrap gap-4 items-end">
             <div>
-                <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Status:</label>
-                <select id="statusFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <label for="statusFilter" class="block text-neon-blue font-title text-sm font-medium mb-1">Filter by Status:</label>
+                <select id="statusFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-900 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
                     <option value="All">All</option>
                     <option value="New">New</option>
                     <option value="Acknowledged">Acknowledged</option>
@@ -44,33 +54,33 @@
                 </select>
             </div>
             <div>
-                <label for="urgencyFilter" class="block text-sm font-medium text-gray-700 mb-1">Filter by Urgency:</label>
-                <select id="urgencyFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                <label for="urgencyFilter" class="block text-neon-blue font-title text-sm font-medium mb-1">Filter by Urgency:</label>
+                <select id="urgencyFilter" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-900 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
                     <option value="All">All</option>
                     <option value="Normal">Normal</option>
                     <option value="Urgent">Urgent</option>
                 </select>
             </div>
             <div class="flex-grow">
-                <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-1">Search:</label>
-                <input type="text" id="searchInput" placeholder="Search by title, description..." class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                <label for="searchInput" class="block text-neon-blue font-title text-sm font-medium mb-1">Search:</label>
+                <input type="text" id="searchInput" placeholder="Search by title, description..." class="mt-1 block w-full px-3 py-2 bg-slate-900 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
             </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table id="ticketTable" class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
+            <table id="ticketTable" class="min-w-full divide-y divide-slate-700">
+                <thead class="bg-slate-800">
                     <tr>
-                        <th scope="col" data-sort-by="Ticket ID" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Ticket ID</th>
-                        <th scope="col" data-sort-by="Ticket Title" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Title</th>
-                        <th scope="col" data-sort-by="created_at" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Date Submitted</th>
-                        <th scope="col" data-sort-by="Urgency Level" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Urgency</th>
-                        <th scope="col" data-sort-by="Status" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Status</th>
-                        <th scope="col" data-sort-by="Assigned Collaborator" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer hover:bg-gray-100">Assigned To</th>
-                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        <th scope="col" data-sort-by="Ticket ID" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Ticket ID</th>
+                        <th scope="col" data-sort-by="Ticket Title" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Title</th>
+                        <th scope="col" data-sort-by="created_at" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Date Submitted</th>
+                        <th scope="col" data-sort-by="Urgency Level" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Urgency</th>
+                        <th scope="col" data-sort-by="Status" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Status</th>
+                        <th scope="col" data-sort-by="Assigned Collaborator" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Assigned To</th>
+                        <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
-                <tbody id="ticketTableBody" class="bg-white divide-y divide-gray-200">
+                <tbody id="ticketTableBody" class="bg-slate-900 divide-y divide-slate-700">
                     <!-- Rows will be styled with Tailwind classes like: -->
                     <!-- <tr class="hover:bg-gray-50"> -->
                     <!--   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">TID-001</td> -->
@@ -86,45 +96,45 @@
     </div>
 
     <!-- Ticket Detail Modal -->
-    <div id="ticketDetailModal" class="fixed z-10 inset-0 overflow-y-auto hidden"> <!-- MODIFIED: style="display:none;" to class="hidden" -->
+    <div id="ticketDetailModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
         <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
             <!-- Background overlay -->
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
+            <div class="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
             <!-- Modal panel -->
             <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="inline-block align-bottom bg-slate-900 rounded-lg text-left overflow-hidden shadow-[0_0_20px_rgba(249,0,249,0.6)] border border-neon-pink transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
+                <div class="bg-slate-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                     <div class="sm:flex sm:items-start">
                         <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-gray-900 mb-4" id="modal-title">
+                            <h3 class="text-lg leading-6 font-medium text-neon-pink font-title mb-4" id="modal-title">
                                 Ticket Details
                             </h3>
-                            <button onclick="closeTicketDetailModal()" class="absolute top-0 right-0 mt-4 mr-4 text-gray-400 hover:text-gray-500">
+                            <button onclick="closeTicketDetailModal()" class="absolute top-0 right-0 mt-4 mr-4 text-text-medium hover:text-neon-pink">
                                 <span class="sr-only">Close</span>
                                 <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                 </svg>
                             </button>
-                            <div class="space-y-3 text-sm text-gray-700">
-                                <p><strong>Ticket ID:</strong> <span id="modalTicketId" class="text-gray-900"></span></p>
-                                <p><strong>Title:</strong> <span id="modalTicketTitle" class="text-gray-900"></span></p>
-                                <p><strong>Full Description:</strong></p>
-                                <div id="modalTicketDescription" class="bg-gray-50 p-3 rounded-md border max-h-40 overflow-y-auto"></div>
-                                <p><strong>Urgency:</strong> <span id="modalTicketUrgency" class="font-semibold"></span></p>
-                                <p><strong>Status:</strong> <span id="modalTicketStatus" class="font-semibold"></span></p>
-                                <p><strong>Assigned Collaborator:</strong> <span id="modalTicketAssignee" class="text-gray-900"></span></p>
-                                <p><strong>Submission Date:</strong> <span id="modalTicketSubmissionDate" class="text-gray-900"></span></p>
-                                <p><strong>Attachment:</strong> <span id="modalTicketAttachment"></span></p>
+                            <div class="space-y-3 text-sm">
+                                <p><strong class="text-neon-blue font-semibold">Ticket ID:</strong> <span id="modalTicketId" class="text-text-light"></span></p>
+                                <p><strong class="text-neon-blue font-semibold">Title:</strong> <span id="modalTicketTitle" class="text-text-light"></span></p>
+                                <p><strong class="text-neon-blue font-semibold">Full Description:</strong></p>
+                                <div id="modalTicketDescription" class="bg-slate-800 border border-slate-700 text-text-light p-3 rounded-md max-h-40 overflow-y-auto"></div>
+                                <p><strong class="text-neon-blue font-semibold">Urgency:</strong> <span id="modalTicketUrgency" class="text-text-light font-semibold"></span></p>
+                                <p><strong class="text-neon-blue font-semibold">Status:</strong> <span id="modalTicketStatus" class="text-text-light font-semibold"></span></p>
+                                <p><strong class="text-neon-blue font-semibold">Assigned Collaborator:</strong> <span id="modalTicketAssignee" class="text-text-light"></span></p>
+                                <p><strong class="text-neon-blue font-semibold">Submission Date:</strong> <span id="modalTicketSubmissionDate" class="text-text-light"></span></p>
+                                <p><strong class="text-neon-blue font-semibold">Attachment:</strong> <span id="modalTicketAttachment" class="text-text-light"></span></p>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 space-y-4">
-                    <h4 class="text-md font-semibold text-gray-800">Update Ticket</h4>
+                <div class="bg-slate-800 px-4 py-3 sm:px-6 space-y-4">
+                    <h4 class="text-md font-title text-neon-green font-semibold">Update Ticket</h4>
                     <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
                         <div class="sm:col-span-3">
-                            <label for="modalChangeStatus" class="block text-sm font-medium text-gray-700">Change Status:</label>
-                            <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
+                            <label for="modalChangeStatus" class="block text-neon-blue font-title text-sm font-medium">Change Status:</label>
+                            <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-800 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
                                 <option value="">-- Select Status --</option>
                                 <option value="New">New</option>
                                 <option value="Acknowledged">Acknowledged (Pris en charge)</option>
@@ -136,19 +146,19 @@
                         </div>
                         <div class="sm:col-span-3 flex items-end">
                              <button id="modalSaveStatusButton" type="button"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm disabled:opacity-50">
+                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-900">
                                 Save Status
                             </button>
                         </div>
 
                         <div class="sm:col-span-3">
-                            <label for="modalAssignCollaborator" class="block text-sm font-medium text-gray-700">Assign Collaborator:</label>
+                            <label for="modalAssignCollaborator" class="block text-neon-blue font-title text-sm font-medium">Assign Collaborator:</label>
                             <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID"
-                                   class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                                   class="mt-1 block w-full px-3 py-2 bg-slate-800 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
                         </div>
                          <div class="sm:col-span-3 flex items-end">
                             <button id="modalSaveAssigneeButton" type="button"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-indigo-600 text-base font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:text-sm disabled:opacity-50">
+                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-900">
                                 Save Assignment
                             </button>
                         </div>

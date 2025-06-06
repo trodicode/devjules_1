@@ -42,12 +42,14 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessageOnPage(message, type = 'info') {
         if (adminMessageArea) {
             adminMessageArea.textContent = message;
-            // Apply Tailwind classes for message types
-            adminMessageArea.className = `my-4 p-3 rounded-md text-center ${
-                type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
-                type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
-                'bg-blue-100 border border-blue-400 text-blue-700' // Default to 'info'
-            }`;
+            let baseClasses = 'my-4 p-3 rounded-md text-center text-lg';
+            if (type === 'success') {
+                adminMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-green text-neon-green`;
+            } else if (type === 'error') {
+                adminMessageArea.className = `${baseClasses} bg-slate-800 border border-red-500 text-red-500`;
+            } else { // 'info' or default
+                adminMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-blue text-neon-blue`;
+            }
             adminMessageArea.style.display = message ? 'block' : 'none';
 
             if (type === 'error' || (type === 'info' && message !== 'Loading tickets...' && !message.includes("No tickets"))) {
@@ -61,13 +63,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessageInModal(message, type = 'info') {
         if (modalUserMessageArea) {
             modalUserMessageArea.textContent = message;
-            let baseClasses = 'p-3 rounded-md mt-3'; // Common classes
+            let baseClasses = 'p-3 rounded-md mt-3 text-center text-lg'; // Common classes
             if (type === 'success') {
-                modalUserMessageArea.className = `${baseClasses} bg-green-100 border-green-500 text-green-700`;
+                modalUserMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-green text-neon-green`;
             } else if (type === 'error') {
-                modalUserMessageArea.className = `${baseClasses} bg-red-100 border-red-500 text-red-700`;
+                modalUserMessageArea.className = `${baseClasses} bg-slate-800 border border-red-500 text-red-500`;
             } else { // 'info' or default
-                modalUserMessageArea.className = `${baseClasses} bg-blue-100 border-blue-500 text-blue-700`;
+                modalUserMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-blue text-neon-blue`;
             }
             modalUserMessageArea.style.display = message ? 'block' : 'none';
         } else {
@@ -78,15 +80,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Ticket Rendering ---
     function renderTickets(ticketsToRender) {
         if (!ticketTableBody) return;
-        ticketTableBody.innerHTML = '';
+        ticketTableBody.innerHTML = ''; // This is fine as it's part of bg-slate-900 from tbody tag in HTML
 
         if (!ticketsToRender || ticketsToRender.length === 0) {
             const row = ticketTableBody.insertRow();
-            row.className = 'bg-white'; // Match Tailwind table body row background if needed
+            // row.className = 'bg-white'; // Removed, will inherit from tbody or use its own slate classes
             const cell = row.insertCell();
             cell.colSpan = tableHeaders.length;
             cell.textContent = 'No tickets to display.';
-            cell.className = 'px-6 py-4 text-center text-sm text-gray-500';
+            cell.className = 'px-6 py-4 text-center text-sm text-text-medium'; // Use themed text color
             return;
         }
 
@@ -96,7 +98,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         ticketsToRender.forEach(ticket => {
             const row = ticketTableBody.insertRow();
-            row.className = 'hover:bg-gray-50'; // Tailwind class for hover effect
+            row.className = 'hover:bg-slate-800'; // Themed hover
             const fields = ticket.fields || {};
             const recordId = ticket.id;
 
@@ -105,65 +107,59 @@ document.addEventListener('DOMContentLoaded', () => {
                 let errorCell = row.insertCell();
                 errorCell.colSpan = tableHeaders.length;
                 errorCell.textContent = 'Error: Invalid ticket data received.';
-                errorCell.className = 'px-6 py-4 text-center text-red-500';
+                errorCell.className = 'px-6 py-4 text-center text-red-500'; // Standard error red
                 return;
             }
 
-            console.log('[Admin JS] renderTickets: Setting data-id for record:', recordId, 'on row (implicitly).');
+            // console.log('[Admin JS] renderTickets: Setting data-id for record:', recordId, 'on row (implicitly).');
 
-            // Applying Tailwind classes to cells
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${fields[COLUMN_NAMES.TICKET_ID] || recordId}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">${fields[COLUMN_NAMES.TICKET_ID] || recordId}</td>`;
 
             const titleCell = row.insertCell();
             titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
-            titleCell.className = "px-6 py-4 whitespace-nowrap text-sm text-indigo-600 hover:text-indigo-900 hover:underline cursor-pointer";
+            titleCell.className = "px-6 py-4 whitespace-nowrap text-sm text-neon-pink hover:text-opacity-80 hover:underline cursor-pointer";
             titleCell.onclick = () => openTicketDetailModal(recordId);
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date'}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date'}</td>`;
 
-            // Urgency Level visual cue
             let urgencyIcon = '';
-            let urgencyClass = 'text-gray-700'; // Default for Normal
+            let urgencyFinalClass = 'text-text-medium'; // Default for Normal
             const urgencyValue = fields[COLUMN_NAMES.URGENCY_LEVEL];
             if (urgencyValue === 'Urgent') {
                 urgencyIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.216 3.031-1.742 3.031H4.42c-1.526 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1.75-2.75a.75.75 0 000 1.5h3.5a.75.75 0 000-1.5h-3.5z" clip-rule="evenodd" /></svg>';
-                urgencyClass = 'text-red-600 font-semibold';
-            } else if (urgencyValue === 'Normal') {
-                // Optional: Add a specific icon or class for Normal if desired
-                // urgencyIcon = '<span>N</span>'; // Example
-                urgencyClass = 'text-gray-700'; // Explicitly set for clarity, though it's the default
+                urgencyFinalClass = 'text-red-500 font-semibold'; // Standard red for urgent, as planned
             }
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyClass}">${urgencyIcon}${urgencyValue || 'Normal'}</span></td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyFinalClass}">${urgencyIcon}${urgencyValue || 'Normal'}</span></td>`;
 
-            // Status display with colored badges - Added "Pending"
-            let statusClass = 'bg-gray-100 text-gray-800'; // Default
+            let statusBadgeClasses = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full border'; // Base border class
             const statusValue = fields[COLUMN_NAMES.STATUS];
             if (statusValue === 'New') {
-                statusClass = 'bg-blue-100 text-blue-800';
+                statusBadgeClasses += ' border-neon-blue text-neon-blue';
             } else if (statusValue === 'In Progress') {
-                statusClass = 'bg-yellow-100 text-yellow-800';
+                statusBadgeClasses += ' border-yellow-400 text-yellow-400';
             } else if (statusValue === 'Acknowledged') {
-                statusClass = 'bg-purple-100 text-purple-800';
-            } else if (statusValue === 'Pending') { // Added Pending
-                statusClass = 'bg-orange-100 text-orange-800';
+                statusBadgeClasses += ' border-purple-500 text-purple-500';
+            } else if (statusValue === 'Pending') {
+                statusBadgeClasses += ' border-orange-500 text-orange-500';
             } else if (statusValue === 'Resolved') {
-                statusClass = 'bg-green-100 text-green-800';
+                statusBadgeClasses += ' border-neon-green text-neon-green';
             } else if (statusValue === 'Closed') {
-                statusClass = 'bg-gray-300 text-gray-800';
+                statusBadgeClasses += ' border-text-medium text-text-medium';
+            } else { // Default
+                statusBadgeClasses += ' border-gray-600 text-gray-400';
             }
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${statusClass}">${statusValue || 'New'}</span></td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${statusBadgeClasses}">${statusValue || 'New'}</span></td>`;
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">${fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned'}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned'}</td>`;
 
             const actionsCell = row.insertCell();
             actionsCell.className = "px-6 py-4 whitespace-nowrap text-right text-sm font-medium";
             const viewDetailsButton = document.createElement('button');
             viewDetailsButton.textContent = 'View/Edit';
-            // Tailwind classes for the "View/Edit" button
-            viewDetailsButton.className = 'px-3 py-1 bg-indigo-600 text-white text-xs font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 disabled:opacity-50';
-            console.log('[Admin JS] renderTickets: Setting up button for recordId:', recordId);
+            viewDetailsButton.className = 'font-title text-xs px-3 py-1 bg-transparent border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neon-blue focus:ring-offset-slate-900 disabled:opacity-50';
+            // console.log('[Admin JS] renderTickets: Setting up button for recordId:', recordId);
             viewDetailsButton.onclick = (event) => {
-                 console.log('[Admin JS] Event Listener: Clicked View/Edit for recordId:', recordId);
+                 // console.log('[Admin JS] Event Listener: Clicked View/Edit for recordId:', recordId);
                 openTicketDetailModal(recordId);
             };
             actionsCell.appendChild(viewDetailsButton);
@@ -282,7 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const attachmentValue = fields[COLUMN_NAMES.ATTACHMENT];
                 if (attachmentValue && Array.isArray(attachmentValue) && attachmentValue.length > 0 && attachmentValue[0].url) {
-                     modalTicketAttachment.innerHTML = `<a href="${attachmentValue[0].url}" target="_blank" rel="noopener noreferrer" class="text-indigo-600 hover:text-indigo-800 underline">${attachmentValue[0].filename || 'View Attachment'}</a>`;
+                modalTicketAttachment.innerHTML = `<a href="${attachmentValue[0].url}" target="_blank" rel="noopener noreferrer" class="text-neon-green hover:underline">${attachmentValue[0].filename || 'View Attachment'}</a>`;
                 } else if (typeof attachmentValue === 'string' && attachmentValue.startsWith('file://')) {
                     modalTicketAttachment.textContent = `File: ${attachmentValue.substring('file://'.length)} (Not a direct link)`;
                 } else {
@@ -444,13 +440,11 @@ document.addEventListener('DOMContentLoaded', () => {
             header.innerHTML = headerText; // Reset to base text
 
             if (columnKey === currentSort.column) {
-                header.classList.add('sorted', 'text-indigo-600'); // Add class for active sort, e.g., highlight color
-                // Append arrow span for better control if needed, or keep simple text
+                header.classList.add('sorted', 'text-neon-pink'); // Cyberpunk: sorted header color
                 const arrow = currentSort.ascending ? '&#9650;' : '&#9660;';
-                header.innerHTML = `${headerText} <span class="sort-arrow">${arrow}</span>`;
+                header.innerHTML = `${headerText} <span class="sort-arrow text-neon-pink">${arrow}</span>`; // Ensure arrow also gets color
             } else {
-                header.classList.remove('sorted', 'text-indigo-600');
-                // header.innerHTML = headerText; // Already reset above
+                header.classList.remove('sorted', 'text-neon-pink');
             }
         });
     }
