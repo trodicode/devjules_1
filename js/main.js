@@ -23,15 +23,13 @@ document.addEventListener('DOMContentLoaded', () => {
     function showMessage(message, type = 'success') {
         if (userMessageArea) {
             userMessageArea.textContent = message;
-            // Default classes
-            let classes = 'p-4 rounded-md mb-4'; // Added mb-4 for spacing
+            let classes = 'p-4 rounded-md mb-4 text-center'; // Added text-center
             if (type === 'success') {
-                // More prominent success styling
-                classes += ' bg-green-100 border border-green-400 text-green-700 text-lg p-6'; // Larger font, more padding, distinct colors
+                classes = 'bg-slate-800 border border-neon-green text-neon-green p-4 rounded-md text-lg mb-4 text-center';
             } else if (type === 'error') {
-                classes += ' bg-red-100 border border-red-400 text-red-700';
-            } else { // For any other type, or a generic info
-                classes += ' bg-blue-100 border border-blue-400 text-blue-700';
+                classes = 'bg-slate-800 border border-red-500 text-red-500 p-4 rounded-md mb-4 text-center';
+            } else { // For any other type, or a generic info - using a blue neon for info
+                classes = 'bg-slate-800 border border-neon-blue text-neon-blue p-4 rounded-md mb-4 text-center';
             }
             userMessageArea.className = classes;
             userMessageArea.style.display = 'block';
@@ -144,7 +142,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const submitAnotherButton = document.createElement('button');
                     submitAnotherButton.type = 'button';
                     submitAnotherButton.id = 'submitAnotherTicket';
-                    submitAnotherButton.className = 'mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500';
+                    // Cyberpunk styled "Submit Another Ticket" button (using neon-blue)
+                    submitAnotherButton.className = 'font-title mt-4 w-full flex justify-center py-2 px-4 border-2 border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-dark-bg font-semibold rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-blue focus:ring-offset-dark-bg';
                     submitAnotherButton.textContent = 'Submit Another Ticket';
 
                     // Insert the new button after the message area
