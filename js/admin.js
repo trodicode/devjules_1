@@ -3,10 +3,23 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('admin.js loaded for admin dashboard.');
 
+    // Access Control Check
+    const userEmail = sessionStorage.getItem('userEmail');
+    const userRole = sessionStorage.getItem('userRole');
+
+    if (!userEmail || userRole !== 'Administrateur') {
+        console.warn('Access denied for admin page. User not logged in or not an admin. Redirecting to login.');
+        window.location.href = 'login.html';
+        return; // Stop further execution
+    }
+
+    console.log(`Admin access granted for user: ${userEmail}, Role: ${userRole}`);
+
     // Ensure airtable-api.js and its functions are loaded
     if (typeof getAllTickets !== 'function' || typeof getTicketById !== 'function' || typeof updateTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
         console.error('Airtable API functions or COLUMN_NAMES are not available. Ensure airtable-api.js is loaded correctly before admin.js.');
         showMessageOnPage('Critical error: Cannot connect to ticketing system. (API script not loaded)', 'error');
+        // Even with access control, this check is important for functionality if API scripts fail to load
         return;
     }
 
@@ -17,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const urgencyFilter = document.getElementById('urgencyFilter');
     const searchInput = document.getElementById('searchInput');
     const tableHeaders = document.querySelectorAll('#ticketTable th[data-sort-by]');
+    const logoutButton = document.getElementById('logoutButton');
 
     // Modal elements
     const ticketDetailModal = document.getElementById('ticketDetailModal');
@@ -463,4 +477,16 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Load ---
     loadAndDisplayTickets();
     updateSortIndicators();
+
+    // --- Logout Button Functionality ---
+    if (logoutButton) {
+        logoutButton.addEventListener('click', () => {
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userRole');
+            console.log('User logged out. Redirecting to login page.');
+            window.location.href = 'login.html';
+        });
+    } else {
+        console.warn('#logoutButton not found. Logout functionality will not work.');
+    }
 });

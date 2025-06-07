@@ -14,6 +14,8 @@ const AIRTABLE_TABLE_NAME = 'tbase'; // This should be URL-encoded if it contain
 // Note: TABLE_NAME will be URL-encoded in the _fetchAirtableAPI function.
 const AIRTABLE_API_BASE_URL = `https://api.airtable.com/v0/${AIRTABLE_BASE_ID}`;
 
+const AIRTABLE_USERS_TABLE_NAME = 'Users';
+
 // Column Name Mapping (Assumed to be the same as Stackby for now, verify with actual Airtable base)
 const COLUMN_NAMES = {
     TICKET_TITLE: 'Ticket Title',
@@ -26,6 +28,11 @@ const COLUMN_NAMES = {
     REQUESTER_EMAIL: 'On Demand', // New field for Requester's Email
     // Airtable's internal Record ID is 'id' at the top level of a record object.
     // No specific 'ROW_ID' needed in COLUMN_NAMES for Airtable like it was for Stackby conceptually.
+
+    // User table columns
+    USER_EMAIL: 'User mail',
+    USER_PASSWORD: 'Password',
+    USER_ROLE: 'Role',
 };
 
 // --- Helper Functions ---
@@ -35,11 +42,12 @@ const COLUMN_NAMES = {
  * @param {string} recordIdOrQuery - Optional record ID for specific record operations, or query parameters for listing.
  * @param {string} method - HTTP method (GET, POST, PATCH, DELETE).
  * @param {object} [body=null] - Request body for POST/PATCH/PUT.
+ * @param {string} tableName - The name of the table to interact with.
  * @returns {Promise<object|Array>} - A promise that resolves to the JSON response.
  */
-async function _fetchAirtableAPI(recordIdOrQuery = '', method, body = null) {
+async function _fetchAirtableAPI(tableName, recordIdOrQuery = '', method, body = null) {
     // URL encode the table name to handle spaces or special characters
-    const encodedTableName = encodeURIComponent(AIRTABLE_TABLE_NAME);
+    const encodedTableName = encodeURIComponent(tableName);
     let url = `${AIRTABLE_API_BASE_URL}/${encodedTableName}`;
 
     if (typeof recordIdOrQuery === 'string' && recordIdOrQuery) {
@@ -174,7 +182,7 @@ async function createTicket(ticketDataFromForm) {
     try {
         console.log('[Airtable API] createTicket: Attempting to create record with data:', JSON.stringify(requestBody, null, 2));
         // Airtable returns the created record object directly (not in an array like Stackby for single creation)
-        const createdRecord = await _fetchAirtableAPI('', 'POST', requestBody);
+        const createdRecord = await _fetchAirtableAPI(AIRTABLE_TABLE_NAME, '', 'POST', requestBody);
 
         if (createdRecord && createdRecord.id) {
             console.log('[Airtable API] createTicket: Ticket created successfully. Result:', JSON.stringify(createdRecord, null, 2));
@@ -204,7 +212,7 @@ async function getAllTickets() {
         // Airtable returns records in a 'records' array
         // Removed the '?view=All%20Tickets' parameter to fetch all records without specifying a view.
         // Other query parameters like sort can be added here if needed, e.g., '?sort%5B0%5D%5Bfield%5D=Created&sort%5B0%5D%5Bdirection%5D=desc'
-        const response = await _fetchAirtableAPI('', 'GET');
+        const response = await _fetchAirtableAPI(AIRTABLE_TABLE_NAME, '', 'GET');
         if (response && response.records) {
             console.log('[Airtable API] getAllTickets: Tickets fetched successfully. Count:', response.records.length);
             // Adapt each record to have 'id' and 'fields' at top level, and 'created_at' from 'createdTime'
@@ -238,7 +246,7 @@ async function getTicketById(recordId) {
     }
 
     try {
-        const record = await _fetchAirtableAPI(recordId, 'GET');
+        const record = await _fetchAirtableAPI(AIRTABLE_TABLE_NAME, recordId, 'GET');
         if (record && record.id) {
             console.log(`[Airtable API] getTicketById: Ticket ${recordId} fetched successfully. Result:`, JSON.stringify(record, null, 2));
             // Adapt to expected structure
@@ -298,7 +306,7 @@ async function updateTicket(recordId, updatedDataFromApp) {
 
     try {
         console.log(`[Airtable API] updateTicket: Attempting to update record ${recordId} with data:`, JSON.stringify(requestBody, null, 2));
-        const updatedRecord = await _fetchAirtableAPI(recordId, 'PATCH', requestBody);
+        const updatedRecord = await _fetchAirtableAPI(AIRTABLE_TABLE_NAME, recordId, 'PATCH', requestBody);
          if (updatedRecord && updatedRecord.id) {
             console.log(`[Airtable API] updateTicket: Ticket ${recordId} updated successfully. Result:`, JSON.stringify(updatedRecord, null, 2));
             // Adapt to expected structure
@@ -314,3 +322,60 @@ async function updateTicket(recordId, updatedDataFromApp) {
 }
 
 console.log('[Airtable API] airtable-api.js loaded and initial configuration logged.');
+
+// --- User Functions ---
+
+/**
+ * Fetches a user by their email address from the 'Users' table.
+ * @param {string} email - The email of the user to fetch.
+ * @returns {Promise<object|null>} - A promise that resolves to the user object if found, otherwise null.
+ */
+async function getUserByEmail(email) {
+    console.log(`[Airtable API] getUserByEmail called for email: ${email}`);
+    if (!AIRTABLE_API_TOKEN || !AIRTABLE_BASE_ID || !AIRTABLE_USERS_TABLE_NAME) {
+        console.error('[Airtable API] getUserByEmail: API not configured for Users table.');
+        return null;
+    }
+    if (!email) {
+        console.error('[Airtable API] getUserByEmail: Email is required.');
+        return null;
+    }
+
+    // Construct the filter formula for Airtable
+    // Example: filterByFormula=({Email}='user@example.com')
+    const filterFormula = encodeURIComponent(`({${COLUMN_NAMES.USER_EMAIL}}='${email}')`);
+    const query = `?filterByFormula=${filterFormula}`;
+
+    try {
+        console.log(`[Airtable API] getUserByEmail: Querying Users table with filter: ${decodeURIComponent(query)}`);
+        const response = await _fetchAirtableAPI(AIRTABLE_USERS_TABLE_NAME, query, 'GET');
+
+        if (response && response.records && response.records.length > 0) {
+            const userRecord = response.records[0]; // Assuming email is unique
+            console.log('[Airtable API] getUserByEmail: User found successfully.', JSON.stringify(userRecord, null, 2));
+            // Adapt to a simpler structure if needed, similar to other functions
+            return { id: userRecord.id, fields: userRecord.fields, createdTime: userRecord.createdTime };
+        } else {
+            console.warn(`[Airtable API] getUserByEmail: No user found with email ${email}. Response:`, response);
+            return null; // No user found
+        }
+    } catch (error) {
+        console.error(`[Airtable API] getUserByEmail: Error fetching user with email ${email}.`, error);
+        // Optionally, re-throw the error if the caller should handle it,
+        // or return null to indicate failure to find/fetch.
+        return null;
+    }
+}
+
+// Expose functions to global scope (if not using modules)
+// This pattern might need adjustment based on how scripts are loaded and interact.
+// For example, if using ES6 modules, you'd use `export { functionName };`
+if (typeof window !== 'undefined') {
+    window.createTicket = createTicket;
+    window.getAllTickets = getAllTickets;
+    window.getTicketById = getTicketById;
+    window.updateTicket = updateTicket;
+    window.getUserByEmail = getUserByEmail; // Expose the new function
+    window.initAirtable = initAirtable; // If needed globally
+    window.COLUMN_NAMES = COLUMN_NAMES; // Expose column names if needed by other scripts
+}

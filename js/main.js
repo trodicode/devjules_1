@@ -3,6 +3,21 @@
 document.addEventListener('DOMContentLoaded', () => {
     console.log('main.js loaded for user form.');
 
+    // Access Control Check for index.html (user-facing form)
+    // Any authenticated user (Utilisateur or Administrateur) can access this page.
+    // They just need to be logged in.
+    const userEmailForAccess = sessionStorage.getItem('userEmail');
+    const userRoleForAccess = sessionStorage.getItem('userRole'); // Role might be useful for UI tweaks later
+
+    if (!userEmailForAccess) {
+        console.warn('Access denied for index page. User not logged in. Redirecting to login.');
+        window.location.href = 'login.html';
+        return; // Stop further execution of main.js
+    }
+    // Log access, role might be used later for conditional UI elements if needed
+    console.log(`User form access granted for user: ${userEmailForAccess}, Role: ${userRoleForAccess}`);
+
+
     // Ensure stackby-api.js and its functions are loaded
     if (typeof createTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
         console.error('Stackby API functions or COLUMN_NAMES are not available. Ensure stackby-api.js is loaded correctly before main.js and functions are globally accessible.');
