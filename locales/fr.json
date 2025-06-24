@@ -1,0 +1,152 @@
+{
+  "appTitle": "Système de Tickets de Support",
+  "adminDashboardTitle": "Tableau de Bord de Gestion des Tickets",
+  "loginPageTitle": "Connexion Utilisateur",
+  "ticketFormTitle": "Soumettre un Nouveau Ticket de Support",
+  "langSwitcherEN": "EN",
+  "langSwitcherFR": "FR",
+
+  "loginPage": {
+    "title": "Connexion - Système de Tickets de Support",
+    "emailLabel": "Adresse E-mail",
+    "passwordLabel": "Mot de passe",
+    "loginButton": "Connexion",
+    "loggingInButton": "Connexion en cours..."
+  },
+  "loginMessages": {
+    "criticalInterfaceError": "Erreur critique : L'interface de connexion n'est pas correctement chargée. Veuillez contacter le support.",
+    "criticalAuthError": "Erreur critique : Impossible de se connecter au système d'authentification. Veuillez réessayer plus tard.",
+    "emailPasswordRequired": "L'adresse e-mail et le mot de passe sont requis.",
+    "loginSuccess": "Connexion réussie ! Redirection en cours...",
+    "roleNoAccess": "Votre rôle ('{{userRole}}') n'a accès à aucune page spécifique.",
+    "invalidCredentials": "Adresse e-mail ou mot de passe invalide.",
+    "genericLoginError": "Une erreur s'est produite lors de la connexion : {{errorMessage}}. Veuillez réessayer.",
+    "unknownError": "Erreur inconnue"
+  },
+
+  "ticketFormPage": {
+    "title": "Soumission de Ticket de Support"
+  },
+  "ticketForm": {
+    "ticketTitleLabel": "Titre du Ticket *",
+    "detailedDescriptionLabel": "Description Détaillée *",
+    "urgencyLevelLabel": "Niveau d'Urgence *",
+    "selectUrgencyDefault": "-- Sélectionnez une Urgence --",
+    "urgencyNormal": "Normal",
+    "urgencyUrgent": "Urgent",
+    "requesterEmailLabel": "Votre Email *",
+    "requesterEmailPlaceholder": "ex: vous@example.com",
+    "attachmentUrlLabel": "URL de la Pièce Jointe (Optionnel)",
+    "attachmentUrlPlaceholder": "ex: https://example.com/image.png",
+    "attachmentUrlHelpText": "Entrez l'URL complète et publiquement accessible de votre pièce jointe.",
+    "submitButton": "Soumettre le Ticket",
+    "submittingButton": "Soumission en cours...",
+    "submitAnotherButton": "Soumettre un Autre Ticket"
+  },
+  "ticketFormMessages": {
+    "criticalApiError": "Erreur critique : Impossible de se connecter au système de billetterie. Veuillez contacter le support. (Script API non chargé)",
+    "validation": {
+      "titleRequired": "Le Titre du Ticket est requis.",
+      "descriptionRequired": "La Description Détaillée est requise.",
+      "urgencyRequired": "Le Niveau d'Urgence est requis.",
+      "emailInvalid": "Veuillez entrer une adresse e-mail valide.",
+      "emailRequired": "Votre Email est requis."
+    },
+    "correctFormErrors": "Veuillez corriger les erreurs dans le formulaire.",
+    "submissionSuccess": "Ticket soumis avec succès ! Votre ID de Ticket est : {{displayId}}. Vous recevrez bientôt un e-mail de confirmation (placeholder).",
+    "submissionFailed": "Échec de la soumission du ticket. Le serveur a retourné une réponse inattendue. Veuillez réessayer plus tard.",
+    "submissionError": "Une erreur s'est produite lors de la soumission de votre ticket : {{errorMessage}}. Veuillez réessayer.",
+    "unknownError": "Erreur inconnue"
+  },
+
+  "adminPage": {
+    "docTitle": "Tableau de Bord Admin",
+    "logoutButton": "Déconnexion"
+  },
+  "adminMessages": {
+    "criticalApiError": "Erreur critique : Impossible de se connecter au système de billetterie. (Script API non chargé)",
+    "loadingTickets": "Chargement des tickets...",
+    "noTicketsInSystem": "Aucun ticket dans le système actuellement.",
+    "noTicketsMatchingCriteria": "Aucun ticket ne correspond à vos critères.",
+    "couldNotRetrieveTickets": "Impossible de récupérer les tickets. Format de données inattendu.",
+    "errorLoadingTickets": "Erreur lors du chargement des tickets : {{errorMessage}}.",
+    "errorInvalidTicketData": "Erreur : Données de ticket invalides reçues.",
+    "errorMissingTicketIdModal": "Impossible d'ouvrir les détails du ticket : ID de ticket manquant.",
+    "modalLoadingDetails": "Chargement des détails du ticket...",
+    "modalErrorLoadingDetails": "Erreur lors de la récupération des détails du ticket : {{errorMessage}}.",
+    "modalCouldNotLoadDetails": "Impossible de charger les détails du ticket ou le ticket n'a pas de champs.",
+    "modalStatusSelectError": "Veuillez sélectionner un statut.",
+    "modalStatusUpdating": "Mise à jour du statut...",
+    "modalStatusUpdatedSuccess": "Statut mis à jour avec succès vers \"{{newStatusDisplay}}\".",
+    "modalStatusUpdateFailed": "Échec de la mise à jour du statut. Le serveur a retourné une réponse inattendue. Veuillez réessayer.",
+    "modalStatusUpdateError": "Erreur lors de la mise à jour du statut : {{errorMessage}}. Veuillez réessayer.",
+    "modalAssignmentUpdating": "Mise à jour de l'affectation...",
+    "modalAssignmentSuccess": "Collaborateur assigné avec succès : \"{{newAssigneeDisplay}}\".",
+    "modalAssignmentFailed": "Échec de l'assignation du collaborateur. Le serveur a retourné une réponse inattendue. Veuillez réessayer.",
+    "modalAssignmentError": "Erreur lors de l'assignation du collaborateur : {{errorMessage}}. Veuillez réessayer.",
+    "reminderNotifyUser": "Statut mis à jour vers {{newStatusDisplay}}. RAPPEL : Informez manuellement l'utilisateur.",
+    "reminderNotifyCollaborator": "Ticket assigné à {{newAssigneeDisplay}}. RAPPEL : Informez manuellement le collaborateur.",
+    "na": "N/D",
+    "unknownError": "Erreur inconnue"
+  },
+  "adminFilters": {
+    "statusLabel": "Filtrer par Statut :",
+    "urgencyLabel": "Filtrer par Urgence :",
+    "searchLabel": "Rechercher :",
+    "searchPlaceholder": "Rechercher par titre, description...",
+    "allOption": "Tous"
+  },
+  "commonStatuses": {
+    "new": "Nouveau",
+    "acknowledged": "Pris en charge",
+    "inProgress": "En cours",
+    "pending": "En attente",
+    "resolved": "Résolu",
+    "closed": "Fermé",
+    "acknowledgedFR": "Pris en charge",
+    "inProgressFR": "En cours",
+    "pendingFR": "En attente",
+    "resolvedFR": "Résolu",
+    "closedFR": "Fermé"
+  },
+  "commonUrgencies": {
+    "normal": "Normal",
+    "urgent": "Urgent"
+  },
+  "adminTable": {
+    "headerTicketId": "ID Ticket",
+    "headerTitle": "Titre",
+    "headerDateSubmitted": "Date de Soumission",
+    "headerUrgency": "Urgence",
+    "headerStatus": "Statut",
+    "headerAssignedTo": "Assigné À",
+    "headerActions": "Actions",
+    "noTitle": "Aucun Titre",
+    "unknownDate": "Date Inconnue",
+    "unassigned": "Non Assigné",
+    "viewEditButton": "Voir/Modifier"
+  },
+  "adminModal": {
+    "title": "Détails du Ticket",
+    "closeSr": "Fermer",
+    "labelTicketId": "ID Ticket :",
+    "labelTitle": "Titre :",
+    "labelDescription": "Description Complète :",
+    "labelUrgency": "Urgence :",
+    "labelStatus": "Statut :",
+    "labelAssignedTo": "Collaborateur Assigné :",
+    "labelSubmissionDate": "Date de Soumission :",
+    "labelAttachment": "Pièce Jointe :",
+    "viewAttachmentLink": "Voir Pièce Jointe",
+    "attachmentFilePrefix": "Fichier : {{filename}} (Pas un lien direct)",
+    "attachmentNone": "Aucune",
+    "updateSectionTitle": "Mettre à Jour le Ticket",
+    "labelChangeStatus": "Changer le Statut :",
+    "selectStatusDefault": "-- Sélectionnez un Statut --",
+    "saveStatusButton": "Enregistrer Statut",
+    "savingButton": "Enregistrement...",
+    "labelAssignCollaborator": "Assigner Collaborateur :",
+    "assignCollaboratorPlaceholder": "Entrez nom/ID collaborateur",
+    "saveAssignmentButton": "Enregistrer Assignation"
+  }
+}

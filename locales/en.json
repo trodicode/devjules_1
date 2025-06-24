@@ -1,0 +1,152 @@
+{
+  "appTitle": "Support Ticket System",
+  "adminDashboardTitle": "Ticket Management Dashboard",
+  "loginPageTitle": "User Login",
+  "ticketFormTitle": "Submit a New Support Ticket",
+  "langSwitcherEN": "EN",
+  "langSwitcherFR": "FR",
+
+  "loginPage": {
+    "title": "Login - Support Ticket System",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "loginButton": "Login",
+    "loggingInButton": "Logging in..."
+  },
+  "loginMessages": {
+    "criticalInterfaceError": "Critical error: Login interface is not correctly loaded. Please contact support.",
+    "criticalAuthError": "Critical error: Cannot connect to authentication system. Please try again later.",
+    "emailPasswordRequired": "Email and Password are required.",
+    "loginSuccess": "Login successful! Redirecting...",
+    "roleNoAccess": "Your role ('{{userRole}}') does not have access to any specific page.",
+    "invalidCredentials": "Invalid email or password.",
+    "genericLoginError": "An error occurred during login: {{errorMessage}}. Please try again.",
+    "unknownError": "Unknown error"
+  },
+
+  "ticketFormPage": {
+    "title": "Support Ticket Submission"
+  },
+  "ticketForm": {
+    "ticketTitleLabel": "Ticket Title *",
+    "detailedDescriptionLabel": "Detailed Description *",
+    "urgencyLevelLabel": "Urgency Level *",
+    "selectUrgencyDefault": "-- Select Urgency --",
+    "urgencyNormal": "Normal",
+    "urgencyUrgent": "Urgent",
+    "requesterEmailLabel": "Your Email *",
+    "requesterEmailPlaceholder": "e.g., you@example.com",
+    "attachmentUrlLabel": "Attachment URL (Optional)",
+    "attachmentUrlPlaceholder": "e.g., https://example.com/image.png",
+    "attachmentUrlHelpText": "Enter the full, publicly accessible URL for your attachment.",
+    "submitButton": "Submit Ticket",
+    "submittingButton": "Submitting...",
+    "submitAnotherButton": "Submit Another Ticket"
+  },
+  "ticketFormMessages": {
+    "criticalApiError": "Critical error: Cannot connect to ticketing system. Please contact support. (API script not loaded)",
+    "validation": {
+      "titleRequired": "Ticket Title is required.",
+      "descriptionRequired": "Detailed Description is required.",
+      "urgencyRequired": "Urgency Level is required.",
+      "emailInvalid": "Please enter a valid email address.",
+      "emailRequired": "Your Email is required."
+    },
+    "correctFormErrors": "Please correct the errors in the form.",
+    "submissionSuccess": "Ticket submitted successfully! Your Ticket ID is: {{displayId}}. You will receive an email confirmation shortly (placeholder).",
+    "submissionFailed": "Failed to submit ticket. The server returned an unexpected response. Please try again later.",
+    "submissionError": "An error occurred while submitting your ticket: {{errorMessage}}. Please try again.",
+    "unknownError": "Unknown error"
+  },
+
+  "adminPage": {
+    "docTitle": "Admin Ticket Dashboard",
+    "logoutButton": "Logout"
+  },
+  "adminMessages": {
+    "criticalApiError": "Critical error: Cannot connect to ticketing system. (API script not loaded)",
+    "loadingTickets": "Loading tickets...",
+    "noTicketsInSystem": "No tickets currently in the system.",
+    "noTicketsMatchingCriteria": "No tickets found matching your criteria.",
+    "couldNotRetrieveTickets": "Could not retrieve tickets. Data format unexpected.",
+    "errorLoadingTickets": "Error loading tickets: {{errorMessage}}.",
+    "errorInvalidTicketData": "Error: Invalid ticket data received.",
+    "errorMissingTicketIdModal": "Could not open ticket details: Missing ticket ID.",
+    "modalLoadingDetails": "Loading ticket details...",
+    "modalErrorLoadingDetails": "Error fetching ticket details: {{errorMessage}}.",
+    "modalCouldNotLoadDetails": "Could not load ticket details or ticket has no fields.",
+    "modalStatusSelectError": "Please select a status.",
+    "modalStatusUpdating": "Updating status...",
+    "modalStatusUpdatedSuccess": "Status successfully updated to \"{{newStatusDisplay}}\".",
+    "modalStatusUpdateFailed": "Failed to update status. The server returned an unexpected response. Please try again.",
+    "modalStatusUpdateError": "Error updating status: {{errorMessage}}. Please try again.",
+    "modalAssignmentUpdating": "Updating assignment...",
+    "modalAssignmentSuccess": "Collaborator successfully assigned: \"{{newAssigneeDisplay}}\".",
+    "modalAssignmentFailed": "Failed to assign collaborator. The server returned an unexpected response. Please try again.",
+    "modalAssignmentError": "Error assigning collaborator: {{errorMessage}}. Please try again.",
+    "reminderNotifyUser": "Status updated to {{newStatusDisplay}}. REMINDER: Manually notify the user.",
+    "reminderNotifyCollaborator": "Ticket assigned to {{newAssigneeDisplay}}. REMINDER: Manually notify the collaborator.",
+    "na": "N/A",
+    "unknownError": "Unknown error"
+  },
+  "adminFilters": {
+    "statusLabel": "Filter by Status:",
+    "urgencyLabel": "Filter by Urgency:",
+    "searchLabel": "Search:",
+    "searchPlaceholder": "Search by title, description...",
+    "allOption": "All"
+  },
+  "commonStatuses": {
+    "new": "New",
+    "acknowledged": "Acknowledged",
+    "inProgress": "In Progress",
+    "pending": "Pending",
+    "resolved": "Resolved",
+    "closed": "Closed",
+    "acknowledgedFR": "Acknowledged (Pris en charge)",
+    "inProgressFR": "In Progress (En cours)",
+    "pendingFR": "Pending (En attente)",
+    "resolvedFR": "Resolved (Résolu)",
+    "closedFR": "Closed (Fermé)"
+  },
+  "commonUrgencies": {
+    "normal": "Normal",
+    "urgent": "Urgent"
+  },
+  "adminTable": {
+    "headerTicketId": "Ticket ID",
+    "headerTitle": "Title",
+    "headerDateSubmitted": "Date Submitted",
+    "headerUrgency": "Urgency",
+    "headerStatus": "Status",
+    "headerAssignedTo": "Assigned To",
+    "headerActions": "Actions",
+    "noTitle": "No Title",
+    "unknownDate": "Unknown Date",
+    "unassigned": "Unassigned",
+    "viewEditButton": "View/Edit"
+  },
+  "adminModal": {
+    "title": "Ticket Details",
+    "closeSr": "Close",
+    "labelTicketId": "Ticket ID:",
+    "labelTitle": "Title:",
+    "labelDescription": "Full Description:",
+    "labelUrgency": "Urgency:",
+    "labelStatus": "Status:",
+    "labelAssignedTo": "Assigned Collaborator:",
+    "labelSubmissionDate": "Submission Date:",
+    "labelAttachment": "Attachment:",
+    "viewAttachmentLink": "View Attachment",
+    "attachmentFilePrefix": "File: {{filename}} (Not a direct link)",
+    "attachmentNone": "None",
+    "updateSectionTitle": "Update Ticket",
+    "labelChangeStatus": "Change Status:",
+    "selectStatusDefault": "-- Select Status --",
+    "saveStatusButton": "Save Status",
+    "savingButton": "Saving...",
+    "labelAssignCollaborator": "Assign Collaborator:",
+    "assignCollaboratorPlaceholder": "Enter collaborator name/ID",
+    "saveAssignmentButton": "Save Assignment"
+  }
+}
