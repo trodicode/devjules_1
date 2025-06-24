@@ -1,7 +1,22 @@
 // JavaScript for admin.html (Admin ticket dashboard)
 
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('[admin] DOMContentLoaded event fired.');
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log('[admin] DOMContentLoaded: Starting. Checking for i18next initialization promise...');
+    if (window.i18nextInitializationPromise) {
+        try {
+            await window.i18nextInitializationPromise;
+            console.log('[admin] i18next initialization promise resolved. Proceeding with admin script.');
+        } catch (error) {
+            console.error('[admin] Error awaiting i18next initialization promise:', error);
+            // Optionally, display an error message to the user on the page,
+            // as translations might not work, impacting the UI.
+            // For now, just logging, as showMessageOnPage might not be ready or itself rely on i18n.
+        }
+    } else {
+        console.error('[admin] i18next initialization promise (window.i18nextInitializationPromise) not found. Translations may not work correctly.');
+        // Application might still try to proceed, but i18n calls will likely fail or use fallback keys.
+    }
+    console.log('[admin] DOMContentLoaded event fired.'); // Moved this log after await
     console.log('admin.js loaded for admin dashboard.');
 
     // Access Control Check
@@ -84,8 +99,30 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             adminMessageArea.style.display = message ? 'block' : 'none';
 
-            if (type === 'error' || (type === 'info' && message !== 'Loading tickets...' && !message.includes("No tickets"))) {
-                 if(ticketTableBody) ticketTableBody.innerHTML = '';
+            let loadingTicketsMsg = 'Loading tickets...'; // Fallback
+            let noTicketsInSystemMsg = 'No tickets currently in the system.'; // Fallback
+            let noTicketsMatchingCriteriaMsg = 'No tickets found matching your criteria.'; // Fallback
+
+            if (typeof i18next !== 'undefined' && i18next.isInitialized) {
+                loadingTicketsMsg = i18next.t('adminMessages.loadingTickets', { defaultValue: loadingTicketsMsg });
+                noTicketsInSystemMsg = i18next.t('adminMessages.noTicketsInSystem', { defaultValue: noTicketsInSystemMsg });
+                noTicketsMatchingCriteriaMsg = i18next.t('adminMessages.noTicketsMatchingCriteria', { defaultValue: noTicketsMatchingCriteriaMsg });
+            } else {
+                console.warn('[admin] showMessageOnPage: i18next not ready when checking message content, using fallback strings for comparison.');
+            }
+
+            // The condition to clear the table body if it's an error,
+            // or if it's an info message that is NOT one of the "loading" or "no tickets" type messages.
+            if (type === 'error' ||
+                (type === 'info' &&
+                 typeof message === 'string' &&
+                 message !== loadingTicketsMsg &&
+                 !message.includes(noTicketsInSystemMsg.substring(0, 10)) &&
+                 !message.includes(noTicketsMatchingCriteriaMsg.substring(0,10)) )) {
+                if (ticketTableBody) {
+                    console.log('[admin] showMessageOnPage: Clearing ticketTableBody because message is error or non-loading/non-no-tickets info.');
+                    ticketTableBody.innerHTML = '';
+                }
             }
         } else {
             type === 'error' ? console.error(message) : console.log(message);
