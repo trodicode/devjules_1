@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-page-title="loginPage.title">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Support Ticket System</title>
+    <title>Login - Support Ticket System</title> <!-- Fallback title -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -29,10 +29,17 @@
       }
     </script>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://unpkg.com/i18next/dist/umd/i18next.min.js"></script>
+    <script src="https://unpkg.com/i18next-http-backend/dist/umd/i18nextHttpBackend.min.js"></script>
 </head>
 <body class="bg-dark-bg text-text-light font-sans flex items-center justify-center min-h-screen">
+    <div class="lang-switcher fixed top-4 right-4 z-50 space-x-1 p-1 bg-slate-800 rounded-md shadow-lg">
+        <button data-lang="en" data-i18n="langSwitcherEN" class="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded disabled:opacity-50">EN</button>
+        <button data-lang="fr" data-i18n="langSwitcherFR" class="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded disabled:opacity-50">FR</button>
+    </div>
+
     <div class="bg-slate-900 p-8 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue w-full max-w-lg">
-        <h1 class="text-2xl font-title text-neon-pink font-bold text-center mb-6">User Login</h1>
+        <h1 data-i18n="loginPageTitle" class="text-2xl font-title text-neon-pink font-bold text-center mb-6">User Login</h1> <!-- This key is for the H1, page title is set on <html> -->
 
         <div id="loginMessageArea" class="message-area mb-4 p-3 rounded-md text-center" style="display:none;">
             <!-- Messages will be displayed here -->
@@ -40,18 +47,18 @@
 
         <form id="loginForm" class="space-y-6">
             <div>
-                <label for="email" class="block text-sm font-medium text-neon-blue font-title">Email</label>
+                <label for="email" class="block text-sm font-medium text-neon-blue font-title" data-i18n="loginPage.emailLabel">Email</label>
                 <input type="email" id="email" name="email" required
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
             </div>
 
             <div>
-                <label for="password" class="block text-sm font-medium text-neon-blue font-title">Password</label>
+                <label for="password" class="block text-sm font-medium text-neon-blue font-title" data-i18n="loginPage.passwordLabel">Password</label>
                 <input type="password" id="password" name="password" required
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
             </div>
 
-            <button type="submit"
+            <button type="submit" data-i18n="loginPage.loginButton"
                     class="w-full flex justify-center py-2 px-4 font-title border-2 border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-pink focus:ring-offset-dark-bg disabled:opacity-50">
                 Login
             </button>
@@ -60,6 +67,7 @@
 
     <script src="js/airtable-api.js"></script>
     <script src="js/login.js"></script>
+    <script src="js/i18n.js"></script>
     <!-- css/style.css is already linked in the head -->
 </body>
 </html>
