@@ -1,6 +1,7 @@
 // JavaScript for admin.html (Admin ticket dashboard)
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('[admin] DOMContentLoaded event fired.');
     console.log('admin.js loaded for admin dashboard.');
 
     // Access Control Check
@@ -8,19 +9,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const userRole = sessionStorage.getItem('userRole');
 
     if (!userEmail || userRole !== 'Administrateur') {
-        console.warn('Access denied for admin page. User not logged in or not an admin. Redirecting to login.');
+        console.warn('[admin] Access denied for admin page. User not logged in or not an admin. Redirecting to login.');
         window.location.href = 'login.html';
         return; // Stop further execution
     }
 
-    console.log(`Admin access granted for user: ${userEmail}, Role: ${userRole}`);
+    console.log(`[admin] Access granted for user: ${userEmail}, Role: ${userRole}, proceeding with admin script initialization.`);
 
     // Ensure airtable-api.js and its functions are loaded
     // Also check for i18next
     if (typeof getAllTickets !== 'function' || typeof getTicketById !== 'function' ||
         typeof updateTicket !== 'function' || typeof COLUMN_NAMES === 'undefined' ||
         typeof i18next === 'undefined' || typeof i18next.t === 'undefined') {
-        console.error('Airtable API functions, COLUMN_NAMES, or i18next are not available.');
+        console.error('[admin] Prerequisite check failed: Airtable API functions, COLUMN_NAMES, or i18next are not available.');
         const adminMessageArea = document.getElementById('adminMessageArea'); // Get it directly here for this critical error
         if (adminMessageArea) {
             const errorMessage = (typeof i18next !== 'undefined' && i18next.t) ?
@@ -38,6 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         return;
     }
+    console.log('[admin] API functions and COLUMN_NAMES verified.');
 
     // Main dashboard elements
     const ticketTableBody = document.getElementById('ticketTableBody');
@@ -109,17 +111,24 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Ticket Rendering ---
     function renderTickets(ticketsToRender) {
-        if (!ticketTableBody) return;
-        ticketTableBody.innerHTML = ''; // This is fine as it's part of bg-slate-900 from tbody tag in HTML
+        console.log(`[admin] renderTickets called with ${ticketsToRender ? ticketsToRender.length : 0} tickets.`);
+        if (!ticketTableBody) {
+            console.error("[admin] renderTickets: ticketTableBody is null.");
+            return;
+        }
+        ticketTableBody.innerHTML = '';
 
         if (!ticketsToRender || ticketsToRender.length === 0) {
             const row = ticketTableBody.insertRow();
-            // row.className = 'bg-white'; // Removed, will inherit from tbody or use its own slate classes
             const cell = row.insertCell();
             cell.colSpan = tableHeaders.length;
-            cell.textContent = i18next.t('adminMessages.noTicketsMatchingCriteria'); // Or a more generic "No tickets"
+            cell.textContent = i18next.t('adminMessages.noTicketsMatchingCriteria');
             cell.className = 'px-6 py-4 text-center text-sm text-text-medium';
             return;
+        }
+
+        if (ticketsToRender.length > 0) {
+            console.log('[admin] First ticket data for rendering:', JSON.parse(JSON.stringify(ticketsToRender[0])));
         }
 
         const currentLoadingMessage = i18next.t('adminMessages.loadingTickets');
@@ -152,8 +161,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : i18next.t('adminTable.unknownDate')}</td>`;
 
-            const urgencyValue = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal'; // Default to Normal if undefined
-            const translatedUrgency = i18next.t(`commonUrgencies.${urgencyValue.toLowerCase()}`, { defaultValue: urgencyValue });
+            const urgencyValue = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal';
+            const urgencyKey = `commonUrgencies.${urgencyValue.toLowerCase()}`;
+            console.log(`[admin] Translating urgency: value='${urgencyValue}', key='${urgencyKey}'`);
+            const translatedUrgency = i18next.t(urgencyKey, { defaultValue: urgencyValue });
+            console.log(`[admin] Translated urgency: '${translatedUrgency}'`);
             let urgencyIcon = '';
             let urgencyFinalClass = 'text-text-medium';
             if (urgencyValue === 'Urgent') {
@@ -162,10 +174,12 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyFinalClass}">${urgencyIcon}${translatedUrgency}</span></td>`;
 
-            const statusValue = fields[COLUMN_NAMES.STATUS] || 'New'; // Default to New if undefined
-            const translatedStatus = i18next.t(`commonStatuses.${statusValue.toLowerCase().replace(/\s+/g, '')}`, { defaultValue: statusValue });
+            const statusValue = fields[COLUMN_NAMES.STATUS] || 'New';
+            const statusKey = `commonStatuses.${statusValue.toLowerCase().replace(/\s+/g, '')}`;
+            console.log(`[admin] Translating status: value='${statusValue}', key='${statusKey}'`);
+            const translatedStatus = i18next.t(statusKey, { defaultValue: statusValue });
+            console.log(`[admin] Translated status: '${translatedStatus}'`);
             let statusBadgeClasses = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full border';
-            // Color logic remains based on English status values
             if (statusValue === 'New') statusBadgeClasses += ' border-neon-blue text-neon-blue';
             else if (statusValue === 'In Progress') statusBadgeClasses += ' border-yellow-400 text-yellow-400';
             else if (statusValue === 'Acknowledged') statusBadgeClasses += ' border-purple-500 text-purple-500';
@@ -191,12 +205,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Fetching & Processing ---
     async function loadAndDisplayTickets() {
+        console.log('[admin] loadAndDisplayTickets called.');
         showMessageOnPage(i18next.t('adminMessages.loadingTickets'), 'info');
         if(ticketTableBody) ticketTableBody.innerHTML = ''; // Clear table before loading
         try {
             const tickets = await getAllTickets();
+            console.log('[admin] getAllTickets response:', tickets);
             if (tickets && Array.isArray(tickets)) {
                 allTickets = tickets;
+                console.log('[admin] allTickets populated. Count:', allTickets ? allTickets.length : 'null');
                 applyFiltersAndSort(); // This will call renderTickets
                 if (allTickets.length === 0) {
                     showMessageOnPage(i18next.t('adminMessages.noTicketsInSystem'), 'info');
@@ -471,6 +488,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     function getHeaderI18nKey(columnKey) {
+        console.log(`[admin] getHeaderI18nKey for: ${columnKey}`);
         const keyMap = {
             'Ticket ID': 'adminTable.headerTicketId',
             'Ticket Title': 'adminTable.headerTitle',
@@ -480,18 +498,19 @@ document.addEventListener('DOMContentLoaded', () => {
             'Assigned Collaborator': 'adminTable.headerAssignedTo'
             // Actions column does not have data-sort-by, so not needed here
         };
-        return keyMap[columnKey] || `adminTable.header${columnKey.replace(/\s+/g, '')}`; // Fallback or specific key
+        const i18nKey = keyMap[columnKey] || `adminTable.header${columnKey.replace(/\s+/g, '')}`; // Fallback or specific key
+        console.log(`[admin] Mapped to i18n key: ${i18nKey}`);
+        return i18nKey;
     }
 
     function updateSortIndicators() {
         tableHeaders.forEach(header => {
             const columnKey = header.getAttribute('data-sort-by');
-            if (!columnKey) return; // Skip if no sort key (like Actions column which has no data-i18n for text)
+            if (!columnKey) return;
 
             const headerI18nKey = getHeaderI18nKey(columnKey);
             const translatedHeaderText = i18next.t(headerI18nKey);
-
-            header.innerHTML = translatedHeaderText;
+            console.log(`[admin] Updating sort indicator for '${columnKey}', i18nKey: '${headerI18nKey}', translated: '${translatedHeaderText}'`);
 
             if (columnKey === currentSort.column) {
                 header.classList.add('sorted', 'text-neon-pink');
@@ -499,6 +518,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 header.innerHTML = `${translatedHeaderText} <span class="sort-arrow text-neon-pink">${arrow}</span>`;
             } else {
                 header.classList.remove('sorted', 'text-neon-pink');
+                header.innerHTML = translatedHeaderText;
             }
         });
     }
