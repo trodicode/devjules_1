@@ -274,8 +274,9 @@ document.addEventListener('DOMContentLoaded', () => {
         modalSaveStatusButton.disabled = true;
         modalSaveAssigneeButton.disabled = true;
 
+        // ticketDetailModal classes are now: "fixed z-10 inset-0 hidden items-center justify-center p-4"
+        // When hidden is removed, it will use its defined flex properties.
         ticketDetailModal.classList.remove('hidden');
-        ticketDetailModal.classList.add('flex'); // Ensure flex for centering
 
         try {
             console.log('[Admin JS] openTicketDetailModal: Calling airtableApi.getTicketById with ID:', currentlySelectedRecordId);
@@ -320,7 +321,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     window.closeTicketDetailModal = function() {
         ticketDetailModal.classList.add('hidden');
-        ticketDetailModal.classList.remove('flex'); // Remove flex display
+        // No need to remove 'flex' as it's part of the base visible state styling.
         currentlySelectedRecordId = null;
         modalUserMessageArea.style.display = 'none';
     }

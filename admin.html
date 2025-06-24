@@ -99,45 +99,45 @@
     </div>
 
     <!-- Ticket Detail Modal -->
-    <div id="ticketDetailModal" class="fixed z-10 inset-0 overflow-y-auto hidden">
-        <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <!-- Background overlay -->
-            <div class="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
-            <!-- Modal panel -->
-            <span class="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">&#8203;</span>
-            <div class="inline-block align-bottom bg-slate-900 rounded-lg text-left overflow-hidden shadow-[0_0_20px_rgba(249,0,249,0.6)] border border-neon-pink transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full">
-                <div class="bg-slate-900 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                            <h3 class="text-lg leading-6 font-medium text-neon-pink font-title mb-4" id="modal-title">
-                                Ticket Details
-                            </h3>
-                            <button onclick="closeTicketDetailModal()" class="absolute top-0 right-0 mt-4 mr-4 text-text-medium hover:text-neon-pink">
-                                <span class="sr-only">Close</span>
-                                <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <div class="space-y-3 text-sm">
-                                <p><strong class="text-neon-blue font-semibold">Ticket ID:</strong> <span id="modalTicketId" class="text-text-light"></span></p>
-                                <p><strong class="text-neon-blue font-semibold">Title:</strong> <span id="modalTicketTitle" class="text-text-light"></span></p>
-                                <p><strong class="text-neon-blue font-semibold">Full Description:</strong></p>
-                                <div id="modalTicketDescription" class="bg-slate-800 border border-slate-700 text-text-light p-3 rounded-md max-h-40 overflow-y-auto"></div>
-                                <p><strong class="text-neon-blue font-semibold">Urgency:</strong> <span id="modalTicketUrgency" class="text-text-light font-semibold"></span></p>
-                                <p><strong class="text-neon-blue font-semibold">Status:</strong> <span id="modalTicketStatus" class="text-text-light font-semibold"></span></p>
-                                <p><strong class="text-neon-blue font-semibold">Assigned Collaborator:</strong> <span id="modalTicketAssignee" class="text-text-light"></span></p>
-                                <p><strong class="text-neon-blue font-semibold">Submission Date:</strong> <span id="modalTicketSubmissionDate" class="text-text-light"></span></p>
-                                <p><strong class="text-neon-blue font-semibold">Attachment:</strong> <span id="modalTicketAttachment" class="text-text-light"></span></p>
-                            </div>
-                        </div>
-                    </div>
+    <div id="ticketDetailModal" class="fixed z-10 inset-0 hidden items-center justify-center p-4">
+        <!-- Background overlay -->
+        <div class="fixed inset-0 bg-black bg-opacity-75 backdrop-blur-sm transition-opacity" aria-hidden="true"></div>
+
+        <!-- Modal panel -->
+        <div class="relative bg-slate-900 rounded-lg text-left overflow-hidden shadow-[0_0_20px_rgba(249,0,249,0.6)] border border-neon-pink transform transition-all w-full sm:max-w-2xl max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="px-4 pt-5 pb-4 sm:p-6 sm:pb-4 border-b border-slate-700">
+                <div class="flex items-start justify-between">
+                    <h3 class="text-lg leading-6 font-medium text-neon-pink font-title" id="modal-title">
+                        Ticket Details
+                    </h3>
+                    <button onclick="closeTicketDetailModal()" class="text-text-medium hover:text-neon-pink">
+                        <span class="sr-only">Close</span>
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
                 </div>
-                <div class="bg-slate-800 px-4 py-3 sm:px-6 space-y-4">
-                    <h4 class="text-md font-title text-neon-green font-semibold">Update Ticket</h4>
-                    <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
-                        <div class="sm:col-span-3">
+            </div>
+            <!-- Modal Body (scrollable part) -->
+            <div class="px-4 sm:px-6 py-4 space-y-3 text-sm overflow-y-auto">
+                <p><strong class="text-neon-blue font-semibold">Ticket ID:</strong> <span id="modalTicketId" class="text-text-light"></span></p>
+                <p><strong class="text-neon-blue font-semibold">Title:</strong> <span id="modalTicketTitle" class="text-text-light"></span></p>
+                <p><strong class="text-neon-blue font-semibold">Full Description:</strong></p>
+                <div id="modalTicketDescription" class="bg-slate-800 border border-slate-700 text-text-light p-3 rounded-md max-h-40 overflow-y-auto"></div>
+                <p><strong class="text-neon-blue font-semibold">Urgency:</strong> <span id="modalTicketUrgency" class="text-text-light font-semibold"></span></p>
+                <p><strong class="text-neon-blue font-semibold">Status:</strong> <span id="modalTicketStatus" class="text-text-light font-semibold"></span></p>
+                <p><strong class="text-neon-blue font-semibold">Assigned Collaborator:</strong> <span id="modalTicketAssignee" class="text-text-light"></span></p>
+                <p><strong class="text-neon-blue font-semibold">Submission Date:</strong> <span id="modalTicketSubmissionDate" class="text-text-light"></span></p>
+                <p><strong class="text-neon-blue font-semibold">Attachment:</strong> <span id="modalTicketAttachment" class="text-text-light"></span></p>
+            </div>
+            <!-- Modal Footer -->
+            <div class="bg-slate-800 px-4 py-3 sm:px-6 space-y-4 border-t border-slate-700">
+                <h4 class="text-md font-title text-neon-green font-semibold">Update Ticket</h4>
+                <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
+                    <div class="sm:col-span-3">
                             <label for="modalChangeStatus" class="block text-neon-blue font-title text-sm font-medium">Change Status:</label>
-                            <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-800 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
+                            <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-900 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
                                 <option value="">-- Select Status --</option>
                                 <option value="New">New</option>
                                 <option value="Acknowledged">Acknowledged (Pris en charge)</option>
@@ -157,11 +157,11 @@
                         <div class="sm:col-span-3">
                             <label for="modalAssignCollaborator" class="block text-neon-blue font-title text-sm font-medium">Assign Collaborator:</label>
                             <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID"
-                                   class="mt-1 block w-full px-3 py-2 bg-slate-800 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
+                                   class="mt-1 block w-full px-3 py-2 bg-slate-900 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
                         </div>
                          <div class="sm:col-span-3 flex items-end">
                             <button id="modalSaveAssigneeButton" type="button"
-                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-900">
+                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-800">
                                 Save Assignment
                             </button>
                         </div>
