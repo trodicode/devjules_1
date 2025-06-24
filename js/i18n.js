@@ -1,6 +1,9 @@
 // js/i18n.js
 function updateContent() {
-    document.querySelectorAll('[data-i18n]').forEach(element => {
+    console.log('[i18n] updateContent called.');
+    const elementsToTranslate = document.querySelectorAll('[data-i18n]');
+    console.log(`[i18n] Found ${elementsToTranslate.length} elements with data-i18n attribute.`);
+    elementsToTranslate.forEach(element => {
         const key = element.getAttribute('data-i18n');
         const translation = i18next.t(key);
         // To prevent FOUC (Flash of Untranslated Content) or empty elements if key is missing,
@@ -16,8 +19,11 @@ function updateContent() {
             element.placeholder = translation;
         }
     });
+    const placeholdersToTranslate = document.querySelectorAll('[data-i18n-placeholder]');
+    console.log(`[i18n] Found ${placeholdersToTranslate.length} elements with data-i18n-placeholder attribute.`);
 
     // Update page title
+    console.log('[i18n] Attempting to update page title.');
     const pageTitleKey = document.documentElement.getAttribute('data-i18n-page-title'); // Assume we'll add this to <html> tag
     if (pageTitleKey) {
         const translatedTitle = i18next.t(pageTitleKey);
@@ -28,11 +34,16 @@ function updateContent() {
 }
 
 function setupLanguageSwitcher() {
+    console.log('[i18n] setupLanguageSwitcher called.');
     const langSwitcherContainer = document.querySelector('.lang-switcher');
-    if (!langSwitcherContainer) return;
+    if (!langSwitcherContainer) {
+        console.log('[i18n] Language switcher container not found.');
+        return;
+    }
 
     const enButton = langSwitcherContainer.querySelector('button[data-lang="en"]');
     const frButton = langSwitcherContainer.querySelector('button[data-lang="fr"]');
+    console.log('[i18n] Language switcher buttons found:', { enButton, frButton });
 
     if (enButton) enButton.addEventListener('click', () => changeLanguage('en'));
     if (frButton) frButton.addEventListener('click', () => changeLanguage('fr'));
@@ -53,17 +64,27 @@ function updateSwitcherUI(currentLang) {
 
 
 async function changeLanguage(lang) {
+    console.log(`[i18n] changeLanguage called with: ${lang}`);
     if (lang && lang !== i18next.language) {
-        await i18next.changeLanguage(lang);
-        localStorage.setItem('language', lang);
-        updateContent();
-        updateSwitcherUI(lang);
-        console.log(`Language changed to ${lang}`);
+        console.log(`[i18n] Attempting to change language to: ${lang}`);
+        try {
+            await i18next.changeLanguage(lang);
+            console.log(`[i18n] i18next.changeLanguage to ${lang} completed.`);
+            localStorage.setItem('language', lang);
+            updateContent();
+            updateSwitcherUI(lang);
+            console.log(`[i18n] Language preferences updated and UI refreshed for ${lang}.`);
+        } catch (err) {
+            console.error(`[i18n] Error in i18next.changeLanguage for ${lang}:`, err);
+        }
+    } else {
+        console.log(`[i18n] Language ${lang} is already active or invalid.`);
     }
 }
 
 async function initI18next() {
     const initialLang = localStorage.getItem('language') || navigator.language.split('-')[0] || 'en';
+    console.log('[i18n] Initializing i18next. Determined initialLang:', initialLang);
 
     try {
         await i18next
@@ -78,11 +99,12 @@ async function initI18next() {
                     loadPath: 'locales/{{lng}}.json' // Path to translation files
                 }
             });
+        console.log('[i18n] i18next initialized successfully.');
         updateContent();
         setupLanguageSwitcher();
             // document.body.style.visibility = 'visible'; // Make body visible after initial translation
     } catch (error) {
-        console.error("Error initializing i18next:", error);
+        console.error('[i18n] Error initializing i18next:', error);
             // document.body.style.visibility = 'visible'; // Also make body visible in case of error to not leave page blank
     }
 }
