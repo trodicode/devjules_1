@@ -80,10 +80,10 @@ async function initI18next() {
             });
         updateContent();
         setupLanguageSwitcher();
-            document.body.style.visibility = 'visible'; // Make body visible after initial translation
+            // document.body.style.visibility = 'visible'; // Make body visible after initial translation
     } catch (error) {
         console.error("Error initializing i18next:", error);
-            document.body.style.visibility = 'visible'; // Also make body visible in case of error to not leave page blank
+            // document.body.style.visibility = 'visible'; // Also make body visible in case of error to not leave page blank
     }
 }
 

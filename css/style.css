@@ -5,9 +5,9 @@
     box-sizing: border-box;
 }
 
-body {
+/* body {
     visibility: hidden; /* Initially hide body to prevent FOUC */
-}
+/* } */
 
 /*
     The rest of the styles previously in this file have been removed
