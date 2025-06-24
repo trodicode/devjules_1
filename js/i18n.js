@@ -84,28 +84,36 @@ async function changeLanguage(lang) {
 
 async function initI18next() {
     const initialLang = localStorage.getItem('language') || navigator.language.split('-')[0] || 'en';
-    console.log('[i18n] Initializing i18next. Determined initialLang:', initialLang);
-
-    try {
-        await i18next
+    // Ensure this runs only once and stores the promise
+    if (!window.i18nextInitializationPromise) {
+        console.log('[i18n] Creating and storing i18next initialization promise. InitialLang:', initialLang);
+        window.i18nextInitializationPromise = i18next
             .use(i18nextHttpBackend)
             .init({
                 lng: initialLang,
                 fallbackLng: 'en',
-                debug: true, // Set to false in production
-                ns: ['translation'], // default namespace
+                debug: true,
+                ns: ['translation'],
                 defaultNS: 'translation',
                 backend: {
-                    loadPath: 'locales/{{lng}}.json' // Path to translation files
+                    loadPath: 'locales/{{lng}}.json'
                 }
             });
-        console.log('[i18n] i18next initialized successfully.');
+    } else {
+        console.log('[i18n] i18next initialization promise already exists.');
+    }
+
+    try {
+        // Await the promise here
+        await window.i18nextInitializationPromise;
+        console.log('[i18n] i18next initialized successfully (awaited promise).'); // Updated log message
+
         updateContent();
         setupLanguageSwitcher();
-            // document.body.style.visibility = 'visible'; // Make body visible after initial translation
+        // document.body.style.visibility = 'visible'; // This line is still commented out
     } catch (error) {
-        console.error('[i18n] Error initializing i18next:', error);
-            // document.body.style.visibility = 'visible'; // Also make body visible in case of error to not leave page blank
+        console.error('[i18n] Error during i18next initialization sequence (awaiting promise):', error);
+        // document.body.style.visibility = 'visible'; // This line is still commented out
     }
 }
 
