@@ -1,37 +1,29 @@
 // JavaScript for index.html (User-facing ticket submission form)
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('main.js loaded for user form.');
+    // console.log('main.js loaded for user form.'); // Original log
 
-    // Access Control Check for index.html (user-facing form)
-    // Any authenticated user (Utilisateur or Administrateur) can access this page.
-    // They just need to be logged in.
+    // Access Control Check for index.html
     const userEmailForAccess = sessionStorage.getItem('userEmail');
-    const userRoleForAccess = sessionStorage.getItem('userRole'); // Role might be useful for UI tweaks later
+    // const userRoleForAccess = sessionStorage.getItem('userRole');
 
     if (!userEmailForAccess) {
-        console.warn('Access denied for index page. User not logged in. Redirecting to login.');
+        // console.warn('Access denied for index page. User not logged in. Redirecting to login.'); // Original log
         window.location.href = 'login.html';
-        return; // Stop further execution of main.js
+        return;
     }
-    // Log access, role might be used later for conditional UI elements if needed
-    console.log(`User form access granted for user: ${userEmailForAccess}, Role: ${userRoleForAccess}`);
+    // console.log(`User form access granted for user: ${userEmailForAccess}, Role: ${userRoleForAccess}`); // Original log
 
 
-    // Ensure stackby-api.js and its functions are loaded
-    // Also check for i18next
-    if (typeof createTicket !== 'function' || typeof COLUMN_NAMES === 'undefined' || typeof i18next === 'undefined' || typeof i18next.t === 'undefined') {
-        console.error('Airtable API functions, COLUMN_NAMES, or i18next are not available.');
+    // Ensure airtable-api.js and its functions are loaded
+    if (typeof createTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
+        // console.error('Airtable API functions or COLUMN_NAMES are not available.'); // Original log
         const userMessageArea = document.getElementById('userMessageArea');
         if (userMessageArea) {
-            const errorMessage = (typeof i18next !== 'undefined' && i18next.t) ?
-                i18next.t('ticketFormMessages.criticalApiError') :
-                'Critical error: Cannot connect to ticketing system. Please contact support. (API script not loaded or i18n error)';
-            userMessageArea.innerHTML = errorMessage;
-            userMessageArea.className = 'p-4 rounded-md mb-4 text-center bg-slate-800 border border-red-500 text-red-500'; // Error styling
+            userMessageArea.innerHTML = 'Critical error: Cannot connect to ticketing system. Please contact support. (API script not loaded)';
+            userMessageArea.className = 'p-4 rounded-md mb-4 text-center bg-slate-800 border border-red-500 text-red-500';
             userMessageArea.style.display = 'block';
         }
-        // Disable form if critical components are missing
         const submitButton = document.querySelector('#ticketForm button[type="submit"]');
         if (submitButton) submitButton.disabled = true;
         return;
@@ -41,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userMessageArea = document.getElementById('userMessageArea');
 
     // Helper to display messages
-    function showMessage(message, type = 'success') { // message is already translated
+    function showMessage(message, type = 'success') {
         if (userMessageArea) {
             userMessageArea.textContent = message;
             let classes = 'p-4 rounded-md mb-4 text-center';
@@ -76,29 +68,29 @@ document.addEventListener('DOMContentLoaded', () => {
         showFieldError('title', '');
         showFieldError('description', '');
         showFieldError('urgency', '');
-        showFieldError('email', ''); // Clear email error
+        showFieldError('email', '');
 
         if (!data[COLUMN_NAMES.TICKET_TITLE]?.trim()) {
-            showFieldError('title', i18next.t('ticketFormMessages.validation.titleRequired'));
+            showFieldError('title', 'Ticket Title is required.');
             isValid = false;
         }
         if (!data[COLUMN_NAMES.DETAILED_DESCRIPTION]?.trim()) {
-            showFieldError('description', i18next.t('ticketFormMessages.validation.descriptionRequired'));
+            showFieldError('description', 'Detailed Description is required.');
             isValid = false;
         }
         if (!data[COLUMN_NAMES.URGENCY_LEVEL]) {
-            showFieldError('urgency', i18next.t('ticketFormMessages.validation.urgencyRequired'));
+            showFieldError('urgency', 'Urgency Level is required.');
             isValid = false;
         }
 
         if (data[COLUMN_NAMES.REQUESTER_EMAIL]) {
             const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailPattern.test(data[COLUMN_NAMES.REQUESTER_EMAIL])) {
-                showFieldError('email', i18next.t('ticketFormMessages.validation.emailInvalid'));
+                showFieldError('email', 'Please enter a valid email address.');
                 isValid = false;
             }
         } else {
-             showFieldError('email', i18next.t('ticketFormMessages.validation.emailRequired'));
+             showFieldError('email', 'Your Email is required.'); // Changed from "Email du demandeur" for consistency
              isValid = false;
         }
         return isValid;
@@ -130,27 +122,26 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // If attachmentUrlValue is empty, the ATTACHMENT field will be omitted from ticketData.
 
-            // Perform validation (Note: Attachment URL is optional, so not validated here for presence)
+            // Perform validation
             if (!validateForm(ticketData)) {
-                showMessage(i18next.t('ticketFormMessages.correctFormErrors'), 'error');
-                return; // Stop submission if validation fails
+                showMessage('Please correct the errors in the form.', 'error');
+                return;
             }
 
-            console.log('Form validated successfully. Preparing data for Airtable:', ticketData);
+            // console.log('Form validated successfully. Preparing data for Airtable:', ticketData); // Original log
 
             // Disable button to prevent multiple submissions
             const submitButton = ticketForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
-            submitButton.textContent = i18next.t('ticketForm.submittingButton');
+            submitButton.textContent = 'Submitting...';
 
             try {
                 const result = await createTicket(ticketData);
 
                 // Corrected check: Stackby returns the created row object directly, which has a top-level 'rowId'.
-                // The success check now uses 'id' which is what Airtable returns as the record ID.
                 if (result && result.id) {
                     const displayId = (result.fields && result.fields[COLUMN_NAMES.TICKET_ID]) || result.id;
-                    showMessage(i18next.t('ticketFormMessages.submissionSuccess', { displayId: displayId }), 'success');
+                    showMessage(`Ticket submitted successfully! Your Ticket ID is: ${displayId}. You will receive an email confirmation shortly (placeholder).`, 'success');
                     ticketForm.reset();
                     showFieldError('title', '');
                     showFieldError('description', '');
@@ -161,7 +152,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     submitAnotherButton.type = 'button';
                     submitAnotherButton.id = 'submitAnotherTicket';
                     submitAnotherButton.className = 'font-title mt-4 w-full flex justify-center py-2 px-4 border-2 border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-dark-bg font-semibold rounded-md shadow-sm text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-blue focus:ring-offset-dark-bg';
-                    submitAnotherButton.textContent = i18next.t('ticketForm.submitAnotherButton');
+                    submitAnotherButton.textContent = 'Submit Another Ticket';
 
                     userMessageArea.parentNode.insertBefore(submitAnotherButton, userMessageArea.nextSibling);
 
@@ -171,9 +162,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
                         if (submitButton) {
                             submitButton.disabled = false;
-                            submitButton.textContent = i18next.t('ticketForm.submitButton');
+                            submitButton.textContent = 'Submit Ticket';
                         }
-                        // This is more of a safeguard.
                         showFieldError('title', '');
                         showFieldError('description', '');
                         showFieldError('urgency', '');
@@ -181,26 +171,25 @@ document.addEventListener('DOMContentLoaded', () => {
                     });
 
 
-                    // Placeholder: Send email confirmation to user.
-                    console.log(`Placeholder: Trigger email confirmation for ticket ID ${displayId} to the user.`);
+                    // console.log(`Placeholder: Trigger email confirmation for ticket ID ${displayId} to the user.`); // Original log
                 } else {
-                    console.error('Failed to create ticket or unexpected response:', result);
-                    showMessage(i18next.t('ticketFormMessages.submissionFailed'), 'error');
+                    // console.error('Failed to create ticket or unexpected response:', result); // Original log
+                    showMessage('Failed to submit ticket. The server returned an unexpected response. Please try again later.', 'error');
                 }
             } catch (error) {
-                console.error('Error during ticket submission:', error);
-                showMessage(i18next.t('ticketFormMessages.submissionError', { errorMessage: error.message || i18next.t('ticketFormMessages.unknownError') }), 'error');
+                // console.error('Error during ticket submission:', error); // Original log
+                showMessage(`An error occurred while submitting your ticket: ${error.message || 'Unknown error'}. Please try again.`, 'error');
             } finally {
                 const submitAnotherButtonExists = document.getElementById('submitAnotherTicket');
                 if (!submitAnotherButtonExists) {
                     submitButton.disabled = false;
-                    submitButton.textContent = i18next.t('ticketForm.submitButton');
+                    submitButton.textContent = 'Submit Ticket';
                 } else {
                     submitButton.disabled = true;
                 }
             }
         });
     } else {
-        console.error('#ticketForm not found in the DOM.');
+        // console.error('#ticketForm not found in the DOM.'); // Original log
     }
 });

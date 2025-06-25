@@ -1,52 +1,30 @@
 // JavaScript for admin.html (Admin ticket dashboard)
 
-document.addEventListener('DOMContentLoaded', async () => {
-    console.log('[admin] DOMContentLoaded: Starting. Checking for i18next initialization promise...');
-    if (window.i18nextInitializationPromise) {
-        try {
-            await window.i18nextInitializationPromise;
-            console.log('[admin] i18next initialization promise resolved. Proceeding with admin script.');
-        } catch (error) {
-            console.error('[admin] Error awaiting i18next initialization promise:', error);
-            // Optionally, display an error message to the user on the page,
-            // as translations might not work, impacting the UI.
-            // For now, just logging, as showMessageOnPage might not be ready or itself rely on i18n.
-        }
-    } else {
-        console.error('[admin] i18next initialization promise (window.i18nextInitializationPromise) not found. Translations may not work correctly.');
-        // Application might still try to proceed, but i18n calls will likely fail or use fallback keys.
-    }
-    console.log('[admin] DOMContentLoaded event fired.'); // Moved this log after await
-    console.log('admin.js loaded for admin dashboard.');
+document.addEventListener('DOMContentLoaded', () => {
+    // console.log('admin.js loaded for admin dashboard.'); // Original log
 
     // Access Control Check
     const userEmail = sessionStorage.getItem('userEmail');
     const userRole = sessionStorage.getItem('userRole');
 
     if (!userEmail || userRole !== 'Administrateur') {
-        console.warn('[admin] Access denied for admin page. User not logged in or not an admin. Redirecting to login.');
+        // console.warn('Access denied for admin page. User not logged in or not an admin. Redirecting to login.'); // Original log
         window.location.href = 'login.html';
-        return; // Stop further execution
+        return;
     }
 
-    console.log(`[admin] Access granted for user: ${userEmail}, Role: ${userRole}, proceeding with admin script initialization.`);
+    // console.log(`Admin access granted for user: ${userEmail}, Role: ${userRole}`); // Original log
 
     // Ensure airtable-api.js and its functions are loaded
-    // Also check for i18next
     if (typeof getAllTickets !== 'function' || typeof getTicketById !== 'function' ||
-        typeof updateTicket !== 'function' || typeof COLUMN_NAMES === 'undefined' ||
-        typeof i18next === 'undefined' || typeof i18next.t === 'undefined') {
-        console.error('[admin] Prerequisite check failed: Airtable API functions, COLUMN_NAMES, or i18next are not available.');
-        const adminMessageArea = document.getElementById('adminMessageArea'); // Get it directly here for this critical error
+        typeof updateTicket !== 'function' || typeof COLUMN_NAMES === 'undefined') {
+        // console.error('Airtable API functions or COLUMN_NAMES are not available.'); // Original log
+        const adminMessageArea = document.getElementById('adminMessageArea');
         if (adminMessageArea) {
-            const errorMessage = (typeof i18next !== 'undefined' && i18next.t) ?
-                i18next.t('adminMessages.criticalApiError') :
-                'Critical error: Cannot connect to ticketing system. (API script not loaded or i18n error)';
-            adminMessageArea.textContent = errorMessage;
+            adminMessageArea.textContent = 'Critical error: Cannot connect to ticketing system. (API script not loaded)';
             adminMessageArea.className = 'my-4 p-3 rounded-md text-center text-lg bg-slate-800 border border-red-500 text-red-500';
             adminMessageArea.style.display = 'block';
         }
-        // Disable filters/buttons if critical components are missing
         const controls = ['statusFilter', 'urgencyFilter', 'searchInput', 'logoutButton'];
         controls.forEach(id => {
             const el = document.getElementById(id);
@@ -54,7 +32,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
         return;
     }
-    console.log('[admin] API functions and COLUMN_NAMES verified.');
+    // console.log('API functions and COLUMN_NAMES verified.'); // Original log
 
     // Main dashboard elements
     const ticketTableBody = document.getElementById('ticketTableBody');
@@ -86,7 +64,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentlySelectedRecordId = null;
 
     // --- Message Display ---
-    function showMessageOnPage(message, type = 'info') { // message is already translated
+    function showMessageOnPage(message, type = 'info') {
         if (adminMessageArea) {
             adminMessageArea.textContent = message;
             let baseClasses = 'my-4 p-3 rounded-md text-center text-lg';
@@ -94,42 +72,21 @@ document.addEventListener('DOMContentLoaded', async () => {
                 adminMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-green text-neon-green`;
             } else if (type === 'error') {
                 adminMessageArea.className = `${baseClasses} bg-slate-800 border border-red-500 text-red-500`;
-            } else { // 'info' or default
+            } else {
                 adminMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-blue text-neon-blue`;
             }
             adminMessageArea.style.display = message ? 'block' : 'none';
 
-            let loadingTicketsMsg = 'Loading tickets...'; // Fallback
-            let noTicketsInSystemMsg = 'No tickets currently in the system.'; // Fallback
-            let noTicketsMatchingCriteriaMsg = 'No tickets found matching your criteria.'; // Fallback
-
-            if (typeof i18next !== 'undefined' && i18next.isInitialized) {
-                loadingTicketsMsg = i18next.t('adminMessages.loadingTickets', { defaultValue: loadingTicketsMsg });
-                noTicketsInSystemMsg = i18next.t('adminMessages.noTicketsInSystem', { defaultValue: noTicketsInSystemMsg });
-                noTicketsMatchingCriteriaMsg = i18next.t('adminMessages.noTicketsMatchingCriteria', { defaultValue: noTicketsMatchingCriteriaMsg });
-            } else {
-                console.warn('[admin] showMessageOnPage: i18next not ready when checking message content, using fallback strings for comparison.');
-            }
-
-            // The condition to clear the table body if it's an error,
-            // or if it's an info message that is NOT one of the "loading" or "no tickets" type messages.
-            if (type === 'error' ||
-                (type === 'info' &&
-                 typeof message === 'string' &&
-                 message !== loadingTicketsMsg &&
-                 !message.includes(noTicketsInSystemMsg.substring(0, 10)) &&
-                 !message.includes(noTicketsMatchingCriteriaMsg.substring(0,10)) )) {
-                if (ticketTableBody) {
-                    console.log('[admin] showMessageOnPage: Clearing ticketTableBody because message is error or non-loading/non-no-tickets info.');
-                    ticketTableBody.innerHTML = '';
-                }
+            // Original logic for clearing table:
+            if (type === 'error' || (type === 'info' && message !== 'Loading tickets...' && !message.includes("No tickets"))) {
+                 if(ticketTableBody) ticketTableBody.innerHTML = '';
             }
         } else {
             type === 'error' ? console.error(message) : console.log(message);
         }
     }
 
-    function showMessageInModal(message, type = 'info') { // message is already translated
+    function showMessageInModal(message, type = 'info') {
         if (modalUserMessageArea) {
             modalUserMessageArea.textContent = message;
             let baseClasses = 'p-3 rounded-md mt-3 text-center text-lg';
@@ -137,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modalUserMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-green text-neon-green`;
             } else if (type === 'error') {
                 modalUserMessageArea.className = `${baseClasses} bg-slate-800 border border-red-500 text-red-500`;
-            } else { // 'info' or default
+            } else {
                 modalUserMessageArea.className = `${baseClasses} bg-slate-800 border border-neon-blue text-neon-blue`;
             }
             modalUserMessageArea.style.display = message ? 'block' : 'none';
@@ -148,9 +105,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Ticket Rendering ---
     function renderTickets(ticketsToRender) {
-        console.log(`[admin] renderTickets called with ${ticketsToRender ? ticketsToRender.length : 0} tickets.`);
+        // console.log(`[admin] renderTickets called with ${ticketsToRender ? ticketsToRender.length : 0} tickets.`); // Removed i18n log
         if (!ticketTableBody) {
-            console.error("[admin] renderTickets: ticketTableBody is null.");
+            // console.error("[admin] renderTickets: ticketTableBody is null."); // Removed i18n log
             return;
         }
         ticketTableBody.innerHTML = '';
@@ -159,20 +116,20 @@ document.addEventListener('DOMContentLoaded', async () => {
             const row = ticketTableBody.insertRow();
             const cell = row.insertCell();
             cell.colSpan = tableHeaders.length;
-            cell.textContent = i18next.t('adminMessages.noTicketsMatchingCriteria');
+            cell.textContent = 'No tickets found matching your criteria.';
             cell.className = 'px-6 py-4 text-center text-sm text-text-medium';
             return;
         }
 
-        if (ticketsToRender.length > 0) {
-            console.log('[admin] First ticket data for rendering:', JSON.parse(JSON.stringify(ticketsToRender[0])));
+        // if (ticketsToRender.length > 0) { // Removed i18n log
+        //     console.log('[admin] First ticket data for rendering:', JSON.parse(JSON.stringify(ticketsToRender[0])));
+        // }
+
+        // Logic for hiding adminMessageArea if it showed "Loading" or "No tickets"
+        if (adminMessageArea.textContent === 'Loading tickets...' || adminMessageArea.textContent === 'No tickets currently in the system.') {
+             adminMessageArea.style.display = 'none';
         }
 
-        const currentLoadingMessage = i18next.t('adminMessages.loadingTickets');
-        const currentNoTicketsMessage = i18next.t('adminMessages.noTicketsInSystem');
-        if (adminMessageArea.textContent === currentLoadingMessage || adminMessageArea.textContent === currentNoTicketsMessage) {
-            adminMessageArea.style.display = 'none';
-        }
 
         ticketsToRender.forEach(ticket => {
             const row = ticketTableBody.insertRow();
@@ -181,10 +138,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             const recordId = ticket.id;
 
             if (!recordId) {
-                console.error("[Admin JS] renderTickets: Ticket object is missing an 'id' property:", ticket);
+                // console.error("[Admin JS] renderTickets: Ticket object is missing an 'id' property:", ticket); // Removed i18n log
                 let errorCell = row.insertCell();
                 errorCell.colSpan = tableHeaders.length;
-                errorCell.textContent = i18next.t('adminMessages.errorInvalidTicketData');
+                errorCell.textContent = 'Error: Invalid ticket data received.';
                 errorCell.className = 'px-6 py-4 text-center text-red-500';
                 return;
             }
@@ -192,48 +149,30 @@ document.addEventListener('DOMContentLoaded', async () => {
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">${fields[COLUMN_NAMES.TICKET_ID] || recordId}</td>`;
 
             const titleCell = row.insertCell();
-            titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || i18next.t('adminTable.noTitle');
+            titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
             titleCell.className = "px-6 py-4 whitespace-nowrap text-sm text-neon-pink hover:text-opacity-80 hover:underline cursor-pointer";
             titleCell.onclick = () => openTicketDetailModal(recordId);
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : i18next.t('adminTable.unknownDate')}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date'}</td>`;
 
             const urgencyValue = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal';
-            const urgencyKey = `commonUrgencies.${urgencyValue.toLowerCase()}`;
-            console.log(`[admin] Translating urgency: value='${urgencyValue}', key='${urgencyKey}'`);
-            const translatedUrgency = i18next.t(urgencyKey, { defaultValue: urgencyValue });
-            console.log(`[admin] Translated urgency: '${translatedUrgency}'`);
+            // const urgencyKey = `commonUrgencies.${urgencyValue.toLowerCase()}`; // Removed i18n
+            // console.log(`[admin] Translating urgency: value='${urgencyValue}', key='${urgencyKey}'`); // Removed i18n log
+            // const translatedUrgency = i18next.t(urgencyKey, { defaultValue: urgencyValue }); // Removed i18n
+            // console.log(`[admin] Translated urgency: '${translatedUrgency}'`); // Removed i18n log
             let urgencyIcon = '';
             let urgencyFinalClass = 'text-text-medium';
             if (urgencyValue === 'Urgent') {
                 urgencyIcon = '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-1 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.216 3.031-1.742 3.031H4.42c-1.526 0-2.492-1.697-1.742-3.031l5.58-9.92zM10 13a1 1 0 110-2 1 1 0 010 2zm-1.75-2.75a.75.75 0 000 1.5h3.5a.75.75 0 000-1.5h-3.5z" clip-rule="evenodd" /></svg>';
                 urgencyFinalClass = 'text-red-500 font-semibold';
             }
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyFinalClass}">${urgencyIcon}${translatedUrgency}</span></td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyFinalClass}">${urgencyIcon}${urgencyValue}</span></td>`; // Reverted to urgencyValue
 
             const statusValue = fields[COLUMN_NAMES.STATUS] || 'New';
-            let formattedStatusValue;
-            if (statusValue === 'In Progress') {
-                formattedStatusValue = 'inProgress';
-            } else if (statusValue === 'Acknowledged') {
-                formattedStatusValue = 'acknowledged';
-            } else if (statusValue === 'Resolved') {
-                formattedStatusValue = 'resolved';
-            } else if (statusValue === 'Pending') {
-                formattedStatusValue = 'pending';
-            } else if (statusValue === 'Closed') {
-                formattedStatusValue = 'closed';
-            } else if (statusValue === 'New') {
-                formattedStatusValue = 'new';
-            } else {
-                // Fallback for any other status: simple lowercase, no space removal.
-                // This might need adjustment if other multi-word statuses exist and need specific keys.
-                formattedStatusValue = statusValue.toLowerCase().replace(/\s+/g, '');
-            }
-            const statusKey = `commonStatuses.${formattedStatusValue}`;
-            console.log(`[admin] Translating status: value='${statusValue}', key='${statusKey}'`);
-            const translatedStatus = i18next.t(statusKey, { defaultValue: statusValue }); // defaultValue already added in previous step, this confirms it.
-            console.log(`[admin] Translated status: '${translatedStatus}'`);
+            // const statusKey = `commonStatuses.${formattedStatusValue}`; // Removed i18n related logic
+            // console.log(`[admin] Translating status: value='${statusValue}', key='${statusKey}'`); // Removed i18n log
+            // const translatedStatus = i18next.t(statusKey, { defaultValue: statusValue }); // Removed i18n
+            // console.log(`[admin] Translated status: '${translatedStatus}'`); // Removed i18n log
             let statusBadgeClasses = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full border';
             if (statusValue === 'New') statusBadgeClasses += ' border-neon-blue text-neon-blue';
             else if (statusValue === 'In Progress') statusBadgeClasses += ' border-yellow-400 text-yellow-400';
@@ -242,14 +181,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             else if (statusValue === 'Resolved') statusBadgeClasses += ' border-neon-green text-neon-green';
             else if (statusValue === 'Closed') statusBadgeClasses += ' border-text-medium text-text-medium';
             else statusBadgeClasses += ' border-gray-600 text-gray-400';
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${statusBadgeClasses}">${translatedStatus}</span></td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${statusBadgeClasses}">${statusValue}</span></td>`; // Reverted to statusValue
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || i18next.t('adminTable.unassigned')}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned'}</td>`;
 
             const actionsCell = row.insertCell();
             actionsCell.className = "px-6 py-4 whitespace-nowrap text-right text-sm font-medium";
             const viewDetailsButton = document.createElement('button');
-            viewDetailsButton.textContent = i18next.t('adminTable.viewEditButton');
+            viewDetailsButton.textContent = 'View/Edit';
             viewDetailsButton.className = 'font-title text-xs px-3 py-1 bg-transparent border border-neon-blue text-neon-blue hover:bg-neon-blue hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neon-blue focus:ring-offset-slate-900 disabled:opacity-50';
             viewDetailsButton.onclick = (event) => {
                 openTicketDetailModal(recordId);
@@ -260,32 +199,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // --- Data Fetching & Processing ---
     async function loadAndDisplayTickets() {
-        console.log('[admin] loadAndDisplayTickets called.');
-        showMessageOnPage(i18next.t('adminMessages.loadingTickets'), 'info');
-        if(ticketTableBody) ticketTableBody.innerHTML = ''; // Clear table before loading
+        // console.log('[admin] loadAndDisplayTickets called.'); // Removed i18n log
+        showMessageOnPage('Loading tickets...', 'info');
+        if(ticketTableBody) ticketTableBody.innerHTML = '';
         try {
             const tickets = await getAllTickets();
-            console.log('[admin] getAllTickets response:', tickets);
+            // console.log('[admin] getAllTickets response:', tickets); // Removed i18n log
             if (tickets && Array.isArray(tickets)) {
                 allTickets = tickets;
-                console.log('[admin] allTickets populated. Count:', allTickets ? allTickets.length : 'null');
-                applyFiltersAndSort(); // This will call renderTickets
+                // console.log('[admin] allTickets populated. Count:', allTickets ? allTickets.length : 'null'); // Removed i18n log
+                applyFiltersAndSort();
                 if (allTickets.length === 0) {
-                    showMessageOnPage(i18next.t('adminMessages.noTicketsInSystem'), 'info');
+                    showMessageOnPage('No tickets currently in the system.', 'info');
                 } else if (filterTickets().length === 0 && (statusFilter.value !== 'All' || urgencyFilter.value !== 'All' || searchInput.value.trim() !== '')) {
-                    // This case is handled by applyFiltersAndSort calling render which shows "No tickets matching criteria"
                 } else {
-                     adminMessageArea.style.display = 'none'; // Hide loading/no tickets message if tickets are displayed
+                     adminMessageArea.style.display = 'none';
                 }
             } else {
-                showMessageOnPage(i18next.t('adminMessages.couldNotRetrieveTickets'), 'error');
+                showMessageOnPage('Could not retrieve tickets. Data format unexpected.', 'error');
                 allTickets = [];
-                renderTickets([]); // Render empty state
+                renderTickets([]);
             }
         } catch (error) {
-            showMessageOnPage(i18next.t('adminMessages.errorLoadingTickets', { errorMessage: error.message || i18next.t('adminMessages.unknownError') }), 'error');
+            showMessageOnPage(`Error loading tickets: ${error.message || 'Unknown error'}.`, 'error');
             allTickets = [];
-            renderTickets([]); // Render empty state
+            renderTickets([]);
         }
     }
 
@@ -312,14 +250,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     function sortTickets(tickets, columnKey, ascending) {
-        const fieldName = COLUMN_NAMES[columnKey] || columnKey;
+        const fieldName = COLUMN_NAMES[columnKey] || columnKey; // Use original field name for sorting
         const sortedTickets = [...tickets].sort((a, b) => {
             let valA = (a.fields && a.fields[fieldName]) || '';
             let valB = (b.fields && b.fields[fieldName]) || '';
-            if (fieldName === 'created_at') {
+            if (fieldName === 'created_at') { // Special handling for date
                 valA = a.created_at ? new Date(a.created_at).getTime() : 0;
                 valB = b.created_at ? new Date(b.created_at).getTime() : 0;
-            } else {
+            } else { // General string comparison
                 valA = String(valA).toLowerCase();
                 valB = String(valB).toLowerCase();
             }
@@ -335,67 +273,57 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (currentSort.column) {
             processedTickets = sortTickets(processedTickets, currentSort.column, currentSort.ascending);
         }
-        // Message for "no tickets matching criteria" is now handled by renderTickets if processedTickets is empty
-        // but allTickets is not.
         if (allTickets.length > 0 && processedTickets.length === 0) {
-             showMessageOnPage(i18next.t('adminMessages.noTicketsMatchingCriteria'), 'info');
+             showMessageOnPage('No tickets found matching your criteria.', 'info');
         } else if (allTickets.length === 0) {
-            // This case handled by loadAndDisplayTickets initially.
-            // showMessageOnPage(i18next.t('adminMessages.noTicketsInSystem'), 'info');
-        } else if (processedTickets.length > 0 && (adminMessageArea.textContent === i18next.t('adminMessages.noTicketsMatchingCriteria') || adminMessageArea.textContent === i18next.t('adminMessages.noTicketsInSystem'))) {
-            adminMessageArea.style.display = 'none'; // Hide "no tickets" message if tickets are now found
+            // This case handled by loadAndDisplayTickets
+        } else if (processedTickets.length > 0 &&
+                   (adminMessageArea.textContent === 'No tickets found matching your criteria.' ||
+                    adminMessageArea.textContent === 'No tickets currently in the system.')) {
+            adminMessageArea.style.display = 'none';
         }
         renderTickets(processedTickets);
     }
 
     // --- Modal Functionality ---
     async function openTicketDetailModal(recordIdParam) {
-        console.log('[Admin JS] openTicketDetailModal: Received recordIdParam:', recordIdParam);
+        // console.log('[Admin JS] openTicketDetailModal: Received recordIdParam:', recordIdParam); // Removed i18n log
         if (!recordIdParam) {
-            console.error("[Admin JS] openTicketDetailModal: called with undefined or null recordIdParam");
-            showMessageOnPage(i18next.t('adminMessages.errorMissingTicketIdModal'), "error");
+            // console.error("[Admin JS] openTicketDetailModal: called with undefined or null recordIdParam"); // Removed i18n log
+            showMessageOnPage("Could not open ticket details: Missing ticket ID.", "error");
             return;
         }
         currentlySelectedRecordId = recordIdParam;
-        console.log('[Admin JS] openTicketDetailModal: Assigned to currentlySelectedRecordId:', currentlySelectedRecordId);
+        // console.log('[Admin JS] openTicketDetailModal: Assigned to currentlySelectedRecordId:', currentlySelectedRecordId); // Removed i18n log
 
-        showMessageInModal(i18next.t('adminMessages.modalLoadingDetails'), 'info');
+        showMessageInModal('Loading ticket details...', 'info');
         modalSaveStatusButton.disabled = true;
         modalSaveAssigneeButton.disabled = true;
-
-        // ticketDetailModal classes are now: "fixed z-10 inset-0 hidden items-center justify-center p-4"
-        // When hidden is removed, it will use its defined flex properties.
         ticketDetailModal.classList.remove('hidden');
 
         try {
-            console.log('[Admin JS] openTicketDetailModal: Calling airtableApi.getTicketById with ID:', currentlySelectedRecordId);
+            // console.log('[Admin JS] openTicketDetailModal: Calling airtableApi.getTicketById with ID:', currentlySelectedRecordId); // Removed i18n log
             const ticket = await getTicketById(currentlySelectedRecordId);
             if (ticket && ticket.fields) {
                 const fields = ticket.fields;
-                const naText = i18next.t('adminMessages.na');
-                modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.id || naText;
-                modalTicketTitle.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || naText;
-                modalTicketDescription.textContent = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || naText;
-
-                const urgencyVal = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal';
-                modalTicketUrgency.textContent = i18next.t(`commonUrgencies.${urgencyVal.toLowerCase()}`, { defaultValue: urgencyVal });
-
-                const statusVal = fields[COLUMN_NAMES.STATUS] || 'New';
-                modalTicketStatus.textContent = i18next.t(`commonStatuses.${statusVal.toLowerCase().replace(/\s+/g, '')}`, { defaultValue: statusVal });
-
-                modalTicketAssignee.textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || i18next.t('adminTable.unassigned');
-                modalTicketSubmissionDate.textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleString() : naText;
+                modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.id || 'N/A';
+                modalTicketTitle.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'N/A';
+                modalTicketDescription.textContent = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || 'N/A';
+                modalTicketUrgency.textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'N/A';
+                modalTicketStatus.textContent = fields[COLUMN_NAMES.STATUS] || 'N/A';
+                modalTicketAssignee.textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
+                modalTicketSubmissionDate.textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A';
 
                 const attachmentValue = fields[COLUMN_NAMES.ATTACHMENT];
                 if (attachmentValue && Array.isArray(attachmentValue) && attachmentValue.length > 0 && attachmentValue[0].url) {
-                    const filename = attachmentValue[0].filename || i18next.t('adminModal.viewAttachmentLink');
+                    const filename = attachmentValue[0].filename || 'View Attachment';
                     modalTicketAttachment.innerHTML = `<a href="${attachmentValue[0].url}" target="_blank" rel="noopener noreferrer" class="text-neon-green hover:underline">${filename}</a>`;
                 } else if (typeof attachmentValue === 'string' && attachmentValue.startsWith('file://')) {
-                    modalTicketAttachment.textContent = i18next.t('adminModal.attachmentFilePrefix', {filename: attachmentValue.substring('file://'.length)});
+                    modalTicketAttachment.textContent = `File: ${attachmentValue.substring('file://'.length)} (Not a direct link)`;
                 } else {
-                    modalTicketAttachment.textContent = i18next.t('adminModal.attachmentNone');
+                    modalTicketAttachment.textContent = 'None';
                 }
-                modalChangeStatusSelect.value = fields[COLUMN_NAMES.STATUS] || ""; // Value should be English
+                modalChangeStatusSelect.value = fields[COLUMN_NAMES.STATUS] || "";
                 modalAssignCollaboratorInput.value = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "";
                 showMessageInModal('', 'info');
                 modalUserMessageArea.style.display = 'none';
@@ -404,91 +332,87 @@ document.addEventListener('DOMContentLoaded', async () => {
                     modalChangeStatusSelect.focus();
                 }
             } else {
-                showMessageInModal(i18next.t('adminMessages.modalCouldNotLoadDetails'), 'error');
+                showMessageInModal('Could not load ticket details or ticket has no fields.', 'error');
             }
         } catch (error) {
-            showMessageInModal(i18next.t('adminMessages.modalErrorLoadingDetails', { errorMessage: error.message || i18next.t('adminMessages.unknownError') }), 'error');
+            showMessageInModal(`Error fetching ticket details: ${error.message || 'Unknown error'}.`, 'error');
         } finally {
             modalSaveStatusButton.disabled = false;
             modalSaveAssigneeButton.disabled = false;
-            // Reset button text in case of error during loading, if they were changed
-            modalSaveStatusButton.textContent = i18next.t('adminModal.saveStatusButton');
-            modalSaveAssigneeButton.textContent = i18next.t('adminModal.saveAssignmentButton');
+            modalSaveStatusButton.textContent = 'Save Status';
+            modalSaveAssigneeButton.textContent = 'Save Assignment';
         }
     }
 
     window.closeTicketDetailModal = function() {
         ticketDetailModal.classList.add('hidden');
-        // No need to remove 'flex' as it's part of the base visible state styling.
         currentlySelectedRecordId = null;
         modalUserMessageArea.style.display = 'none';
     }
 
     // --- Update Ticket Functionality (Modal) ---
     modalSaveStatusButton.addEventListener('click', async () => {
-        console.log('[Admin JS] Save Changes Function (Status): Using currentlySelectedRecordId for update:', currentlySelectedRecordId);
+        // console.log('[Admin JS] Save Changes Function (Status): Using currentlySelectedRecordId for update:', currentlySelectedRecordId); // Removed i18n log
         if (!currentlySelectedRecordId) return;
-        const newStatus = modalChangeStatusSelect.value; // This value is English e.g. "In Progress"
+        const newStatus = modalChangeStatusSelect.value;
         if (!newStatus) {
-            showMessageInModal(i18next.t('adminMessages.modalStatusSelectError'), 'error');
+            showMessageInModal('Please select a status.', 'error');
             return;
         }
-        showMessageInModal(i18next.t('adminMessages.modalStatusUpdating'), 'info');
+        showMessageInModal('Updating status...', 'info');
         modalSaveStatusButton.disabled = true;
-        modalSaveStatusButton.textContent = i18next.t('adminModal.savingButton');
+        modalSaveStatusButton.textContent = 'Saving...';
         const dataForUpdate = { [COLUMN_NAMES.STATUS]: newStatus };
         try {
             const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
             if (updatedTicket && updatedTicket.fields) {
-                const newStatusValue = updatedTicket.fields[COLUMN_NAMES.STATUS]; // English value
-                const newStatusDisplay = i18next.t(`commonStatuses.${newStatusValue.toLowerCase().replace(/\s+/g, '')}`, { defaultValue: newStatusValue });
-
-                showMessageInModal(i18next.t('adminMessages.modalStatusUpdatedSuccess', { newStatusDisplay: newStatusDisplay }), 'success');
-                modalTicketStatus.textContent = newStatusDisplay; // Display translated status
+                const newStatusValue = updatedTicket.fields[COLUMN_NAMES.STATUS];
+                showMessageInModal(`Status successfully updated to "${newStatusValue}".`, 'success');
+                modalTicketStatus.textContent = newStatusValue;
 
                 const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
                 if (ticketIndex > -1) {
                     if (allTickets[ticketIndex].fields) {
-                         allTickets[ticketIndex].fields[COLUMN_NAMES.STATUS] = newStatusValue; // Store English value
+                         allTickets[ticketIndex].fields[COLUMN_NAMES.STATUS] = newStatusValue;
                     } else {
                         allTickets[ticketIndex].fields = { [COLUMN_NAMES.STATUS]: newStatusValue };
                     }
                     applyFiltersAndSort();
                 } else {
-                     loadAndDisplayTickets(); // Fallback to reload all
+                     loadAndDisplayTickets();
                 }
-                const userNotifyStatuses = ["Acknowledged", "In Progress", "Resolved"]; // English values for logic
+                const userNotifyStatuses = ["Acknowledged", "In Progress", "Resolved"];
                 if (userNotifyStatuses.includes(newStatusValue)) {
-                    showMessageOnPage(i18next.t('adminMessages.reminderNotifyUser', {newStatusDisplay: newStatusDisplay}), 'info');
+                    showMessageOnPage(`Status updated to ${newStatusValue}. REMINDER: Manually notify the user.`, 'info');
                 }
             } else {
-                showMessageInModal(i18next.t('adminMessages.modalStatusUpdateFailed'), 'error');
+                showMessageInModal('Failed to update status. The server returned an unexpected response. Please try again.', 'error');
             }
         } catch (error) {
-            showMessageInModal(i18next.t('adminMessages.modalStatusUpdateError', { errorMessage: error.message || i18next.t('adminMessages.unknownError') }), 'error');
+            showMessageInModal(`Error updating status: ${error.message || 'Unknown error'}.`, 'error');
         } finally {
             modalSaveStatusButton.disabled = false;
-            modalSaveStatusButton.textContent = i18next.t('adminModal.saveStatusButton');
+            modalSaveStatusButton.textContent = 'Save Status';
         }
     });
 
     modalSaveAssigneeButton.addEventListener('click', async () => {
-        console.log('[Admin JS] Save Changes Function (Assignee): Using currentlySelectedRecordId for update:', currentlySelectedRecordId);
+        // console.log('[Admin JS] Save Changes Function (Assignee): Using currentlySelectedRecordId for update:', currentlySelectedRecordId); // Removed i18n log
         if (!currentlySelectedRecordId) return;
         const newAssignee = modalAssignCollaboratorInput.value.trim();
         modalSaveAssigneeButton.disabled = true;
-        showMessageInModal(i18next.t('adminMessages.modalAssignmentUpdating'), 'info');
-        modalSaveAssigneeButton.textContent = i18next.t('adminModal.savingButton');
+        showMessageInModal('Updating assignment...', 'info');
+        modalSaveAssigneeButton.textContent = 'Saving...';
         const dataForUpdate = { [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: newAssignee };
         try {
             const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
             if (updatedTicket && updatedTicket.fields) {
                 const newAssigneeValue = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR];
-                const newAssigneeDisplay = newAssigneeValue || i18next.t('adminTable.unassigned');
+                const newAssigneeDisplay = newAssigneeValue || 'Unassigned';
 
-                showMessageInModal(i18next.t('adminMessages.modalAssignmentSuccess', { newAssigneeDisplay: newAssigneeDisplay }), 'success');
+                showMessageInModal(`Collaborator successfully assigned: "${newAssigneeDisplay}".`, 'success');
                 modalTicketAssignee.textContent = newAssigneeDisplay;
-                modalAssignCollaboratorInput.value = newAssigneeValue || ""; // Keep input as actual value or empty
+                modalAssignCollaboratorInput.value = newAssigneeValue || "";
 
                 const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
                 if (ticketIndex > -1) {
@@ -499,19 +423,19 @@ document.addEventListener('DOMContentLoaded', async () => {
                     }
                     applyFiltersAndSort();
                 } else {
-                    loadAndDisplayTickets(); // Fallback
+                    loadAndDisplayTickets();
                 }
                 if (newAssignee.trim() !== "") {
-                    showMessageOnPage(i18next.t('adminMessages.reminderNotifyCollaborator', { newAssigneeDisplay: newAssigneeDisplay }), 'info');
+                    showMessageOnPage(`Ticket assigned to ${newAssigneeDisplay}. REMINDER: Manually notify the collaborator.`, 'info');
                 }
             } else {
-                showMessageInModal(i18next.t('adminMessages.modalAssignmentFailed'), 'error');
+                showMessageInModal('Failed to assign collaborator. The server returned an unexpected response. Please try again.', 'error');
             }
         } catch (error) {
-            showMessageInModal(i18next.t('adminMessages.modalAssignmentError', { errorMessage: error.message || i18next.t('adminMessages.unknownError') }), 'error');
+            showMessageInModal(`Error assigning collaborator: ${error.message || 'Unknown error'}.`, 'error');
         } finally {
             modalSaveAssigneeButton.disabled = false;
-            modalSaveAssigneeButton.textContent = i18next.t('adminModal.saveAssignmentButton');
+            modalSaveAssigneeButton.textContent = 'Save Assignment';
         }
     });
 
@@ -542,20 +466,19 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     });
 
-    function getHeaderI18nKey(columnKey) {
-        console.log(`[admin] getHeaderI18nKey for: ${columnKey}`);
-        const keyMap = {
-            'Ticket ID': 'adminTable.headerTicketId',
-            'Ticket Title': 'adminTable.headerTitle',
-            'created_at': 'adminTable.headerDateSubmitted',
-            'Urgency Level': 'adminTable.headerUrgency',
-            'Status': 'adminTable.headerStatus',
-            'Assigned Collaborator': 'adminTable.headerAssignedTo'
-            // Actions column does not have data-sort-by, so not needed here
+    function getHeaderDisplayName(columnKey) { // Reverted from getHeaderI18nKey
+        // console.log(`[admin] getHeaderDisplayName for: ${columnKey}`); // Removed i18n log
+        const keyMap = { // This map was used by getHeaderI18nKey, now used to return display names
+            'Ticket ID': 'Ticket ID',
+            'Ticket Title': 'Title',
+            'created_at': 'Date Submitted',
+            'Urgency Level': 'Urgency',
+            'Status': 'Status',
+            'Assigned Collaborator': 'Assigned To'
         };
-        const i18nKey = keyMap[columnKey] || `adminTable.header${columnKey.replace(/\s+/g, '')}`; // Fallback or specific key
-        console.log(`[admin] Mapped to i18n key: ${i18nKey}`);
-        return i18nKey;
+        const displayName = keyMap[columnKey] || columnKey.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase()).trim();
+        // console.log(`[admin] Mapped to display name: ${displayName}`); // Removed i18n log
+        return displayName;
     }
 
     function updateSortIndicators() {
@@ -563,17 +486,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             const columnKey = header.getAttribute('data-sort-by');
             if (!columnKey) return;
 
-            const headerI18nKey = getHeaderI18nKey(columnKey);
-            const translatedHeaderText = i18next.t(headerI18nKey);
-            console.log(`[admin] Updating sort indicator for '${columnKey}', i18nKey: '${headerI18nKey}', translated: '${translatedHeaderText}'`);
+            const headerText = getHeaderDisplayName(columnKey); // Use reverted function
+            // console.log(`[admin] Updating sort indicator for '${columnKey}', headerText: '${headerText}'`); // Removed i18n log
 
             if (columnKey === currentSort.column) {
                 header.classList.add('sorted', 'text-neon-pink');
                 const arrow = currentSort.ascending ? '&#9650;' : '&#9660;';
-                header.innerHTML = `${translatedHeaderText} <span class="sort-arrow text-neon-pink">${arrow}</span>`;
+                header.innerHTML = `${headerText} <span class="sort-arrow text-neon-pink">${arrow}</span>`;
             } else {
                 header.classList.remove('sorted', 'text-neon-pink');
-                header.innerHTML = translatedHeaderText;
+                header.innerHTML = headerText;
             }
         });
     }
