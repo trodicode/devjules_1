@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-i18n-page-title-static="ticketFormPage.title">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Support Ticket Submission</title>
+    <title>Support Ticket Submission</title> <!-- Fallback title -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -31,52 +31,57 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-dark-bg text-text-light font-sans flex items-center justify-center min-h-screen">
+    <div class="lang-switcher-static fixed top-4 right-4 z-50 space-x-1 p-1 bg-slate-800 rounded-md shadow-lg">
+        <button data-lang="en" onclick="setLanguage('en')" class="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded disabled:opacity-50" data-i18n-static="langSwitcherEN">EN</button>
+        <button data-lang="fr" onclick="setLanguage('fr')" class="px-3 py-1 text-xs bg-slate-700 hover:bg-slate-600 text-white rounded disabled:opacity-50" data-i18n-static="langSwitcherFR">FR</button>
+    </div>
+
     <div class="bg-slate-900 p-8 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue w-full max-w-lg">
-        <h1 class="text-2xl font-title text-neon-pink font-bold text-center mb-6">Submit a New Support Ticket</h1>
+        <h1 data-i18n-static="ticketForm.header" class="text-2xl font-title text-neon-pink font-bold text-center mb-6">Submit a New Support Ticket</h1>
 
         <div id="userMessageArea" class="message-area" style="display:none;"></div>
 
         <form id="ticketForm" class="space-y-6">
             <div>
-                <label for="ticketTitle" class="block text-sm font-medium text-neon-blue font-title">Ticket Title *</label>
+                <label for="ticketTitle" class="block text-sm font-medium text-neon-blue font-title" data-i18n-static="ticketForm.ticketTitleLabel">Ticket Title *</label>
                 <input type="text" id="ticketTitle" name="ticketTitle" required
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
                 <div class="error-message text-red-500 text-xs mt-1" id="titleError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="detailedDescription" class="block text-sm font-medium text-neon-blue font-title">Detailed Description *</label>
+                <label for="detailedDescription" class="block text-sm font-medium text-neon-blue font-title" data-i18n-static="ticketForm.detailedDescriptionLabel">Detailed Description *</label>
                 <textarea id="detailedDescription" name="detailedDescription" rows="4" required
                           class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm"></textarea>
                 <div class="error-message text-red-500 text-xs mt-1" id="descriptionError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="urgencyLevel" class="block text-sm font-medium text-neon-blue font-title">Urgency Level *</label>
+                <label for="urgencyLevel" class="block text-sm font-medium text-neon-blue font-title" data-i18n-static="ticketForm.urgencyLevelLabel">Urgency Level *</label>
                 <select id="urgencyLevel" name="urgencyLevel" required
                         class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
-                    <option value="">-- Select Urgency --</option>
-                    <option value="Normal">Normal</option>
-                    <option value="Urgent">Urgent</option>
+                    <option value="" data-i18n-static="ticketForm.selectUrgencyDefault">-- Select Urgency --</option>
+                    <option value="Normal" data-i18n-static="ticketForm.urgencyNormal">Normal</option>
+                    <option value="Urgent" data-i18n-static="ticketForm.urgencyUrgent">Urgent</option>
                 </select>
                 <div class="error-message text-red-500 text-xs mt-1" id="urgencyError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="requesterEmail" class="block text-sm font-medium text-neon-blue font-title">Votre Email *</label>
-                <input type="email" id="requesterEmail" name="requesterEmail" placeholder="e.g., you@example.com" required
+                <label for="requesterEmail" class="block text-sm font-medium text-neon-blue font-title" data-i18n-static="ticketForm.requesterEmailLabel">Votre Email *</label>
+                <input type="email" id="requesterEmail" name="requesterEmail" placeholder="e.g., you@example.com" data-i18n-static-placeholder="ticketForm.requesterEmailPlaceholder" required
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
                 <div class="error-message text-red-500 text-xs mt-1" id="emailError" style="display:none;"></div>
             </div>
 
             <div>
-                <label for="attachmentUrl" class="block text-sm font-medium text-neon-blue font-title">Attachment URL (Optional)</label>
-                <input type="url" id="attachmentUrl" name="attachmentUrl" placeholder="e.g., https://example.com/image.png"
+                <label for="attachmentUrl" class="block text-sm font-medium text-neon-blue font-title" data-i18n-static="ticketForm.attachmentUrlLabel">Attachment URL (Optional)</label>
+                <input type="url" id="attachmentUrl" name="attachmentUrl" placeholder="e.g., https://example.com/image.png" data-i18n-static-placeholder="ticketForm.attachmentUrlPlaceholder"
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
-                <small class="text-xs text-text-medium mt-1">Enter the full, publicly accessible URL for your attachment.</small>
+                <small class="text-xs text-text-medium mt-1" data-i18n-static="ticketForm.attachmentUrlHelpText">Enter the full, publicly accessible URL for your attachment.</small>
             </div>
 
-            <button type="submit"
+            <button type="submit" data-i18n-static="ticketForm.submitButton"
                     class="w-full flex justify-center py-2 px-4 font-title border-2 border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-pink focus:ring-offset-dark-bg disabled:opacity-50">
                 Submit Ticket
             </button>
@@ -85,5 +90,6 @@
 
     <script src="js/airtable-api.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/i18n-static.js"></script>
 </body>
 </html>
