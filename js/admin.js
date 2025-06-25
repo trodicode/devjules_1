@@ -212,9 +212,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyFinalClass}">${urgencyIcon}${translatedUrgency}</span></td>`;
 
             const statusValue = fields[COLUMN_NAMES.STATUS] || 'New';
-            const statusKey = `commonStatuses.${statusValue.toLowerCase().replace(/\s+/g, '')}`;
+            let formattedStatusValue;
+            if (statusValue === 'In Progress') {
+                formattedStatusValue = 'inProgress';
+            } else if (statusValue === 'Acknowledged') {
+                formattedStatusValue = 'acknowledged';
+            } else if (statusValue === 'Resolved') {
+                formattedStatusValue = 'resolved';
+            } else if (statusValue === 'Pending') {
+                formattedStatusValue = 'pending';
+            } else if (statusValue === 'Closed') {
+                formattedStatusValue = 'closed';
+            } else if (statusValue === 'New') {
+                formattedStatusValue = 'new';
+            } else {
+                // Fallback for any other status: simple lowercase, no space removal.
+                // This might need adjustment if other multi-word statuses exist and need specific keys.
+                formattedStatusValue = statusValue.toLowerCase().replace(/\s+/g, '');
+            }
+            const statusKey = `commonStatuses.${formattedStatusValue}`;
             console.log(`[admin] Translating status: value='${statusValue}', key='${statusKey}'`);
-            const translatedStatus = i18next.t(statusKey, { defaultValue: statusValue });
+            const translatedStatus = i18next.t(statusKey, { defaultValue: statusValue }); // defaultValue already added in previous step, this confirms it.
             console.log(`[admin] Translated status: '${translatedStatus}'`);
             let statusBadgeClasses = 'px-2 inline-flex text-xs leading-5 font-semibold rounded-full border';
             if (statusValue === 'New') statusBadgeClasses += ' border-neon-blue text-neon-blue';
