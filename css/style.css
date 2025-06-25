@@ -9,6 +9,62 @@
     visibility: hidden; /* Initially hide body to prevent FOUC */
 /* } */
 
+/* Attempt to hide Google Translate attribution text and branding */
+
+/* Hide the main banner frame if it appears */
+iframe.goog-te-banner-frame {
+    display: none !important;
+}
+
+/* Hide the text element often containing "Powered by" within the simple layout */
+.goog-te-gadget-simple span[style*="text-decoration:none"] {
+    display: none !important;
+}
+
+/* Hide the Google logo that might appear in some widget variations */
+.goog-logo-link {
+    display: none !important;
+}
+
+img.goog-logo-link {
+    display: none !important;
+}
+
+/* Hide the general "Powered by" text container if it's outside the main gadget span */
+.goog-te-gadget-icon { /* This may hide the icon too, adjust if needed */
+    display: none !important;
+}
+
+/* Hide the tooltip balloon that can show "Original text" or attribution */
+#goog-gt-tt, .goog-te-balloon-frame {
+    display: none !important;
+}
+
+/* Hide the "Skip to main content" link sometimes added by Google's scripts */
+body > .skiptranslate {
+    display: none !important;
+    visibility: hidden !important; /* Extra measures */
+    height: 0px !important;
+    width: 0px !important;
+    overflow: hidden !important;
+}
+
+/* If the simple layout still shows a small Google icon next to the language */
+#google_translate_element .goog-te-gadget-simple .goog-te-menu-value img {
+    display: none !important;
+}
+#google_translate_element .goog-te-gadget-simple span {
+    padding-right: 5px !important; /* Adjust padding if icon is removed */
+}
+
+/* A more aggressive attempt to hide the text if it's within a specific structure */
+.goog-te-gadget-simple > span > a {
+    display: none !important; /* This might hide the language text too, be careful */
+}
+/* If the above hides language text, try to be more specific if Google uses a particular class for attribution links */
+/* .goog-te-gadget-simple > span > a.google-attribution-link { display: none !important; } */
+
+
 /*
     The rest of the styles previously in this file have been removed
     as they are now handled by Tailwind CSS utility classes applied
