@@ -139,7 +139,7 @@ const translations = {
 
 let currentLanguage = localStorage.getItem('selectedLanguage') || 'en';
 
-function setLanguage(lang) {
+window.setLanguage = function(lang) {
     if (translations[lang]) {
         currentLanguage = lang;
         localStorage.setItem('selectedLanguage', lang);
