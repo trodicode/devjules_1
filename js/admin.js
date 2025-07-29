@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTicketAttachment = document.getElementById('modalTicketAttachment');
     const modalChangeStatusSelect = document.getElementById('modalChangeStatus');
     const modalSaveStatusButton = document.getElementById('modalSaveStatusButton');
+    const modalSaveDescriptionButton = document.getElementById('modalSaveDescriptionButton');
     const modalAssignCollaboratorInput = document.getElementById('modalAssignCollaborator');
     const modalSaveAssigneeButton = document.getElementById('modalSaveAssigneeButton');
     const modalUserMessageArea = document.getElementById('modalUserMessageArea');
@@ -233,9 +234,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const urgencyValue = urgencyFilter.value;
         const searchTerm = searchInput.value.toLowerCase().trim();
 
-        if (statusValue !== 'All') {
+        if (statusValue === 'All') {
+            filteredTickets = filteredTickets.filter(t => t.fields && t.fields[COLUMN_NAMES.STATUS] !== 'Closed');
+        } else {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS] === statusValue));
         }
+
         if (urgencyValue !== 'All') {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL] === urgencyValue));
         }
@@ -308,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const fields = ticket.fields;
                 modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.id || 'N/A';
                 modalTicketTitle.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'N/A';
-                modalTicketDescription.textContent = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || 'N/A';
+                modalTicketDescription.value = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || 'N/A';
                 modalTicketUrgency.textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'N/A';
                 modalTicketStatus.textContent = fields[COLUMN_NAMES.STATUS] || 'N/A';
                 modalTicketAssignee.textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
@@ -351,6 +355,46 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Update Ticket Functionality (Modal) ---
+    modalSaveDescriptionButton.addEventListener('click', async () => {
+        if (!currentlySelectedRecordId) return;
+        const newDescription = modalTicketDescription.value.trim();
+        if (!newDescription) {
+            showMessageInModal('Description cannot be empty.', 'error');
+            return;
+        }
+        showMessageInModal('Updating description...', 'info');
+        modalSaveDescriptionButton.disabled = true;
+        modalSaveDescriptionButton.textContent = 'Saving...';
+        const dataForUpdate = { [COLUMN_NAMES.DETAILED_DESCRIPTION]: newDescription };
+        try {
+            const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
+            if (updatedTicket && updatedTicket.fields) {
+                const newDescriptionValue = updatedTicket.fields[COLUMN_NAMES.DETAILED_DESCRIPTION];
+                showMessageInModal(`Description successfully updated.`, 'success');
+                modalTicketDescription.textContent = newDescriptionValue;
+
+                const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
+                if (ticketIndex > -1) {
+                    if (allTickets[ticketIndex].fields) {
+                         allTickets[ticketIndex].fields[COLUMN_NAMES.DETAILED_DESCRIPTION] = newDescriptionValue;
+                    } else {
+                        allTickets[ticketIndex].fields = { [COLUMN_NAMES.DETAILED_DESCRIPTION]: newDescriptionValue };
+                    }
+                    applyFiltersAndSort();
+                } else {
+                     loadAndDisplayTickets();
+                }
+            } else {
+                showMessageInModal('Failed to update description. The server returned an unexpected response. Please try again.', 'error');
+            }
+        } catch (error) {
+            showMessageInModal(`Error updating description: ${error.message || 'Unknown error'}.`, 'error');
+        } finally {
+            modalSaveDescriptionButton.disabled = false;
+            modalSaveDescriptionButton.textContent = 'Save Description';
+        }
+    });
+
     modalSaveStatusButton.addEventListener('click', async () => {
         // console.log('[Admin JS] Save Changes Function (Status): Using currentlySelectedRecordId for update:', currentlySelectedRecordId); // Removed i18n log
         if (!currentlySelectedRecordId) return;
