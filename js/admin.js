@@ -147,7 +147,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">${fields[COLUMN_NAMES.TICKET_ID] || recordId}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light ticket-id-cell">${fields[COLUMN_NAMES.TICKET_ID] || recordId}</td>`;
 
             const titleCell = row.insertCell();
             titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
@@ -560,6 +560,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Load ---
     loadAndDisplayTickets(); // This will also call updateSortIndicators via applyFiltersAndSort if needed
     updateSortIndicators(); // Call once at the start to set initial header texts
+
+    const toggleTicketIdButton = document.getElementById('toggle-ticket-id');
+    if (toggleTicketIdButton) {
+        toggleTicketIdButton.addEventListener('click', () => {
+            const cells = document.querySelectorAll('.ticket-id-cell');
+            cells.forEach(cell => {
+                cell.classList.toggle('hidden');
+            });
+            const header = document.querySelector('th[data-sort-by="Ticket ID"]');
+            header.classList.toggle('hidden');
+        });
+    }
 
     // --- Logout Button Functionality ---
     if (logoutButton) {
