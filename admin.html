@@ -31,10 +31,10 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- <link rel="stylesheet" href="css/admin-style.css"> -->
 </head>
-<body class="bg-dark-bg text-text-light font-sans p-4">
-    <div class="max-w-6xl mx-auto bg-slate-900 p-6 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue">
+<body class="bg-dark-bg text-text-light font-sans min-h-screen flex flex-col">
+    <div class="max-w-6xl mx-auto bg-slate-900 p-6 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue w-full flex-grow flex flex-col">
         <div class="flex justify-between items-center mb-6">
-            <h1 class="text-3xl font-title text-neon-pink font-bold">Ticket Management Dashboard</h1>
+            <h1 class="text-3xl font-title text-neon-blue font-bold">Ticket Management Dashboard</h1>
             <div class="flex items-center space-x-4">
                 <span class="text-xs font-semibold text-dark-bg bg-neon-blue px-2 py-1 rounded-full">V0.6.3</span>
                 <div id="google_translate_element"></div>
@@ -71,8 +71,8 @@
             </div>
         </div>
 
-        <div class="overflow-x-auto">
-            <table id="ticketTable" class="min-w-full divide-y divide-slate-700">
+        <div class="overflow-x-auto flex-grow">
+            <table id="ticketTable" class="min-w-full divide-y divide-slate-700 h-full">
                 <thead class="bg-slate-800">
                     <tr>
                         <th scope="col" data-sort-by="Ticket ID" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Ticket ID</th>
@@ -194,5 +194,8 @@
     }
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <footer class="text-center p-4">
+        <small class="text-text-medium">Talandria@2025-Ticketyx all right reserved</small>
+    </footer>
 </body>
 </html>
