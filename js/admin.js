@@ -233,9 +233,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const urgencyValue = urgencyFilter.value;
         const searchTerm = searchInput.value.toLowerCase().trim();
 
-        if (statusValue !== 'All') {
+        if (statusValue === 'All') {
+            filteredTickets = filteredTickets.filter(t => t.fields && t.fields[COLUMN_NAMES.STATUS] !== 'Closed');
+        } else {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS] === statusValue));
         }
+
         if (urgencyValue !== 'All') {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL] === urgencyValue));
         }
