@@ -520,16 +520,16 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAndDisplayTickets(); // This will also call updateSortIndicators via applyFiltersAndSort if needed
     updateSortIndicators(); // Call once at the start to set initial header texts
 
-    const toggleTicketIdVisibilityButton = document.getElementById('toggle-ticket-id-visibility');
-    if (toggleTicketIdVisibilityButton) {
-        toggleTicketIdVisibilityButton.addEventListener('click', (e) => {
-            e.stopPropagation(); // Prevents sorting when clicking the eye
-            const header = document.getElementById('ticket-id-header');
-            const cells = document.querySelectorAll('.ticket-id-cell');
+    const toggleButton = document.getElementById('toggle-id-column');
+    if (toggleButton) {
+        toggleButton.addEventListener('click', function(event) {
+            event.stopPropagation(); // Pour ne pas trier la colonne
 
-            header.classList.toggle('hidden');
-            cells.forEach(cell => {
-                cell.classList.toggle('hidden');
+            // Sélectionne l'en-tête et toutes les cellules de la colonne
+            const columnElements = document.querySelectorAll('.ticket-id-header, .ticket-id-cell');
+
+            columnElements.forEach(function(el) {
+                el.classList.toggle('hidden');
             });
         });
     }
