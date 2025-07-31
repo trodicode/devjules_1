@@ -83,3 +83,12 @@ body > .skiptranslate {
     achievable easily with Tailwind or are true global overrides could be
     placed here, but currently, none are needed.
 */
+
+.title-neon-effect {
+    color: #00F0F0; /* neon-blue */
+    text-shadow:
+        0 0 1px #F900F9,
+        0 0 1px #F900F9,
+        0 0 1px #F900F9,
+        0 0 1px #F900F9;
+}
