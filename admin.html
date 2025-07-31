@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>V0.6.8 - Admin Ticket Dashboard</title>
+    <title>V0.6.9 - Admin Ticket Dashboard</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
@@ -36,7 +36,7 @@
         <div class="flex justify-between items-center mb-6">
             <h1 class="text-3xl font-title text-neon-pink font-bold">Ticket Management Dashboard</h1>
             <div class="flex items-center space-x-4">
-                <span class="text-xs font-semibold text-dark-bg bg-neon-blue px-2 py-1 rounded-full">V0.6.8</span>
+                <span class="text-xs font-semibold text-dark-bg bg-neon-blue px-2 py-1 rounded-full">V0.6.9</span>
                 <div id="google_translate_element"></div>
                 <button id="logoutButton" class="font-title text-xs px-3 py-1 bg-transparent border border-neon-pink text-neon-pink hover:bg-neon-pink hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neon-pink focus:ring-offset-slate-900">Logout</button>
             </div>
@@ -75,10 +75,7 @@
             <table id="ticketTable" class="min-w-full divide-y divide-slate-700">
                 <thead class="bg-slate-800">
                     <tr>
-                        <th scope="col" data-sort-by="Ticket ID" class="ticket-id-header px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">
-                            Ticket ID
-                            <span id="toggle-id-column" class="inline-block cursor-pointer ml-2 text-red-500">👁️</span>
-                        </th>
+                        <th scope="col" data-sort-by="Ticket ID" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Ticket ID</th>
                         <th scope="col" data-sort-by="Ticket Title" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Title</th>
                         <th scope="col" data-sort-by="created_at" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Date Submitted</th>
                         <th scope="col" data-sort-by="Urgency Level" class="px-6 py-3 text-left text-xs font-medium text-neon-blue font-title uppercase tracking-wider cursor-pointer hover:bg-slate-700">Urgency</th>
@@ -128,7 +125,7 @@
                 <p><strong class="text-neon-blue font-semibold">Ticket ID:</strong> <span id="modalTicketId" class="text-text-light"></span></p>
                 <p><strong class="text-neon-blue font-semibold">Title:</strong> <span id="modalTicketTitle" class="text-text-light"></span></p>
                 <p><strong class="text-neon-blue font-semibold">Full Description:</strong></p>
-                <div id="modalTicketDescription" class="bg-slate-800 border border-slate-700 text-text-light p-3 rounded-md max-h-40 overflow-y-auto"></div>
+                <textarea id="modalTicketDescription" class="bg-slate-800 border border-slate-700 text-text-light p-3 rounded-md max-h-40 overflow-y-auto w-full"></textarea>
                 <p><strong class="text-neon-blue font-semibold">Urgency:</strong> <span id="modalTicketUrgency" class="text-text-light font-semibold"></span></p>
                 <p><strong class="text-neon-blue font-semibold">Status:</strong> <span id="modalTicketStatus" class="text-text-light font-semibold"></span></p>
                 <p><strong class="text-neon-blue font-semibold">Assigned Collaborator:</strong> <span id="modalTicketAssignee" class="text-text-light"></span></p>
@@ -167,6 +164,15 @@
                             <button id="modalSaveAssigneeButton" type="button"
                                 class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-800">
                                 Save Assignment
+                            </button>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-6">
+                        <label for="modalTicketDescription" class="block text-neon-blue font-title text-sm font-medium">Edit Description:</label>
+                        <div class="mt-1 flex items-end">
+                            <button id="modalSaveDescriptionButton" type="button"
+                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-800">
+                                Save Description
                             </button>
                         </div>
                     </div>
