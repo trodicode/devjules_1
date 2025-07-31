@@ -55,6 +55,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTicketAttachment = document.getElementById('modalTicketAttachment');
     const modalChangeStatusSelect = document.getElementById('modalChangeStatus');
     const modalSaveStatusButton = document.getElementById('modalSaveStatusButton');
+    const modalSaveDescriptionButton = document.getElementById('modalSaveDescriptionButton');
     const modalAssignCollaboratorInput = document.getElementById('modalAssignCollaborator');
     const modalSaveAssigneeButton = document.getElementById('modalSaveAssigneeButton');
     const modalUserMessageArea = document.getElementById('modalUserMessageArea');
@@ -146,7 +147,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light ticket-id-cell">${fields[COLUMN_NAMES.TICKET_ID] || recordId}</td>`;
+            const ticketId = fields[COLUMN_NAMES.TICKET_ID] || recordId;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">${ticketId.slice(-5)}</td>`;
 
             const titleCell = row.insertCell();
             titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
@@ -233,12 +235,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const urgencyValue = urgencyFilter.value;
         const searchTerm = searchInput.value.toLowerCase().trim();
 
-        if (statusValue === 'All') {
-            filteredTickets = filteredTickets.filter(t => t.fields && t.fields[COLUMN_NAMES.STATUS] !== 'Closed');
-        } else {
+        if (statusValue !== 'All') {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS] === statusValue));
         }
-
         if (urgencyValue !== 'All') {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL] === urgencyValue));
         }
@@ -354,6 +353,48 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- Update Ticket Functionality (Modal) ---
+    if (modalSaveDescriptionButton) {
+        modalSaveDescriptionButton.addEventListener('click', async () => {
+            if (!currentlySelectedRecordId) return;
+            const newDescription = modalTicketDescription.value.trim();
+            if (!newDescription) {
+                showMessageInModal('Description cannot be empty.', 'error');
+                return;
+            }
+            showMessageInModal('Updating description...', 'info');
+            modalSaveDescriptionButton.disabled = true;
+            modalSaveDescriptionButton.textContent = 'Saving...';
+            const dataForUpdate = { [COLUMN_NAMES.DETAILED_DESCRIPTION]: newDescription };
+            try {
+                const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
+                if (updatedTicket && updatedTicket.fields) {
+                    const newDescriptionValue = updatedTicket.fields[COLUMN_NAMES.DETAILED_DESCRIPTION];
+                    showMessageInModal(`Description successfully updated.`, 'success');
+                    modalTicketDescription.value = newDescriptionValue;
+
+                    const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
+                    if (ticketIndex > -1) {
+                        if (allTickets[ticketIndex].fields) {
+                             allTickets[ticketIndex].fields[COLUMN_NAMES.DETAILED_DESCRIPTION] = newDescriptionValue;
+                        } else {
+                            allTickets[ticketIndex].fields = { [COLUMN_NAMES.DETAILED_DESCRIPTION]: newDescriptionValue };
+                        }
+                        applyFiltersAndSort();
+                    } else {
+                         loadAndDisplayTickets();
+                    }
+                } else {
+                    showMessageInModal('Failed to update description. The server returned an unexpected response. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessageInModal(`Error updating description: ${error.message || 'Unknown error'}.`, 'error');
+            } finally {
+                modalSaveDescriptionButton.disabled = false;
+                modalSaveDescriptionButton.textContent = 'Save Description';
+            }
+        });
+    }
+
     modalSaveStatusButton.addEventListener('click', async () => {
         // console.log('[Admin JS] Save Changes Function (Status): Using currentlySelectedRecordId for update:', currentlySelectedRecordId); // Removed i18n log
         if (!currentlySelectedRecordId) return;
@@ -519,20 +560,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Initial Load ---
     loadAndDisplayTickets(); // This will also call updateSortIndicators via applyFiltersAndSort if needed
     updateSortIndicators(); // Call once at the start to set initial header texts
-
-    const toggleButton = document.getElementById('toggle-id-column');
-    if (toggleButton) {
-        toggleButton.addEventListener('click', function(event) {
-            event.stopPropagation(); // Pour ne pas trier la colonne
-
-            // Sélectionne l'en-tête et toutes les cellules de la colonne
-            const columnElements = document.querySelectorAll('.ticket-id-header, .ticket-id-cell');
-
-            columnElements.forEach(function(el) {
-                el.classList.toggle('hidden');
-            });
-        });
-    }
 
     // --- Logout Button Functionality ---
     if (logoutButton) {
