@@ -61,7 +61,7 @@ async function _fetchBaserowAPI(tableId, recordIdOrQuery = '', method, body = nu
 
 
     const headers = {
-        'Authorization': `Token ${BASEROW_API_TOKEN}`,
+        'Authorization': `Token ${window.BASEROW_API_TOKEN}`,
         'Content-Type': 'application/json'
     };
 
