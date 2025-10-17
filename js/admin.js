@@ -238,7 +238,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
 
         if (statusValue === 'All') {
-            filteredTickets = filteredTickets.filter(t => t.fields && t.fields[COLUMN_NAMES.STATUS]?.value !== 'Closed');
+            // Show all tickets that are not 'Closed'. This includes tickets with no status.
+            filteredTickets = filteredTickets.filter(t => !t.fields[COLUMN_NAMES.STATUS] || t.fields[COLUMN_NAMES.STATUS]?.value !== 'Closed');
         } else {
             filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS]?.value === statusValue));
         }
