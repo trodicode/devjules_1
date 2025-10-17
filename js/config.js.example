@@ -3,4 +3,4 @@
 // It is intended for local development only.
 // For production, use environment variables or a more secure secrets management system.
 
-const BASEROW_API_TOKEN = 'YOUR_BASEROW_API_TOKEN_HERE';
+window.BASEROW_API_TOKEN = 'YOUR_BASEROW_API_TOKEN_HERE';
