@@ -70,7 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (userRecord && userRecord.fields) {
                 const storedPassword = userRecord.fields[window.COLUMN_NAMES.USER_PASSWORD];
-                const userRole = userRecord.fields[window.COLUMN_NAMES.USER_ROLE];
+                const userRoleObject = userRecord.fields[window.COLUMN_NAMES.USER_ROLE];
+                const userRole = userRoleObject ? userRoleObject.value : null;
 
                 // Direct string comparison (as specified for the exercise)
                 if (storedPassword === password) {

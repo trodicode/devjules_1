@@ -148,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             const ticketId = fields[COLUMN_NAMES.TICKET_ID] || recordId;
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">${ticketId.slice(-5)}</td>`;
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-light">${String(ticketId).slice(-5)}</td>`;
 
             const titleCell = row.insertCell();
             titleCell.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'No Title';
@@ -157,7 +157,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date'}</td>`;
 
-            const urgencyValue = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'Normal';
+            const urgencyObject = fields[COLUMN_NAMES.URGENCY_LEVEL];
+            const urgencyValue = urgencyObject ? urgencyObject.value : 'Normal';
             // const urgencyKey = `commonUrgencies.${urgencyValue.toLowerCase()}`; // Removed i18n
             // console.log(`[admin] Translating urgency: value='${urgencyValue}', key='${urgencyKey}'`); // Removed i18n log
             // const translatedUrgency = i18next.t(urgencyKey, { defaultValue: urgencyValue }); // Removed i18n
@@ -170,7 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm"><span class="${urgencyFinalClass}">${urgencyIcon}${urgencyValue}</span></td>`; // Reverted to urgencyValue
 
-            const statusValue = fields[COLUMN_NAMES.STATUS] || 'New';
+            const statusObject = fields[COLUMN_NAMES.STATUS];
+            const statusValue = statusObject ? statusObject.value : 'New';
             // const statusKey = `commonStatuses.${formattedStatusValue}`; // Removed i18n related logic
             // console.log(`[admin] Translating status: value='${statusValue}', key='${statusKey}'`); // Removed i18n log
             // const translatedStatus = i18next.t(statusKey, { defaultValue: statusValue }); // Removed i18n
