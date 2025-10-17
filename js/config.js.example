@@ -1,0 +1,6 @@
+// API Token Configuration
+// IMPORTANT: This file should NOT be committed to version control.
+// It is intended for local development only.
+// For production, use environment variables or a more secure secrets management system.
+
+const BASEROW_API_TOKEN = 'YOUR_BASEROW_API_TOKEN_HERE';

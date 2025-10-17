@@ -6,7 +6,6 @@
 // is insecure and should NOT be done in a production environment.
 // This is done here only for the purpose of this exercise.
 // In a real application, use a backend proxy or serverless functions to protect your API token.
-const BASEROW_API_TOKEN = 'a23L9KwlPonuxRfZV9gGbCiS4slMY8as';
 const BASEROW_DATABASE_ID = '305770';
 const BASEROW_TICKETS_TABLE_ID = '708904';
 const BASEROW_USERS_TABLE_ID = '708905';
