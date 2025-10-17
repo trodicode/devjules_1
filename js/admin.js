@@ -238,13 +238,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTerm = searchInput.value.toLowerCase().trim();
 
         if (statusValue === 'All') {
-            filteredTickets = filteredTickets.filter(t => t.fields && t.fields[COLUMN_NAMES.STATUS] !== 'Closed');
+            filteredTickets = filteredTickets.filter(t => t.fields && t.fields[COLUMN_NAMES.STATUS]?.value !== 'Closed');
         } else {
-            filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS] === statusValue));
+            filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS]?.value === statusValue));
         }
 
         if (urgencyValue !== 'All') {
-            filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL] === urgencyValue));
+            filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL]?.value === urgencyValue));
         }
         if (searchTerm) {
             filteredTickets = filteredTickets.filter(t => {
