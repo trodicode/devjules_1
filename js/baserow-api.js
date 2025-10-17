@@ -110,12 +110,12 @@ async function _fetchBaserowAPI(tableId, recordIdOrQuery = '', method, body = nu
  */
 function initBaserow() {
     console.log("[Baserow API Init] Initializing Baserow API configuration...");
-    console.log("[Baserow API Init] BASEROW_API_TOKEN (first 5 chars):", BASEROW_API_TOKEN ? BASEROW_API_TOKEN.substring(0, 5) + "..." : "Not Set");
+    console.log("[Baserow API Init] BASEROW_API_TOKEN (first 5 chars):", window.BASEROW_API_TOKEN ? window.BASEROW_API_TOKEN.substring(0, 5) + "..." : "Not Set");
     console.log("[Baserow API Init] BASEROW_DATABASE_ID:", BASEROW_DATABASE_ID);
     console.log("[Baserow API Init] BASEROW_TICKETS_TABLE_ID:", BASEROW_TICKETS_TABLE_ID);
     console.log("[Baserow API Init] BASEROW_USERS_TABLE_ID:", BASEROW_USERS_TABLE_ID);
 
-    if (BASEROW_API_TOKEN && BASEROW_DATABASE_ID && BASEROW_TICKETS_TABLE_ID && BASEROW_USERS_TABLE_ID) {
+    if (window.BASEROW_API_TOKEN && BASEROW_DATABASE_ID && BASEROW_TICKETS_TABLE_ID && BASEROW_USERS_TABLE_ID) {
         console.log('[Baserow API Init] Configuration appears to be loaded.');
     } else {
         console.error('[Baserow API Init] CRITICAL: Baserow configuration is missing.');
