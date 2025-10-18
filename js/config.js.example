@@ -1,6 +1,13 @@
-// API Token Configuration
+// --- Global API Configuration ---
 // IMPORTANT: This file should NOT be committed to version control.
-// It is intended for local development only.
-// For production, use environment variables or a more secure secrets management system.
+// It contains sensitive information and environment-specific settings.
 
+// Baserow API Token (Secret)
+// Find this in your Baserow account under Settings -> API Tokens
 window.BASEROW_API_TOKEN = 'YOUR_BASEROW_API_TOKEN_HERE';
+
+// Baserow Database and Table IDs
+// These can be found in the URL of your Baserow tables.
+window.BASEROW_DATABASE_ID = 'YOUR_DATABASE_ID';
+window.BASEROW_TICKETS_TABLE_ID = 'YOUR_TICKETS_TABLE_ID';
+window.BASEROW_USERS_TABLE_ID = 'YOUR_USERS_TABLE_ID';
