@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', () => {
-    initBaserow();
     // console.log('login.js loaded.'); // Original log
 
     const loginForm = document.getElementById('loginForm');
