@@ -2,13 +2,8 @@
 // This file contains all functions for interacting with the Baserow API.
 
 // --- Baserow Configuration ---
-// IMPORTANT SECURITY WARNING: Embedding API keys/tokens directly in client-side JavaScript
-// is insecure and should NOT be done in a production environment.
-// This is done here only for the purpose of this exercise.
-// In a real application, use a backend proxy or serverless functions to protect your API token.
-const BASEROW_DATABASE_ID = '305770';
-const BASEROW_TICKETS_TABLE_ID = '708904';
-const BASEROW_USERS_TABLE_ID = '708905';
+// All configuration is now loaded from js/config.js
+// This ensures that sensitive data is not stored in version control.
 
 // Base URL for Baserow API
 const BASEROW_API_BASE_URL = 'https://api.baserow.io/api/database/rows';
@@ -111,11 +106,11 @@ async function _fetchBaserowAPI(tableId, recordIdOrQuery = '', method, body = nu
 function initBaserow() {
     console.log("[Baserow API Init] Initializing Baserow API configuration...");
     console.log("[Baserow API Init] BASEROW_API_TOKEN (first 5 chars):", window.BASEROW_API_TOKEN ? window.BASEROW_API_TOKEN.substring(0, 5) + "..." : "Not Set");
-    console.log("[Baserow API Init] BASEROW_DATABASE_ID:", BASEROW_DATABASE_ID);
-    console.log("[Baserow API Init] BASEROW_TICKETS_TABLE_ID:", BASEROW_TICKETS_TABLE_ID);
-    console.log("[Baserow API Init] BASEROW_USERS_TABLE_ID:", BASEROW_USERS_TABLE_ID);
+    console.log("[Baserow API Init] BASEROW_DATABASE_ID:", window.BASEROW_DATABASE_ID);
+    console.log("[Baserow API Init] BASEROW_TICKETS_TABLE_ID:", window.BASEROW_TICKETS_TABLE_ID);
+    console.log("[Baserow API Init] BASEROW_USERS_TABLE_ID:", window.BASEROW_USERS_TABLE_ID);
 
-    if (window.BASEROW_API_TOKEN && BASEROW_DATABASE_ID && BASEROW_TICKETS_TABLE_ID && BASEROW_USERS_TABLE_ID) {
+    if (window.BASEROW_API_TOKEN && window.BASEROW_DATABASE_ID && window.BASEROW_TICKETS_TABLE_ID && window.BASEROW_USERS_TABLE_ID) {
         console.log('[Baserow API Init] Configuration appears to be loaded.');
     } else {
         console.error('[Baserow API Init] CRITICAL: Baserow configuration is missing.');
@@ -151,7 +146,7 @@ async function createTicket(ticketDataFromForm) {
     }
 
     try {
-        const createdRecord = await _fetchBaserowAPI(BASEROW_TICKETS_TABLE_ID, '', 'POST', fieldsToCreate);
+        const createdRecord = await _fetchBaserowAPI(window.BASEROW_TICKETS_TABLE_ID, '', 'POST', fieldsToCreate);
         console.log('[Baserow API] createTicket: Ticket created successfully. Result:', createdRecord);
         // Adapt the response to the structure expected by the app
         return { id: createdRecord.id, fields: createdRecord, createdTime: createdRecord.created_on };
@@ -167,7 +162,7 @@ async function createTicket(ticketDataFromForm) {
 async function getAllTickets() {
     console.log("[Baserow API] getAllTickets called.");
     try {
-        const response = await _fetchBaserowAPI(BASEROW_TICKETS_TABLE_ID, '', 'GET');
+        const response = await _fetchBaserowAPI(window.BASEROW_TICKETS_TABLE_ID, '', 'GET');
         if (response && response.results) {
             console.log('[Baserow API] getAllTickets: Tickets fetched successfully. Count:', response.results.length);
             // Adapt each record to the structure expected by the app
@@ -192,7 +187,7 @@ async function getAllTickets() {
 async function getTicketById(recordId) {
     console.log(`[Baserow API] getTicketById called with recordId: ${recordId}`);
     try {
-        const record = await _fetchBaserowAPI(BASEROW_TICKETS_TABLE_ID, recordId, 'GET');
+        const record = await _fetchBaserowAPI(window.BASEROW_TICKETS_TABLE_ID, recordId, 'GET');
         console.log(`[Baserow API] getTicketById: Ticket ${recordId} fetched successfully.`, record);
         // Adapt to expected structure
         return { id: record.id, fields: record, created_at: record.created_on };
@@ -221,7 +216,7 @@ async function updateTicket(recordId, updatedDataFromApp) {
     }
 
     try {
-        const updatedRecord = await _fetchBaserowAPI(BASEROW_TICKETS_TABLE_ID, recordId, 'PATCH', fieldsToUpdate);
+        const updatedRecord = await _fetchBaserowAPI(window.BASEROW_TICKETS_TABLE_ID, recordId, 'PATCH', fieldsToUpdate);
         console.log(`[Baserow API] updateTicket: Ticket ${recordId} updated successfully.`, updatedRecord);
         // Adapt to expected structure
         return { id: updatedRecord.id, fields: updatedRecord, created_at: updatedRecord.created_on };
@@ -245,7 +240,7 @@ async function getUserByEmail(email) {
 
     try {
         console.log(`[Baserow API] getUserByEmail: Querying Users table with filter: ${decodeURIComponent(query)}`);
-        const response = await _fetchBaserowAPI(BASEROW_USERS_TABLE_ID, query, 'GET');
+        const response = await _fetchBaserowAPI(window.BASEROW_USERS_TABLE_ID, query, 'GET');
 
         if (response && response.results && response.results.length > 0) {
             const userRecord = response.results[0]; // Assuming email is unique
