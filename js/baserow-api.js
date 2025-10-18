@@ -121,7 +121,7 @@ function initBaserow() {
         console.error('[Baserow API Init] CRITICAL: Baserow configuration is missing.');
     }
 }
-initBaserow(); // Call init
+
 
 
 /**
