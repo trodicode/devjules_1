@@ -1,6 +1,7 @@
 // JavaScript for index.html (User-facing ticket submission form)
 
 document.addEventListener('DOMContentLoaded', () => {
+    initBaserow();
     // console.log('main.js loaded for user form.'); // Original log
 
     // Access Control Check for index.html
