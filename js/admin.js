@@ -1,7 +1,6 @@
 // JavaScript for admin.html (Admin ticket dashboard)
 
 document.addEventListener('DOMContentLoaded', () => {
-    initBaserow();
     // console.log('admin.js loaded for admin dashboard.'); // Original log
 
     // Access Control Check
