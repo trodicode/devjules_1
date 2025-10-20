@@ -36,6 +36,12 @@
     <div class="bg-slate-900 p-8 rounded-lg shadow-[0_0_15px_rgba(0,240,240,0.5)] border border-neon-blue w-full max-w-lg">
         <h1 class="text-2xl font-title text-neon-pink font-bold text-center mb-6">User Login</h1>
 
+        <!-- Debug Panel (only visible in development) -->
+        <div id="debugPanel" style="background: rgba(255,0,255,0.1); border: 1px solid #F900F9; border-radius: 5px; padding: 10px; margin-bottom: 15px; font-size: 12px; display: none;">
+            <div><strong>🔧 Debug Info:</strong></div>
+            <div id="debugInfo"></div>
+        </div>
+
         <div id="loginMessageArea" class="message-area mb-4 p-3 rounded-md text-center" style="display:none;">
             <!-- Messages will be displayed here -->
         </div>

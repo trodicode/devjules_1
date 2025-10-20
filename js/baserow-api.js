@@ -52,17 +52,28 @@
             config.body = JSON.stringify(body);
         }
 
+        console.log('🔍 Debug API - URL:', url);
+        console.log('🔍 Debug API - Method:', method);
+        console.log('🔍 Debug API - Headers:', headers);
+        if (body) console.log('🔍 Debug API - Body:', body);
+
         try {
             const response = await fetch(url, config);
+            console.log('🔍 Debug API - Response status:', response.status);
+            console.log('🔍 Debug API - Response headers:', response.headers);
+
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({}));
                 const detail = errorData.detail || `HTTP error status: ${response.status}`;
+                console.error('🔍 Debug API - Error response:', errorData);
                 throw new Error(detail);
             }
             if (response.status === 204 || response.headers.get("content-length") === "0") {
                 return null;
             }
-            return await response.json();
+            const data = await response.json();
+            console.log('🔍 Debug API - Response data:', data);
+            return data;
         } catch (error) {
             console.error(`Baserow API Error: ${error.message}`);
             throw error;
