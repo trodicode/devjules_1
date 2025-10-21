@@ -72,7 +72,21 @@
             <button onclick="testBasicConnection()">2️⃣ Tester la connexion basique</button>
             <button onclick="testUsersTable()">3️⃣ Tester l'accès à la table utilisateurs</button>
             <button onclick="testTicketsTable()">4️⃣ Tester l'accès à la table tickets</button>
+            <button onclick="inspectTicketFields()">5️⃣ Inspecter les champs d'un ticket</button>
+            <button onclick="inspectUsersTable()">6️⃣ Inspecter les utilisateurs</button>
+            <button onclick="testUserLogin()">7️⃣ Tester la connexion utilisateur</button>
             <button onclick="clearLog()">🗑️ Effacer les logs</button>
+        </div>
+
+        <!-- Test User Login Form -->
+        <div style="margin: 20px 0; padding: 15px; background: rgba(0, 240, 240, 0.1); border: 1px solid #00F0F0; border-radius: 5px;">
+            <h3>🔐 Test de connexion utilisateur</h3>
+            <div style="display: flex; gap: 10px; margin: 10px 0;">
+                <input type="email" id="testEmail" placeholder="Email" style="flex: 1; padding: 8px; background: #1A1A2E; color: #E0E0E0; border: 1px solid #00F0F0;">
+                <input type="password" id="testPassword" placeholder="Mot de passe" style="flex: 1; padding: 8px; background: #1A1A2E; color: #E0E0E0; border: 1px solid #00F0F0;">
+                <button onclick="testUserLogin()" style="padding: 8px 15px; background: #00F0F0; color: #1A1A2E; border: none; border-radius: 3px; cursor: pointer;">Tester</button>
+            </div>
+            <div id="loginTestResult" style="margin-top: 10px; display: none;"></div>
         </div>
 
         <div id="log"></div>
@@ -298,6 +312,179 @@
                 showResult('ticketsResult', `❌ Erreur de connexion: ${error.message}`, 'error');
                 log(`Erreur de connexion à la table tickets: ${error.message}`, 'error');
             }
+        }
+
+        async function inspectTicketFields() {
+            log('🔍 Inspection des champs d\'un ticket...', 'info');
+
+            if (BASEROW_TICKETS_TABLE_ID === 'YOUR_TICKETS_TABLE_ID' || BASEROW_TICKETS_TABLE_ID === '708904') {
+                log('Test d\'inspection avec ID de table configuré', 'success');
+            } else {
+                log('Test d\'inspection avec ID de table personnalisé', 'success');
+            }
+
+            try {
+                const response = await fetch(`https://api.baserow.io/api/database/rows/table/${BASEROW_TICKETS_TABLE_ID}/?user_field_names=true`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${BASEROW_API_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`Réponse HTTP pour inspection: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.results && data.results.length > 0) {
+                        const firstTicket = data.results[0];
+                        log('🔍 Champs disponibles dans le premier ticket:', 'success');
+
+                        // Show all field names
+                        Object.keys(firstTicket).forEach(key => {
+                            const value = firstTicket[key];
+                            const type = typeof value;
+                            log(`  📋 ${key}: ${type} = ${value}`, 'info');
+                        });
+
+                        showResult('ticketsResult', `✅ Inspection réussie! ${Object.keys(firstTicket).length} champs trouvés. Voir les logs pour les détails.`, 'success');
+                    } else {
+                        showResult('ticketsResult', '⚠️ Aucun ticket trouvé pour l\'inspection', 'warning');
+                        log('Aucun ticket trouvé dans la table pour l\'inspection', 'warning');
+                    }
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    showResult('ticketsResult', `❌ Erreur d'inspection: ${errorData.detail || response.statusText}`, 'error');
+                    log(`Erreur d'inspection: ${JSON.stringify(errorData)}`, 'error');
+                }
+            } catch (error) {
+                showResult('ticketsResult', `❌ Erreur d'inspection: ${error.message}`, 'error');
+                log(`Erreur d'inspection: ${error.message}`, 'error');
+            }
+        }
+
+        async function inspectUsersTable() {
+            log('🔍 Inspection de la table utilisateurs...', 'info');
+
+            if (BASEROW_USERS_TABLE_ID === 'YOUR_USERS_TABLE_ID' || BASEROW_USERS_TABLE_ID === '708905') {
+                log('Test d\'inspection users avec ID configuré', 'success');
+            } else {
+                log('Test d\'inspection users avec ID personnalisé', 'success');
+            }
+
+            try {
+                const response = await fetch(`https://api.baserow.io/api/database/rows/table/${BASEROW_USERS_TABLE_ID}/?user_field_names=true`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Token ${BASEROW_API_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                log(`Réponse HTTP pour inspection users: ${response.status}`, response.ok ? 'success' : 'error');
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    if (data.results && data.results.length > 0) {
+                        log('🔍 Utilisateurs trouvés:', 'success');
+                        data.results.forEach((user, index) => {
+                            log(`👤 Utilisateur ${index + 1}:`, 'info');
+                            Object.keys(user).forEach(key => {
+                                const value = user[key];
+                                const type = typeof value;
+                                log(`  📋 ${key}: ${type} = ${value}`, 'info');
+                            });
+                        });
+
+                        showResult('usersResult', `✅ Inspection réussie! ${data.results.length} utilisateurs trouvés. Voir les logs pour les détails.`, 'success');
+                    } else {
+                        showResult('usersResult', '⚠️ Aucun utilisateur trouvé', 'warning');
+                        log('Aucun utilisateur trouvé dans la table', 'warning');
+                    }
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    showResult('usersResult', `❌ Erreur d'inspection: ${errorData.detail || response.statusText}`, 'error');
+                    log(`Erreur d'inspection users: ${JSON.stringify(errorData)}`, 'error');
+                }
+            } catch (error) {
+                showResult('usersResult', `❌ Erreur d'inspection: ${error.message}`, 'error');
+                log(`Erreur d'inspection users: ${error.message}`, 'error');
+            }
+        }
+
+        async function testUserLogin() {
+            const emailInput = document.getElementById('testEmail');
+            const passwordInput = document.getElementById('testPassword');
+            const resultDiv = document.getElementById('loginTestResult');
+
+            const email = emailInput ? emailInput.value.trim() : '';
+            const password = passwordInput ? passwordInput.value.trim() : '';
+
+            console.log('🔍 Debug Test Login - Email input:', emailInput);
+            console.log('🔍 Debug Test Login - Password input:', passwordInput);
+            console.log('🔍 Debug Test Login - Email value:', email);
+            console.log('🔍 Debug Test Login - Password value:', password);
+
+            if (!email || !password) {
+                resultDiv.textContent = '❌ Email et mot de passe requis';
+                resultDiv.className = 'test-result error';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            log(`🔐 Test de connexion pour: ${email}`, 'info');
+            resultDiv.style.display = 'none';
+
+            try {
+                // Use the same logic as the real login system
+                const userRecord = await window.getUserByEmail(email);
+                console.log('🔍 Debug Test Login - User record:', userRecord);
+
+                if (userRecord && userRecord.fields) {
+                    const storedPassword = userRecord.fields[window.COLUMN_NAMES.USER_PASSWORD];
+                    const userRoleObject = userRecord.fields[window.COLUMN_NAMES.USER_ROLE];
+
+                    // Handle both object and string formats for user role
+                    let userRole;
+                    if (userRoleObject && typeof userRoleObject === 'object' && userRoleObject.value) {
+                        userRole = userRoleObject.value;
+                    } else if (typeof userRoleObject === 'string') {
+                        userRole = userRoleObject;
+                    } else {
+                        userRole = null;
+                    }
+
+                    console.log('🔍 Debug Test Login - Stored password:', storedPassword);
+                    console.log('🔍 Debug Test Login - User role:', userRole);
+
+                    if (storedPassword === password) {
+                        resultDiv.innerHTML = `
+                            ✅ Connexion réussie!<br>
+                            👤 Email: ${email}<br>
+                            🏷️ Rôle: ${userRole}<br>
+                            🔀 Redirection: ${userRole === 'Administrateur' ? 'admin.html' : 'index.html'}
+                        `;
+                        resultDiv.className = 'test-result success';
+                        log(`✅ Connexion réussie pour ${email} avec rôle ${userRole}`, 'success');
+                    } else {
+                        resultDiv.textContent = '❌ Mot de passe incorrect';
+                        resultDiv.className = 'test-result error';
+                        log(`❌ Mot de passe incorrect pour ${email}`, 'error');
+                    }
+                } else {
+                    resultDiv.textContent = '❌ Utilisateur non trouvé';
+                    resultDiv.className = 'test-result error';
+                    log(`❌ Utilisateur ${email} non trouvé`, 'error');
+                }
+            } catch (error) {
+                resultDiv.textContent = `❌ Erreur: ${error.message}`;
+                resultDiv.className = 'test-result error';
+                log(`❌ Erreur de connexion: ${error.message}`, 'error');
+            }
+
+            resultDiv.style.display = 'block';
         }
 
         function clearLog() {

@@ -70,6 +70,11 @@
                 <label for="searchInput" class="block text-neon-blue font-title text-sm font-medium mb-1">Search:</label>
                 <input type="text" id="searchInput" placeholder="Search by title, description..." class="mt-1 block w-full px-3 py-2 bg-slate-900 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
             </div>
+            <div>
+                <button id="refreshButton" class="font-title text-xs px-3 py-1 bg-transparent border border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-neon-green focus:ring-offset-slate-900">
+                    🔄 Refresh
+                </button>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
@@ -138,46 +143,46 @@
                 <h4 class="text-md font-title text-neon-green font-semibold">Update Ticket</h4>
                 <div class="grid grid-cols-1 gap-y-4 gap-x-4 sm:grid-cols-6">
                     <div class="sm:col-span-3">
-                            <label for="modalChangeStatus" class="block text-neon-blue font-title text-sm font-medium">Change Status:</label>
-                            <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-900 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
-                                <option value="">-- Select Status --</option>
-                                <option value="New">New</option>
-                                <option value="Acknowledged">Acknowledged (Pris en charge)</option>
-                                <option value="In Progress">In Progress (En cours)</option>
-                                <option value="Pending">Pending (En attente)</option>
-                                <option value="Resolved">Resolved (Résolu)</option>
-                                <option value="Closed">Closed (Fermé)</option>
-                            </select>
-                        </div>
-                        <div class="sm:col-span-3 flex items-end">
-                             <button id="modalSaveStatusButton" type="button"
-                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-900">
-                                Save Status
-                            </button>
-                        </div>
-
-                        <div class="sm:col-span-3">
-                            <label for="modalAssignCollaborator" class="block text-neon-blue font-title text-sm font-medium">Assign Collaborator:</label>
-                            <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID"
-                                   class="mt-1 block w-full px-3 py-2 bg-slate-900 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
-                        </div>
-                         <div class="sm:col-span-3 flex items-end">
-                            <button id="modalSaveAssigneeButton" type="button"
-                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-800">
-                                Save Assignment
-                            </button>
-                        </div>
+                        <label for="modalChangeStatus" class="block text-neon-blue font-title text-sm font-medium">Change Status:</label>
+                        <select id="modalChangeStatus" class="mt-1 block w-full pl-3 pr-10 py-2 text-base bg-slate-900 text-text-light border border-neon-blue focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
+                            <option value="">-- Select Status --</option>
+                            <option value="New">New</option>
+                            <option value="Acknowledged">Acknowledged (Pris en charge)</option>
+                            <option value="In Progress">In Progress (En cours)</option>
+                            <option value="Pending">Pending (En attente)</option>
+                            <option value="Resolved">Resolved (Résolu)</option>
+                            <option value="Closed">Closed (Fermé)</option>
+                        </select>
                     </div>
+                    <div class="sm:col-span-3">
+                        <label for="modalAssignCollaborator" class="block text-neon-blue font-title text-sm font-medium">Assign Collaborator:</label>
+                        <input type="text" id="modalAssignCollaborator" placeholder="Enter collaborator name/ID"
+                               class="mt-1 block w-full px-3 py-2 bg-slate-900 text-text-light border border-neon-blue placeholder-text-medium focus:ring-neon-pink focus:border-neon-pink sm:text-sm rounded-md">
+                    </div>
+
                     <div class="sm:col-span-6">
                         <label for="modalTicketDescription" class="block text-neon-blue font-title text-sm font-medium">Edit Description:</label>
-                        <div class="mt-1 flex items-end">
-                            <button id="modalSaveDescriptionButton" type="button"
-                                class="w-full inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-800">
-                                Save Description
+                        <textarea id="modalTicketDescription" class="bg-slate-800 border border-slate-700 text-text-light p-3 rounded-md overflow-y-auto w-full"></textarea>
+                    </div>
+
+                    <!-- Unified Save Button and Changes Indicator -->
+                    <div class="sm:col-span-6 flex items-center justify-between">
+                        <div id="changesIndicator" class="text-xs text-text-medium" style="display: none;">
+                            ⚡ Unsaved changes
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="modalResetButton" type="button"
+                                class="inline-flex justify-center rounded-md border border-gray-600 text-text-medium hover:bg-gray-700 font-semibold shadow-sm px-4 py-2 bg-transparent text-sm font-title disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-slate-800">
+                                Reset
+                            </button>
+                            <button id="modalSaveAllButton" type="button"
+                                class="inline-flex justify-center rounded-md border-2 border-neon-green text-neon-green hover:bg-neon-green hover:text-dark-bg font-semibold shadow-sm px-4 py-2 bg-transparent text-base font-title sm:text-sm disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neon-green focus:ring-offset-slate-800">
+                                💾 Save All Changes
                             </button>
                         </div>
                     </div>
-                    <div id="modalUserMessageArea" class="message-area mt-3" style="display:none;"></div>
+
+                    <div id="modalUserMessageArea" class="message-area mt-3 sm:col-span-6" style="display:none;"></div>
                 </div>
             </div>
         </div>

@@ -46,16 +46,26 @@
             <!-- Messages will be displayed here -->
         </div>
 
-        <form id="loginForm" class="space-y-6">
+        <!-- Control Buttons -->
+        <div style="text-align: center; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+            <button id="forceLogoutBtn" type="button" style="background: transparent; border: 1px solid #F900F9; color: #F900F9; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
+                🚪 Force Logout
+            </button>
+            <button id="clearFieldsBtn" type="button" style="background: transparent; border: 1px solid #00F0F0; color: #00F0F0; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
+                🧹 Clear Fields
+            </button>
+        </div>
+
+        <form id="loginForm" class="space-y-6" autocomplete="off">
             <div>
                 <label for="email" class="block text-sm font-medium text-neon-blue font-title">Email</label>
-                <input type="email" id="email" name="email" required
+                <input type="email" id="email" name="email" required autocomplete="off" autofill="off"
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
             </div>
 
             <div>
                 <label for="password" class="block text-sm font-medium text-neon-blue font-title">Password</label>
-                <input type="password" id="password" name="password" required
+                <input type="password" id="password" name="password" required autocomplete="new-password" autofill="off"
                        class="mt-1 block w-full px-3 py-2 bg-slate-800 border border-neon-blue text-text-light rounded-md shadow-sm placeholder-text-medium focus:outline-none focus:ring-neon-pink focus:border-neon-pink sm:text-sm">
             </div>
 
@@ -66,6 +76,21 @@
         </form>
     </div>
 
+    <script>
+        // Force clear session storage on page load to prevent old data interference
+        sessionStorage.clear();
+        localStorage.clear();
+        console.log('🔧 All storage cleared on login page load');
+
+        // Clear form fields on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const emailField = document.getElementById('email');
+            const passwordField = document.getElementById('password');
+            if (emailField) emailField.value = '';
+            if (passwordField) passwordField.value = '';
+            console.log('🔧 Form fields cleared');
+        });
+    </script>
     <script src="js/config.js"></script>
     <script src="js/baserow-api.js"></script>
     <script src="js/login.js"></script>

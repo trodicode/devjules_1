@@ -40,6 +40,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const statusFilter = document.getElementById('statusFilter');
     const urgencyFilter = document.getElementById('urgencyFilter');
     const searchInput = document.getElementById('searchInput');
+    const refreshButton = document.getElementById('refreshButton');
     const tableHeaders = document.querySelectorAll('#ticketTable th[data-sort-by]');
     const logoutButton = document.getElementById('logoutButton');
 
@@ -48,21 +49,26 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalTicketId = document.getElementById('modalTicketId');
     const modalTicketTitle = document.getElementById('modalTicketTitle');
     const modalTicketDescription = document.getElementById('modalTicketDescription');
+    const modalTicketDescriptionDisplay = document.getElementById('modalTicketDescriptionDisplay');
     const modalTicketUrgency = document.getElementById('modalTicketUrgency');
     const modalTicketStatus = document.getElementById('modalTicketStatus');
     const modalTicketAssignee = document.getElementById('modalTicketAssignee');
     const modalTicketSubmissionDate = document.getElementById('modalTicketSubmissionDate');
     const modalTicketAttachment = document.getElementById('modalTicketAttachment');
     const modalChangeStatusSelect = document.getElementById('modalChangeStatus');
-    const modalSaveStatusButton = document.getElementById('modalSaveStatusButton');
-    const modalSaveDescriptionButton = document.getElementById('modalSaveDescriptionButton');
     const modalAssignCollaboratorInput = document.getElementById('modalAssignCollaborator');
-    const modalSaveAssigneeButton = document.getElementById('modalSaveAssigneeButton');
+    const modalSaveAllButton = document.getElementById('modalSaveAllButton');
+    const modalResetButton = document.getElementById('modalResetButton');
+    const changesIndicator = document.getElementById('changesIndicator');
     const modalUserMessageArea = document.getElementById('modalUserMessageArea');
 
     let allTickets = [];
     let currentSort = { column: null, ascending: true };
     let currentlySelectedRecordId = null;
+
+    // Modal state management
+    let originalTicketData = {};
+    let hasUnsavedChanges = false;
 
     // --- Message Display ---
     function showMessageOnPage(message, type = 'info') {
@@ -155,7 +161,10 @@ document.addEventListener('DOMContentLoaded', () => {
             titleCell.className = "px-6 py-4 whitespace-nowrap text-sm text-neon-pink hover:text-opacity-80 hover:underline cursor-pointer";
             titleCell.onclick = () => openTicketDetailModal(recordId);
 
-            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date'}</td>`;
+            // Use Date Submitted field if available, otherwise fallback to created_at
+            const submittedDate = fields[COLUMN_NAMES.DATE_SUBMITTED];
+            const displayDate = submittedDate ? new Date(submittedDate).toLocaleDateString() : (ticket.created_at ? new Date(ticket.created_at).toLocaleDateString() : 'Unknown Date');
+            row.insertCell().outerHTML = `<td class="px-6 py-4 whitespace-nowrap text-sm text-text-medium">${displayDate}</td>`;
 
             const urgencyObject = fields[COLUMN_NAMES.URGENCY_LEVEL];
             const urgencyValue = urgencyObject ? urgencyObject.value : 'Normal';
@@ -203,21 +212,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Data Fetching & Processing ---
     async function loadAndDisplayTickets() {
-        // console.log('[admin] loadAndDisplayTickets called.'); // Removed i18n log
+        console.log('🔍 Debug - Loading tickets from API...');
         showMessageOnPage('Loading tickets...', 'info');
         if(ticketTableBody) ticketTableBody.innerHTML = '';
         try {
             const tickets = await getAllTickets();
-            // console.log('[admin] getAllTickets response:', tickets); // Removed i18n log
+            console.log('🔍 Debug - API Response:', tickets);
             if (tickets && Array.isArray(tickets)) {
                 allTickets = tickets;
-                // console.log('[admin] allTickets populated. Count:', allTickets ? allTickets.length : 'null'); // Removed i18n log
+                console.log('🔍 Debug - Total tickets loaded:', allTickets.length);
+                console.log('🔍 Debug - First ticket sample:', allTickets[0]);
+
+                // Apply filters and display
                 applyFiltersAndSort();
+
                 if (allTickets.length === 0) {
                     showMessageOnPage('No tickets currently in the system.', 'info');
-                } else if (filterTickets().length === 0 && (statusFilter.value !== 'All' || urgencyFilter.value !== 'All' || searchInput.value.trim() !== '')) {
                 } else {
-                     adminMessageArea.style.display = 'none';
+                    // Hide loading message if we have tickets
+                    adminMessageArea.style.display = 'none';
                 }
             } else {
                 showMessageOnPage('Could not retrieve tickets. Data format unexpected.', 'error');
@@ -225,6 +238,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderTickets([]);
             }
         } catch (error) {
+            console.error('🔍 Debug - Error loading tickets:', error);
             showMessageOnPage(`Error loading tickets: ${error.message || 'Unknown error'}.`, 'error');
             allTickets = [];
             renderTickets([]);
@@ -233,27 +247,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function filterTickets() {
         let filteredTickets = [...allTickets];
-        const statusValue = statusFilter.value;
-        const urgencyValue = urgencyFilter.value;
-        const searchTerm = searchInput.value.toLowerCase().trim();
+        const statusValue = statusFilter ? statusFilter.value : 'All';
+        const urgencyValue = urgencyFilter ? urgencyFilter.value : 'All';
+        const searchTerm = searchInput ? searchInput.value.toLowerCase().trim() : '';
 
-        if (statusValue === 'All') {
-            // Show all tickets that are not 'Closed'. This includes tickets with no status.
-            filteredTickets = filteredTickets.filter(t => !t.fields[COLUMN_NAMES.STATUS] || t.fields[COLUMN_NAMES.STATUS]?.value !== 'Closed');
-        } else {
-            filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.STATUS]?.value === statusValue));
+        console.log('🔍 Debug Filter - Status:', statusValue, 'Urgency:', urgencyValue, 'Search:', searchTerm);
+        console.log('🔍 Debug Filter - Total tickets before filter:', filteredTickets.length);
+
+        if (statusValue !== 'All') {
+            filteredTickets = filteredTickets.filter(t => {
+                const ticketStatus = t.fields && t.fields[COLUMN_NAMES.STATUS];
+                const statusValueToCheck = ticketStatus ? ticketStatus.value : 'New';
+                return statusValueToCheck === statusValue;
+            });
+            console.log('🔍 Debug Filter - After status filter:', filteredTickets.length);
         }
 
         if (urgencyValue !== 'All') {
-            filteredTickets = filteredTickets.filter(t => (t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL]?.value === urgencyValue));
+            filteredTickets = filteredTickets.filter(t => {
+                const ticketUrgency = t.fields && t.fields[COLUMN_NAMES.URGENCY_LEVEL];
+                const urgencyValueToCheck = ticketUrgency ? ticketUrgency.value : 'Normal';
+                return urgencyValueToCheck === urgencyValue;
+            });
+            console.log('🔍 Debug Filter - After urgency filter:', filteredTickets.length);
         }
+
         if (searchTerm) {
             filteredTickets = filteredTickets.filter(t => {
                 const title = (t.fields && t.fields[COLUMN_NAMES.TICKET_TITLE] || '').toLowerCase();
                 const description = (t.fields && t.fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || '').toLowerCase();
                 return title.includes(searchTerm) || description.includes(searchTerm);
             });
+            console.log('🔍 Debug Filter - After search filter:', filteredTickets.length);
         }
+
+        console.log('🔍 Debug Filter - Final filtered tickets:', filteredTickets.length);
         return filteredTickets;
     }
 
@@ -262,9 +290,18 @@ document.addEventListener('DOMContentLoaded', () => {
         const sortedTickets = [...tickets].sort((a, b) => {
             let valA = (a.fields && a.fields[fieldName]) || '';
             let valB = (b.fields && b.fields[fieldName]) || '';
-            if (fieldName === 'created_at') { // Special handling for date
-                valA = a.created_at ? new Date(a.created_at).getTime() : 0;
-                valB = b.created_at ? new Date(b.created_at).getTime() : 0;
+
+            if (fieldName === COLUMN_NAMES.DATE_SUBMITTED || fieldName === 'created_at') { // Special handling for dates
+                // Try Date Submitted first, then fallback to created_at
+                const dateA = a.fields && a.fields[COLUMN_NAMES.DATE_SUBMITTED] ?
+                    new Date(a.fields[COLUMN_NAMES.DATE_SUBMITTED]).getTime() :
+                    (a.created_at ? new Date(a.created_at).getTime() : 0);
+                const dateB = b.fields && b.fields[COLUMN_NAMES.DATE_SUBMITTED] ?
+                    new Date(b.fields[COLUMN_NAMES.DATE_SUBMITTED]).getTime() :
+                    (b.created_at ? new Date(b.created_at).getTime() : 0);
+
+                valA = dateA;
+                valB = dateB;
             } else { // General string comparison
                 valA = String(valA).toLowerCase();
                 valB = String(valB).toLowerCase();
@@ -295,32 +332,83 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- Modal Functionality ---
     async function openTicketDetailModal(recordIdParam) {
-        // console.log('[Admin JS] openTicketDetailModal: Received recordIdParam:', recordIdParam); // Removed i18n log
+        console.log('🔍 Debug Modal - Opening ticket with ID:', recordIdParam, typeof recordIdParam);
+
         if (!recordIdParam) {
-            // console.error("[Admin JS] openTicketDetailModal: called with undefined or null recordIdParam"); // Removed i18n log
+            console.error("🔍 Debug Modal - No recordIdParam provided");
             showMessageOnPage("Could not open ticket details: Missing ticket ID.", "error");
             return;
         }
-        currentlySelectedRecordId = recordIdParam;
-        // console.log('[Admin JS] openTicketDetailModal: Assigned to currentlySelectedRecordId:', currentlySelectedRecordId); // Removed i18n log
+
+        // Ensure recordIdParam is a string or number
+        const ticketId = String(recordIdParam);
+        currentlySelectedRecordId = ticketId;
+
+        console.log('🔍 Debug Modal - Using ticket ID:', currentlySelectedRecordId);
 
         showMessageInModal('Loading ticket details...', 'info');
-        modalSaveStatusButton.disabled = true;
-        modalSaveAssigneeButton.disabled = true;
+        modalSaveAllButton.disabled = true;
         ticketDetailModal.classList.remove('hidden');
 
         try {
-            // console.log('[Admin JS] openTicketDetailModal: Calling airtableApi.getTicketById with ID:', currentlySelectedRecordId); // Removed i18n log
+            console.log('🔍 Debug Modal - Calling getTicketById with:', currentlySelectedRecordId);
             const ticket = await getTicketById(currentlySelectedRecordId);
             if (ticket && ticket.fields) {
                 const fields = ticket.fields;
+
+                // Store original data for change tracking - Fix: handle object values
+                const statusObject = fields[COLUMN_NAMES.STATUS];
+                const urgencyObject = fields[COLUMN_NAMES.URGENCY_LEVEL];
+
+                originalTicketData = {
+                    status: statusObject && typeof statusObject === 'object' ? statusObject.value : statusObject || "",
+                    assignee: fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "",
+                    description: fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || ""
+                };
+
+                console.log('🔍 Debug Modal - Original data stored:', originalTicketData);
+
+                // Update display fields - Fix: handle object values correctly
                 modalTicketId.textContent = fields[COLUMN_NAMES.TICKET_ID] || ticket.id || 'N/A';
                 modalTicketTitle.textContent = fields[COLUMN_NAMES.TICKET_TITLE] || 'N/A';
-                modalTicketDescription.textContent = fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || 'N/A';
-                modalTicketUrgency.textContent = fields[COLUMN_NAMES.URGENCY_LEVEL] || 'N/A';
-                modalTicketStatus.textContent = fields[COLUMN_NAMES.STATUS] || 'N/A';
-                modalTicketAssignee.textContent = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || 'Unassigned';
-                modalTicketSubmissionDate.textContent = ticket.created_at ? new Date(ticket.created_at).toLocaleString() : 'N/A';
+                modalTicketDescription.value = originalTicketData.description;
+
+                // Fix: Extract value from object structure
+                const urgencyObj = fields[COLUMN_NAMES.URGENCY_LEVEL];
+                const urgencyValue = urgencyObj && typeof urgencyObj === 'object' ? urgencyObj.value : urgencyObj;
+                modalTicketUrgency.textContent = urgencyValue || 'N/A';
+
+                // Status is already handled correctly in originalTicketData
+                modalTicketStatus.textContent = originalTicketData.status;
+                modalTicketAssignee.textContent = originalTicketData.assignee || 'Unassigned';
+
+                // Use Date Submitted field if available, otherwise fallback to created_at
+                const submittedDate = fields[COLUMN_NAMES.DATE_SUBMITTED];
+                console.log('🔍 Debug Date - Submitted date from API:', submittedDate, typeof submittedDate);
+                console.log('🔍 Debug Date - Created at from API:', ticket.created_at);
+
+                if (submittedDate && submittedDate !== '' && submittedDate !== null && submittedDate !== undefined) {
+                    try {
+                        const dateToShow = new Date(submittedDate).toLocaleString();
+                        modalTicketSubmissionDate.textContent = dateToShow;
+                        console.log('🔍 Debug Date - Using submitted date:', submittedDate, '->', dateToShow);
+                    } catch (dateError) {
+                        console.error('🔍 Debug Date - Error parsing submitted date:', submittedDate, dateError);
+                        modalTicketSubmissionDate.textContent = 'Invalid Date Format';
+                    }
+                } else if (ticket.created_at) {
+                    try {
+                        const dateToShow = new Date(ticket.created_at).toLocaleString();
+                        modalTicketSubmissionDate.textContent = dateToShow;
+                        console.log('🔍 Debug Date - Using created date:', ticket.created_at, '->', dateToShow);
+                    } catch (dateError) {
+                        console.error('🔍 Debug Date - Error parsing created date:', ticket.created_at, dateError);
+                        modalTicketSubmissionDate.textContent = 'Invalid Date Format';
+                    }
+                } else {
+                    modalTicketSubmissionDate.textContent = 'N/A';
+                    console.log('🔍 Debug Date - No date available');
+                }
 
                 const attachmentValue = fields[COLUMN_NAMES.ATTACHMENT];
                 if (attachmentValue && Array.isArray(attachmentValue) && attachmentValue.length > 0 && attachmentValue[0].url) {
@@ -331,8 +419,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else {
                     modalTicketAttachment.textContent = 'None';
                 }
-                modalChangeStatusSelect.value = fields[COLUMN_NAMES.STATUS] || "";
-                modalAssignCollaboratorInput.value = fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "";
+
+                // Set form values - Fix: ensure values are properly set for editing
+                if (modalChangeStatusSelect) {
+                    modalChangeStatusSelect.value = originalTicketData.status || "";
+                    console.log('🔍 Debug Modal - Set status to:', originalTicketData.status);
+                }
+
+                if (modalAssignCollaboratorInput) {
+                    modalAssignCollaboratorInput.value = originalTicketData.assignee || "";
+                    console.log('🔍 Debug Modal - Set assignee to:', originalTicketData.assignee);
+                }
+
+                if (modalTicketDescription) {
+                    modalTicketDescription.value = originalTicketData.description || "";
+                    console.log('🔍 Debug Modal - Set description to:', originalTicketData.description);
+                }
+
+                // Reset change tracking
+                hasUnsavedChanges = false;
+                updateChangesIndicator();
+
                 showMessageInModal('', 'info');
                 modalUserMessageArea.style.display = 'none';
 
@@ -345,10 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             showMessageInModal(`Error fetching ticket details: ${error.message || 'Unknown error'}.`, 'error');
         } finally {
-            modalSaveStatusButton.disabled = false;
-            modalSaveAssigneeButton.disabled = false;
-            modalSaveStatusButton.textContent = 'Save Status';
-            modalSaveAssigneeButton.textContent = 'Save Assignment';
+            modalSaveAllButton.disabled = false;
+            modalSaveAllButton.textContent = '💾 Save All Changes';
         }
     }
 
@@ -358,140 +463,196 @@ document.addEventListener('DOMContentLoaded', () => {
         modalUserMessageArea.style.display = 'none';
     }
 
-    // --- Update Ticket Functionality (Modal) ---
-    if (modalSaveDescriptionButton) {
-        modalSaveDescriptionButton.addEventListener('click', async () => {
-            if (!currentlySelectedRecordId) return;
-            const newDescription = modalTicketDescription.value.trim();
-            if (!newDescription) {
-                showMessageInModal('Description cannot be empty.', 'error');
-                return;
-            }
-            showMessageInModal('Updating description...', 'info');
-            modalSaveDescriptionButton.disabled = true;
-            modalSaveDescriptionButton.textContent = 'Saving...';
-            const dataForUpdate = { [COLUMN_NAMES.DETAILED_DESCRIPTION]: newDescription };
-            try {
-                const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
-                if (updatedTicket && updatedTicket.fields) {
-                    const newDescriptionValue = updatedTicket.fields[COLUMN_NAMES.DETAILED_DESCRIPTION];
-                    showMessageInModal(`Description successfully updated.`, 'success');
-                    modalTicketDescription.value = newDescriptionValue;
+    // --- Change Detection Functions ---
+    function detectChanges() {
+        if (!currentlySelectedRecordId || !originalTicketData) return false;
 
-                    const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
-                    if (ticketIndex > -1) {
-                        if (allTickets[ticketIndex].fields) {
-                             allTickets[ticketIndex].fields[COLUMN_NAMES.DETAILED_DESCRIPTION] = newDescriptionValue;
-                        } else {
-                            allTickets[ticketIndex].fields = { [COLUMN_NAMES.DETAILED_DESCRIPTION]: newDescriptionValue };
-                        }
-                        applyFiltersAndSort();
-                    } else {
-                         loadAndDisplayTickets();
-                    }
-                } else {
-                    showMessageInModal('Failed to update description. The server returned an unexpected response. Please try again.', 'error');
-                }
-            } catch (error) {
-                showMessageInModal(`Error updating description: ${error.message || 'Unknown error'}.`, 'error');
-            } finally {
-                modalSaveDescriptionButton.disabled = false;
-                modalSaveDescriptionButton.textContent = 'Save Description';
-            }
-        });
+        const currentStatus = modalChangeStatusSelect.value;
+        const currentAssignee = modalAssignCollaboratorInput.value.trim();
+        const currentDescription = modalTicketDescription.value.trim();
+
+        const statusChanged = currentStatus !== originalTicketData.status;
+        const assigneeChanged = currentAssignee !== originalTicketData.assignee;
+        const descriptionChanged = currentDescription !== originalTicketData.description;
+
+        return statusChanged || assigneeChanged || descriptionChanged;
     }
 
-    modalSaveStatusButton.addEventListener('click', async () => {
-        // console.log('[Admin JS] Save Changes Function (Status): Using currentlySelectedRecordId for update:', currentlySelectedRecordId); // Removed i18n log
+    function updateChangesIndicator() {
+        if (changesIndicator) {
+            if (hasUnsavedChanges) {
+                changesIndicator.style.display = 'block';
+                changesIndicator.textContent = '⚡ Unsaved changes';
+                changesIndicator.className = 'text-xs text-orange-400';
+            } else {
+                changesIndicator.style.display = 'none';
+            }
+        }
+    }
+
+    // --- Unified Save Function ---
+    async function saveAllChanges() {
         if (!currentlySelectedRecordId) return;
-        const newStatus = modalChangeStatusSelect.value;
-        if (!newStatus) {
-            showMessageInModal('Please select a status.', 'error');
+
+        const changes = detectChanges();
+        if (!changes) {
+            showMessageInModal('No changes to save.', 'info');
             return;
         }
-        showMessageInModal('Updating status...', 'info');
-        modalSaveStatusButton.disabled = true;
-        modalSaveStatusButton.textContent = 'Saving...';
-        const dataForUpdate = { [COLUMN_NAMES.STATUS]: newStatus };
-        try {
-            const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
-            if (updatedTicket && updatedTicket.fields) {
-                const newStatusValue = updatedTicket.fields[COLUMN_NAMES.STATUS];
-                showMessageInModal(`Status successfully updated to "${newStatusValue}".`, 'success');
-                modalTicketStatus.textContent = newStatusValue;
 
+        showMessageInModal('Saving all changes...', 'info');
+        modalSaveAllButton.disabled = true;
+        modalSaveAllButton.textContent = '💾 Saving...';
+
+        try {
+            const dataForUpdate = {};
+
+            // Check each field for changes
+            const currentStatus = modalChangeStatusSelect.value;
+            const currentAssignee = modalAssignCollaboratorInput.value.trim();
+            const currentDescription = modalTicketDescription.value.trim();
+
+            if (currentStatus && currentStatus !== originalTicketData.status) {
+                dataForUpdate[COLUMN_NAMES.STATUS] = currentStatus;
+            }
+
+            if (currentAssignee !== originalTicketData.assignee) {
+                dataForUpdate[COLUMN_NAMES.ASSIGNED_COLLABORATOR] = currentAssignee || null;
+            }
+
+            if (currentDescription !== originalTicketData.description) {
+                dataForUpdate[COLUMN_NAMES.DETAILED_DESCRIPTION] = currentDescription;
+            }
+
+            console.log('🔍 Debug Save - Data to update:', dataForUpdate);
+
+            if (Object.keys(dataForUpdate).length === 0) {
+                showMessageInModal('No valid changes to save.', 'warning');
+                return;
+            }
+
+            const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
+
+            if (updatedTicket && updatedTicket.fields) {
+                const fields = updatedTicket.fields;
+
+                // Update original data
+                originalTicketData = {
+                    status: fields[COLUMN_NAMES.STATUS] || "",
+                    assignee: fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] || "",
+                    description: fields[COLUMN_NAMES.DETAILED_DESCRIPTION] || ""
+                };
+
+                // Update display
+                modalTicketStatus.textContent = originalTicketData.status;
+                modalTicketAssignee.textContent = originalTicketData.assignee || 'Unassigned';
+                modalTicketDescription.value = originalTicketData.description;
+
+                // Update form values
+                modalChangeStatusSelect.value = originalTicketData.status;
+                modalAssignCollaboratorInput.value = originalTicketData.assignee;
+
+                // Reset change tracking
+                hasUnsavedChanges = false;
+                updateChangesIndicator();
+
+                // Update ticket in main list
                 const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
                 if (ticketIndex > -1) {
                     if (allTickets[ticketIndex].fields) {
-                         allTickets[ticketIndex].fields[COLUMN_NAMES.STATUS] = newStatusValue;
+                        Object.assign(allTickets[ticketIndex].fields, fields);
                     } else {
-                        allTickets[ticketIndex].fields = { [COLUMN_NAMES.STATUS]: newStatusValue };
-                    }
-                    applyFiltersAndSort();
-                } else {
-                     loadAndDisplayTickets();
-                }
-                const userNotifyStatuses = ["Acknowledged", "In Progress", "Resolved"];
-                if (userNotifyStatuses.includes(newStatusValue)) {
-                    showMessageOnPage(`Status updated to ${newStatusValue}. REMINDER: Manually notify the user.`, 'info');
-                }
-            } else {
-                showMessageInModal('Failed to update status. The server returned an unexpected response. Please try again.', 'error');
-            }
-        } catch (error) {
-            showMessageInModal(`Error updating status: ${error.message || 'Unknown error'}.`, 'error');
-        } finally {
-            modalSaveStatusButton.disabled = false;
-            modalSaveStatusButton.textContent = 'Save Status';
-        }
-    });
-
-    modalSaveAssigneeButton.addEventListener('click', async () => {
-        // console.log('[Admin JS] Save Changes Function (Assignee): Using currentlySelectedRecordId for update:', currentlySelectedRecordId); // Removed i18n log
-        if (!currentlySelectedRecordId) return;
-        const newAssignee = modalAssignCollaboratorInput.value.trim();
-        modalSaveAssigneeButton.disabled = true;
-        showMessageInModal('Updating assignment...', 'info');
-        modalSaveAssigneeButton.textContent = 'Saving...';
-        const dataForUpdate = { [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: newAssignee };
-        try {
-            const updatedTicket = await updateTicket(currentlySelectedRecordId, dataForUpdate);
-            if (updatedTicket && updatedTicket.fields) {
-                const newAssigneeValue = updatedTicket.fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR];
-                const newAssigneeDisplay = newAssigneeValue || 'Unassigned';
-
-                showMessageInModal(`Collaborator successfully assigned: "${newAssigneeDisplay}".`, 'success');
-                modalTicketAssignee.textContent = newAssigneeDisplay;
-                modalAssignCollaboratorInput.value = newAssigneeValue || "";
-
-                const ticketIndex = allTickets.findIndex(t => t.id === currentlySelectedRecordId);
-                if (ticketIndex > -1) {
-                     if (allTickets[ticketIndex].fields) {
-                        allTickets[ticketIndex].fields[COLUMN_NAMES.ASSIGNED_COLLABORATOR] = newAssigneeValue;
-                    } else {
-                        allTickets[ticketIndex].fields = { [COLUMN_NAMES.ASSIGNED_COLLABORATOR]: newAssigneeValue };
+                        allTickets[ticketIndex].fields = fields;
                     }
                     applyFiltersAndSort();
                 } else {
                     loadAndDisplayTickets();
                 }
-                if (newAssignee.trim() !== "") {
-                    showMessageOnPage(`Ticket assigned to ${newAssigneeDisplay}. REMINDER: Manually notify the collaborator.`, 'info');
+
+                // Show success message with details
+                const changesText = Object.keys(dataForUpdate).join(', ');
+                showMessageInModal(`✅ Successfully updated: ${changesText}`, 'success');
+
+                // Show notification for status changes
+                if (dataForUpdate[COLUMN_NAMES.STATUS]) {
+                    const userNotifyStatuses = ["Acknowledged", "In Progress", "Resolved"];
+                    if (userNotifyStatuses.includes(originalTicketData.status)) {
+                        showMessageOnPage(`Status updated to ${originalTicketData.status}. REMINDER: Manually notify the user.`, 'info');
+                    }
                 }
+
+                // Show notification for assignee changes
+                if (dataForUpdate[COLUMN_NAMES.ASSIGNED_COLLABORATOR] && originalTicketData.assignee) {
+                    showMessageOnPage(`Ticket assigned to ${originalTicketData.assignee}. REMINDER: Manually notify the collaborator.`, 'info');
+                }
+
             } else {
-                showMessageInModal('Failed to assign collaborator. The server returned an unexpected response. Please try again.', 'error');
+                showMessageInModal('❌ Failed to save changes. Please try again.', 'error');
             }
+
         } catch (error) {
-            showMessageInModal(`Error assigning collaborator: ${error.message || 'Unknown error'}.`, 'error');
+            console.error('🔍 Debug Save - Error:', error);
+            showMessageInModal(`❌ Error saving changes: ${error.message}`, 'error');
         } finally {
-            modalSaveAssigneeButton.disabled = false;
-            modalSaveAssigneeButton.textContent = 'Save Assignment';
+            modalSaveAllButton.disabled = false;
+            modalSaveAllButton.textContent = '💾 Save All Changes';
         }
-    });
+    }
+
+    // --- Reset Function ---
+    function resetChanges() {
+        if (!currentlySelectedRecordId || !originalTicketData) return;
+
+        modalChangeStatusSelect.value = originalTicketData.status;
+        modalAssignCollaboratorInput.value = originalTicketData.assignee;
+        modalTicketDescription.value = originalTicketData.description;
+
+        hasUnsavedChanges = false;
+        updateChangesIndicator();
+
+        showMessageInModal('Changes reset to original values.', 'info');
+    }
+
+    // --- Event Listeners for Form Changes ---
+    if (modalChangeStatusSelect) {
+        modalChangeStatusSelect.addEventListener('change', () => {
+            hasUnsavedChanges = detectChanges();
+            updateChangesIndicator();
+        });
+    }
+
+    if (modalAssignCollaboratorInput) {
+        modalAssignCollaboratorInput.addEventListener('input', () => {
+            hasUnsavedChanges = detectChanges();
+            updateChangesIndicator();
+        });
+    }
+
+    if (modalTicketDescription) {
+        modalTicketDescription.addEventListener('input', () => {
+            hasUnsavedChanges = detectChanges();
+            updateChangesIndicator();
+        });
+    }
+
+    // --- Unified Save and Reset Button Listeners ---
+    if (modalSaveAllButton) {
+        modalSaveAllButton.addEventListener('click', saveAllChanges);
+    }
+
+    if (modalResetButton) {
+        modalResetButton.addEventListener('click', resetChanges);
+    }
 
     // --- Event Listeners for Controls ---
     if (statusFilter) statusFilter.addEventListener('change', applyFiltersAndSort);
     if (urgencyFilter) urgencyFilter.addEventListener('change', applyFiltersAndSort);
+    if (refreshButton) {
+        refreshButton.addEventListener('click', () => {
+            console.log('🔄 Manual refresh triggered');
+            loadAndDisplayTickets();
+        });
+    }
     let searchTimeout;
     if (searchInput) {
         searchInput.addEventListener('input', () => {

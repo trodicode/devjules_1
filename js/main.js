@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const ticketData = {
                 [COLUMN_NAMES.TICKET_TITLE]: titleInput.value,
                 [COLUMN_NAMES.DETAILED_DESCRIPTION]: descriptionInput.value,
-                [COLUMN_NAMES.URGENCY_LEVEL]: { value: urgencyInput.value },
+                [COLUMN_NAMES.URGENCY_LEVEL]: urgencyInput.value,
                 [COLUMN_NAMES.REQUESTER_EMAIL]: requesterEmailInput.value.trim(), // Add email to ticketData
             };
 
@@ -177,8 +177,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     showMessage('Failed to submit ticket. The server returned an unexpected response. Please try again later.', 'error');
                 }
             } catch (error) {
-                // console.error('Error during ticket submission:', error); // Original log
-                showMessage(`An error occurred while submitting your ticket: ${error.message || 'Unknown error'}. Please try again.`, 'error');
+                console.error('Error during ticket submission:', error); // Debug log
+                const errorMessage = error.message || 'Unknown error';
+                showMessage(`An error occurred while submitting your ticket: ${errorMessage}. Please try again.`, 'error');
             } finally {
                 const submitAnotherButtonExists = document.getElementById('submitAnotherTicket');
                 if (!submitAnotherButtonExists) {

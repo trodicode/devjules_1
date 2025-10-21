@@ -46,6 +46,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show debug info after a short delay to ensure all scripts are loaded
     setTimeout(showDebugInfo, 100);
 
+    // Force logout functionality
+    const forceLogoutBtn = document.getElementById('forceLogoutBtn');
+    if (forceLogoutBtn) {
+        forceLogoutBtn.addEventListener('click', () => {
+            sessionStorage.clear();
+            localStorage.clear();
+            console.log('🔧 All storage cleared by force logout');
+            alert('All sessions cleared! Please refresh the page.');
+        });
+    }
+
+    // Clear fields functionality
+    const clearFieldsBtn = document.getElementById('clearFieldsBtn');
+    if (clearFieldsBtn) {
+        clearFieldsBtn.addEventListener('click', () => {
+            if (loginForm) loginForm.reset();
+            console.log('🔧 Form fields cleared manually');
+        });
+    }
+
     const loginForm = document.getElementById('loginForm');
     const loginMessageArea = document.getElementById('loginMessageArea');
     const submitButton = loginForm ? loginForm.querySelector('button[type="submit"]') : null;
@@ -98,8 +118,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
 
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
+        const email = emailInput ? emailInput.value.trim() : '';
+        const password = passwordInput ? passwordInput.value.trim() : '';
+
+        console.log('🔍 Debug Login - Email input element:', emailInput);
+        console.log('🔍 Debug Login - Password input element:', passwordInput);
+        console.log('🔍 Debug Login - Email value from form:', email);
+        console.log('🔍 Debug Login - Password value from form:', password);
 
         if (!email || !password) {
             showMessage('Email and Password are required.', 'error');
@@ -111,14 +136,31 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.textContent = 'Logging in...';
 
         try {
-            console.log('🔍 Debug - Tentative de connexion pour:', email);
+            // Clear any existing session data before login
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userRole');
+            console.log('🔍 Debug - Session cleared, tentative de connexion pour:', email);
+
             const userRecord = await window.getUserByEmail(email);
             console.log('🔍 Debug - Réponse API reçue:', userRecord);
+            console.log('🔍 Debug - User fields:', userRecord?.fields);
 
             if (userRecord && userRecord.fields) {
                 const storedPassword = userRecord.fields[window.COLUMN_NAMES.USER_PASSWORD];
                 const userRoleObject = userRecord.fields[window.COLUMN_NAMES.USER_ROLE];
-                const userRole = userRoleObject ? userRoleObject.value : null;
+
+                // Handle both object and string formats for user role
+                let userRole;
+                if (userRoleObject && typeof userRoleObject === 'object' && userRoleObject.value) {
+                    userRole = userRoleObject.value;
+                } else if (typeof userRoleObject === 'string') {
+                    userRole = userRoleObject;
+                } else {
+                    userRole = null;
+                }
+
+                console.log('🔍 Debug Login - User role object:', userRoleObject);
+                console.log('🔍 Debug Login - Extracted role:', userRole);
 
                 // Direct string comparison (as specified for the exercise)
                 if (storedPassword === password) {
@@ -151,11 +193,12 @@ document.addEventListener('DOMContentLoaded', () => {
             // console.error('Error during login process:', error); // Original log
             showMessage(`An error occurred during login: ${error.message || 'Unknown error'}. Please try again.`, 'error');
         } finally {
-            const userRoleFromStorage = sessionStorage.getItem('userRole');
-            if (!(userRoleFromStorage === 'Administrateur' || userRoleFromStorage === 'Utilisateur') ||
-                (loginMessageArea.style.display === 'block' && loginMessageArea.textContent.includes('Invalid email or password.')) ||
-                (loginMessageArea.style.display === 'block' && loginMessageArea.textContent.includes('An error occurred during login:'))) {
-                 if (submitButton.disabled) {
+            // Only re-enable button if login failed
+            const currentMessage = loginMessageArea.textContent;
+            if (currentMessage.includes('Invalid email or password') ||
+                currentMessage.includes('An error occurred during login') ||
+                currentMessage.includes('does not have access to any specific page')) {
+                if (submitButton.disabled) {
                     submitButton.disabled = false;
                     submitButton.textContent = 'Login';
                 }
