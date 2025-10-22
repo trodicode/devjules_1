@@ -47,14 +47,19 @@
         </div>
 
         <!-- Control Buttons -->
-        <div style="text-align: center; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center;">
+        <div style="text-align: center; margin-bottom: 20px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;">
             <button id="forceLogoutBtn" type="button" style="background: transparent; border: 1px solid #F900F9; color: #F900F9; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
                 🚪 Force Logout
             </button>
             <button id="clearFieldsBtn" type="button" style="background: transparent; border: 1px solid #00F0F0; color: #00F0F0; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
                 🧹 Clear Fields
             </button>
+            <button id="showStorageBtn" type="button" style="background: transparent; border: 1px solid #FFA500; color: #FFA500; padding: 5px 10px; border-radius: 3px; font-size: 12px; cursor: pointer;">
+                🔍 Show Storage
+            </button>
         </div>
+
+
 
         <form id="loginForm" class="space-y-6" autocomplete="off">
             <div>
@@ -82,14 +87,31 @@
         localStorage.clear();
         console.log('🔧 All storage cleared on login page load');
 
-        // Clear form fields on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        // Clear form fields immediately when script loads
+        function clearFormFields() {
             const emailField = document.getElementById('email');
             const passwordField = document.getElementById('password');
-            if (emailField) emailField.value = '';
-            if (passwordField) passwordField.value = '';
-            console.log('🔧 Form fields cleared');
-        });
+            if (emailField) {
+                emailField.value = '';
+                emailField.setAttribute('value', '');
+                console.log('🔧 Email field cleared');
+            }
+            if (passwordField) {
+                passwordField.value = '';
+                passwordField.setAttribute('value', '');
+                console.log('🔧 Password field cleared');
+            }
+        }
+
+        // Clear immediately if DOM is already loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', clearFormFields);
+        } else {
+            clearFormFields();
+        }
+
+        // Also clear on page show (when returning to tab)
+        window.addEventListener('pageshow', clearFormFields);
     </script>
     <script src="js/config.js"></script>
     <script src="js/baserow-api.js"></script>

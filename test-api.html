@@ -99,6 +99,9 @@
         </div>
     </div>
 
+    <script>window.BASEROW_API_TOKEN = "YOUR_API_TOKEN_HERE";</script>
+    <script src="js/config.js"></script>
+    <script src="js/baserow-api.js"></script>
     <script>
         function log(message, type = 'info') {
             const logDiv = document.getElementById('log');
@@ -123,9 +126,7 @@
 
             // Test API Token
             if (typeof BASEROW_API_TOKEN !== 'undefined') {
-                if (BASEROW_API_TOKEN === 'YdXGd0xTxa0iUL90Pg96YjEX6jQn87DT
-' || BASEROW_API_TOKEN === 'YdXGd0xTxa0iUL90Pg96YjEX6jQn87DT
-') {
+                if (BASEROW_API_TOKEN === 'YOUR_API_TOKEN_HERE' || BASEROW_API_TOKEN.startsWith('DidwqyN')) {
                     results.push('✅ API Token: Configuré');
                     log('API Token trouvé et configuré', 'success');
                 } else {

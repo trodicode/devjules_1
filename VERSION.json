@@ -1,0 +1,50 @@
+{
+  "version": "1.02",
+  "release_date": "2025-01-22",
+  "version_name": "Security Update",
+  "changelog": [
+    {
+      "version": "1.02",
+      "date": "2025-01-22",
+      "type": "security",
+      "changes": [
+        "🔒 CRITICAL: Sécurisation de la clé API - Suppression du token en dur côté client",
+        "🔒 CRITICAL: Suppression des boutons de test utilisateurs dangereux",
+        "🔒 Sécurisation du serveur avec injection dynamique du token",
+        "🔒 Ajout de la gestion sécurisée des variables d'environnement",
+        "📝 Création du guide de sécurité complet (README_SECURITY.md)",
+        "📝 Ajout du fichier d'exemple d'environnement (.env.example)",
+        "🔧 Amélioration de la gestion des erreurs de sécurité",
+        "🔧 Mise à jour des numéros de version dans tous les fichiers"
+      ]
+    },
+    {
+      "version": "1.01",
+      "date": "2025-01-20",
+      "type": "feature",
+      "changes": [
+        "✨ Version initiale de l'application de ticketing",
+        "🎨 Interface utilisateur avec thème cyber/néon",
+        "📋 Système de soumission de tickets",
+        "👥 Dashboard d'administration",
+        "🔐 Système d'authentification utilisateur",
+        "🌍 Support multilingue (Français/Anglais)",
+        "📊 Intégration API Baserow"
+      ]
+    }
+  ],
+  "next_features": [
+    "📋 Amélioration de la validation côté serveur",
+    "🚀 Optimisation des performances avec pagination",
+    "📧 Système de notifications par email",
+    "📱 Interface responsive améliorée",
+    "🔍 Recherche avancée dans les tickets",
+    "📈 Système de métriques et rapports"
+  ],
+  "security_notes": [
+    "⚠️ IMPORTANT: Configurez BASEROW_API_TOKEN avant déploiement",
+    "⚠️ Utilisez HTTPS en production",
+    "⚠️ Restreignez le CORS aux domaines autorisés",
+    "⚠️ Ne commitez jamais le fichier .env"
+  ]
+}

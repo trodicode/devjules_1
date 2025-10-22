@@ -8,7 +8,7 @@
     // Base URL for Baserow API
     const BASEROW_API_BASE_URL = 'https://api.baserow.io/api/database/rows';
 
-    // Column Name Mapping
+    // Column Name Mapping - Updated to match your Baserow database exactly
     const COLUMN_NAMES = {
         TICKET_TITLE: 'Ticket Title',
         DETAILED_DESCRIPTION: 'Detailed Description',
@@ -18,10 +18,10 @@
         STATUS: 'Status',
         ASSIGNED_COLLABORATOR: 'Assigned Collaborator',
         REQUESTER_EMAIL: 'On Demand',
-        DATE_SUBMITTED: 'Date Submited', // Make sure this matches exactly your Baserow column name
-        USER_EMAIL: 'User mail',
-        USER_PASSWORD: 'Password',
-        USER_ROLE: 'Role',
+        DATE_SUBMITTED: 'Date Submited',
+        USER_EMAIL: 'User mail',        // ← Exact match: "User mail"
+        USER_PASSWORD: 'Password',      // ← Exact match: "Password"
+        USER_ROLE: 'Role',             // ← Exact match: "Role"
     };
 
     // Expose COLUMN_NAMES to the global scope
@@ -126,17 +126,36 @@
 
     async function getUserByEmail(email) {
         console.log('🔍 Debug getUserByEmail - Searching for email:', email);
+        console.log('🔍 Debug getUserByEmail - COLUMN_NAMES.USER_EMAIL:', COLUMN_NAMES.USER_EMAIL);
+
         const filterField = encodeURIComponent(COLUMN_NAMES.USER_EMAIL);
         const query = `?filter__field_${filterField}__equal=${encodeURIComponent(email)}`;
+        console.log('🔍 Debug getUserByEmail - Filter field:', filterField);
         console.log('🔍 Debug getUserByEmail - Query:', query);
+
         const response = await _fetchBaserowAPI(BASEROW_USERS_TABLE_ID, query, 'GET');
-        console.log('🔍 Debug getUserByEmail - Response:', response);
-        if (response.results.length > 0) {
+        console.log('🔍 Debug getUserByEmail - Raw response:', response);
+        console.log('🔍 Debug getUserByEmail - Results count:', response.results?.length || 0);
+
+        if (response.results && response.results.length > 0) {
             const userRecord = response.results[0];
-            console.log('🔍 Debug getUserByEmail - User found:', userRecord);
+            console.log('🔍 Debug getUserByEmail - User found:', {
+                id: userRecord.id,
+                fields: userRecord,
+                emailField: userRecord[COLUMN_NAMES.USER_EMAIL],
+                roleField: userRecord[COLUMN_NAMES.USER_ROLE]
+            });
             return { id: userRecord.id, fields: userRecord, createdTime: userRecord.created_on };
         }
-        console.log('🔍 Debug getUserByEmail - No user found');
+
+        console.log('🔍 Debug getUserByEmail - No user found for email:', email);
+        console.log('🔍 Debug getUserByEmail - Available users in table:');
+        if (response.results) {
+            response.results.forEach((user, index) => {
+                console.log(`  User ${index + 1}:`, user[COLUMN_NAMES.USER_EMAIL]);
+            });
+        }
+
         return null;
     }
 

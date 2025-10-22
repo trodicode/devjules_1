@@ -1,210 +1,193 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // console.log('login.js loaded.'); // Original log
+    console.log('🚀 Login system completely refactored');
 
-    // Debug function to check configuration
-    function showDebugInfo() {
-        if (typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE) {
-            const debugPanel = document.getElementById('debugPanel');
-            const debugInfo = document.getElementById('debugInfo');
+    // === CONFIGURATION CHECK ===
+    const debugPanel = document.getElementById('debugPanel');
+    const debugInfo = document.getElementById('debugInfo');
 
-            if (debugPanel && debugInfo) {
-                debugPanel.style.display = 'block';
+    if (debugPanel && debugInfo && typeof DEBUG_MODE !== 'undefined' && DEBUG_MODE) {
+        debugPanel.style.display = 'block';
+        const configStatus = [
+            typeof BASEROW_API_TOKEN !== 'undefined' ? '✅ API Token: Configuré' : '❌ API Token: Non chargé',
+            typeof BASEROW_USERS_TABLE_ID !== 'undefined' ? '✅ Users Table ID: Configuré' : '❌ Users Table ID: Non chargé',
+            typeof window.getUserByEmail === 'function' ? '✅ getUserByEmail: Disponible' : '❌ getUserByEmail: Non disponible',
+            typeof window.COLUMN_NAMES !== 'undefined' ? '✅ COLUMN_NAMES: Chargé' : '❌ COLUMN_NAMES: Non chargé'
+        ];
+        debugInfo.innerHTML = configStatus.join('<br>');
+    }
 
-                let info = [];
+    // === UTILITY FUNCTIONS ===
+    function clearAllStorage() {
+        sessionStorage.clear();
+        localStorage.clear();
+        console.log('🔧 All storage cleared');
+    }
 
-                // Check if config constants are loaded
-                if (typeof BASEROW_API_TOKEN !== 'undefined') {
-                    info.push(`✅ API Token: ${BASEROW_API_TOKEN !== 'YOUR_BASEROW_API_TOKEN_HERE' ? 'Configuré' : 'Non configuré'}`);
-                } else {
-                    info.push(`❌ API Token: Non chargé`);
-                }
+    function clearFormFields() {
+        const emailField = document.getElementById('email');
+        const passwordField = document.getElementById('password');
+        if (emailField) {
+            emailField.value = '';
+            emailField.setAttribute('value', '');
+        }
+        if (passwordField) {
+            passwordField.value = '';
+            passwordField.setAttribute('value', '');
+        }
+        console.log('🔧 Form fields cleared');
+    }
 
-                if (typeof BASEROW_USERS_TABLE_ID !== 'undefined') {
-                    info.push(`✅ Users Table ID: ${BASEROW_USERS_TABLE_ID !== 'YOUR_USERS_TABLE_ID' ? 'Configuré' : 'Non configuré'}`);
-                } else {
-                    info.push(`❌ Users Table ID: Non chargé`);
-                }
-
-                // Check if API functions are available
-                if (typeof window.getUserByEmail === 'function') {
-                    info.push(`✅ getUserByEmail: Disponible`);
-                } else {
-                    info.push(`❌ getUserByEmail: Non disponible`);
-                }
-
-                if (typeof window.COLUMN_NAMES !== 'undefined') {
-                    info.push(`✅ COLUMN_NAMES: Chargé`);
-                } else {
-                    info.push(`❌ COLUMN_NAMES: Non chargé`);
-                }
-
-                debugInfo.innerHTML = info.join('<br>');
+    function showMessage(message, type = 'info') {
+        const messageArea = document.getElementById('loginMessageArea');
+        if (messageArea) {
+            messageArea.textContent = message;
+            messageArea.style.display = 'block';
+            const baseClasses = 'p-3 rounded-md mb-4 text-center text-sm';
+            switch (type) {
+                case 'success': messageArea.className = `${baseClasses} bg-slate-800 border border-neon-green text-neon-green`; break;
+                case 'error': messageArea.className = `${baseClasses} bg-slate-800 border border-red-500 text-red-500`; break;
+                default: messageArea.className = `${baseClasses} bg-slate-800 border border-neon-blue text-neon-blue`; break;
             }
         }
     }
 
-    // Show debug info after a short delay to ensure all scripts are loaded
-    setTimeout(showDebugInfo, 100);
+    // === EVENT LISTENERS FOR CONTROL BUTTONS ===
+    document.getElementById('forceLogoutBtn')?.addEventListener('click', () => {
+        clearAllStorage();
+        alert('All sessions cleared! Please refresh the page.');
+    });
 
-    // Force logout functionality
-    const forceLogoutBtn = document.getElementById('forceLogoutBtn');
-    if (forceLogoutBtn) {
-        forceLogoutBtn.addEventListener('click', () => {
-            sessionStorage.clear();
-            localStorage.clear();
-            console.log('🔧 All storage cleared by force logout');
-            alert('All sessions cleared! Please refresh the page.');
+    document.getElementById('clearFieldsBtn')?.addEventListener('click', () => {
+        clearFormFields();
+    });
+
+    document.getElementById('showStorageBtn')?.addEventListener('click', () => {
+        console.log('🔍 sessionStorage:', {
+            userEmail: sessionStorage.getItem('userEmail'),
+            userRole: sessionStorage.getItem('userRole')
         });
-    }
+        console.log('🔍 localStorage:', Object.fromEntries(
+            Array.from({length: localStorage.length}, (_, i) => [
+                localStorage.key(i),
+                localStorage.getItem(localStorage.key(i))
+            ])
+        ));
+        alert('Check console for storage details');
+    });
 
-    // Clear fields functionality
-    const clearFieldsBtn = document.getElementById('clearFieldsBtn');
-    if (clearFieldsBtn) {
-        clearFieldsBtn.addEventListener('click', () => {
-            if (loginForm) loginForm.reset();
-            console.log('🔧 Form fields cleared manually');
-        });
-    }
-
+    // === MAIN LOGIN FORM ===
     const loginForm = document.getElementById('loginForm');
-    const loginMessageArea = document.getElementById('loginMessageArea');
-    const submitButton = loginForm ? loginForm.querySelector('button[type="submit"]') : null;
+    const submitButton = loginForm?.querySelector('button[type="submit"]');
 
-    if (!loginForm || !loginMessageArea || !submitButton) {
-        // console.error('Login form, message area, or submit button not found. Ensure HTML is correct.'); // Original log
-        if (loginMessageArea) {
-            loginMessageArea.textContent = 'Critical error: Login interface is not correctly loaded. Please contact support.';
-            loginMessageArea.className = 'p-3 rounded-md mb-4 text-center text-sm bg-slate-800 border border-red-500 text-red-500';
-            loginMessageArea.style.display = 'block';
-        }
+    if (!loginForm || !submitButton) {
+        console.error('❌ Login form elements not found');
+        showMessage('Critical error: Login interface not found.', 'error');
         return;
     }
 
-    // Ensure airtable-api.js and its functions are loaded
-    if (typeof window.getUserByEmail !== 'function' || typeof window.COLUMN_NAMES === 'undefined') {
-        // console.error('Airtable API functions (getUserByEmail) or COLUMN_NAMES are not available.'); // Original log
-        loginMessageArea.textContent = 'Critical error: Cannot connect to authentication system. Please try again later.';
-        loginMessageArea.className = 'p-3 rounded-md mb-4 text-center text-sm bg-slate-800 border border-red-500 text-red-500';
-        loginMessageArea.style.display = 'block';
-        if (submitButton) submitButton.disabled = true;
-        return;
-    }
-
-    // Helper to display messages in the loginMessageArea
-    function showMessage(message, type = 'info') {
-        loginMessageArea.textContent = message;
-        let classes = 'p-3 rounded-md mb-4 text-center text-sm ';
-        switch (type) {
-            case 'success':
-                classes += 'bg-slate-800 border border-neon-green text-neon-green';
-                break;
-            case 'error':
-                classes += 'bg-slate-800 border border-red-500 text-red-500';
-                break;
-            case 'info':
-            default:
-                classes += 'bg-slate-800 border border-neon-blue text-neon-blue';
-                break;
-        }
-        loginMessageArea.className = classes;
-        loginMessageArea.style.display = 'block';
-    }
-
+    // === FORM SUBMISSION HANDLER ===
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
-        loginMessageArea.style.display = 'none'; // Clear previous messages
-        loginMessageArea.textContent = '';
+        console.log('🔐 Login form submitted');
 
+        // Get form values
         const emailInput = document.getElementById('email');
         const passwordInput = document.getElementById('password');
 
-        const email = emailInput ? emailInput.value.trim() : '';
-        const password = passwordInput ? passwordInput.value.trim() : '';
+        const email = emailInput?.value?.trim() || '';
+        const password = passwordInput?.value?.trim() || '';
 
-        console.log('🔍 Debug Login - Email input element:', emailInput);
-        console.log('🔍 Debug Login - Password input element:', passwordInput);
-        console.log('🔍 Debug Login - Email value from form:', email);
-        console.log('🔍 Debug Login - Password value from form:', password);
+        console.log('📝 Form values:', { email: email || '(empty)', password: password ? '***' : '(empty)' });
 
+        // Validation
         if (!email || !password) {
             showMessage('Email and Password are required.', 'error');
             return;
         }
 
-        // Disable button to prevent multiple submissions
+        // Disable form during submission
         submitButton.disabled = true;
         submitButton.textContent = 'Logging in...';
+        showMessage('Connecting to authentication system...', 'info');
 
         try {
-            // Clear any existing session data before login
-            sessionStorage.removeItem('userEmail');
-            sessionStorage.removeItem('userRole');
-            console.log('🔍 Debug - Session cleared, tentative de connexion pour:', email);
+            // CRITICAL: Clear ALL storage before login
+            clearAllStorage();
 
+            console.log('🔍 Searching for user:', email);
             const userRecord = await window.getUserByEmail(email);
-            console.log('🔍 Debug - Réponse API reçue:', userRecord);
-            console.log('🔍 Debug - User fields:', userRecord?.fields);
 
-            if (userRecord && userRecord.fields) {
-                const storedPassword = userRecord.fields[window.COLUMN_NAMES.USER_PASSWORD];
-                const userRoleObject = userRecord.fields[window.COLUMN_NAMES.USER_ROLE];
-
-                // Handle both object and string formats for user role
-                let userRole;
-                if (userRoleObject && typeof userRoleObject === 'object' && userRoleObject.value) {
-                    userRole = userRoleObject.value;
-                } else if (typeof userRoleObject === 'string') {
-                    userRole = userRoleObject;
-                } else {
-                    userRole = null;
-                }
-
-                console.log('🔍 Debug Login - User role object:', userRoleObject);
-                console.log('🔍 Debug Login - Extracted role:', userRole);
-
-                // Direct string comparison (as specified for the exercise)
-                if (storedPassword === password) {
-                    // Passwords match
-                    sessionStorage.setItem('userEmail', email);
-                    sessionStorage.setItem('userRole', userRole);
-
-                    showMessage('Login successful! Redirecting...', 'success');
-
-                    // Redirect based on role
-                    setTimeout(() => {
-                        if (userRole === 'Administrateur') {
-                            window.location.href = 'admin.html';
-                        } else if (userRole === 'Utilisateur') {
-                            window.location.href = 'index.html';
-                        } else {
-                            showMessage(`Your role ('${userRole}') does not have access to any specific page.`, 'error');
-                            submitButton.disabled = false;
-                            submitButton.textContent = 'Login';
-                        }
-                    }, 1500);
-
-                } else {
-                    showMessage('Invalid email or password.', 'error');
-                }
-            } else {
-                showMessage('Invalid email or password.', 'error');
+            if (!userRecord) {
+                throw new Error('User not found in database');
             }
+
+            console.log('👤 User found:', {
+                id: userRecord.id,
+                hasFields: !!userRecord.fields,
+                fieldsCount: userRecord.fields ? Object.keys(userRecord.fields).length : 0
+            });
+
+            if (!userRecord.fields) {
+                throw new Error('User data is incomplete');
+            }
+
+            // Extract user data with detailed logging
+            const userFields = userRecord.fields;
+            const storedPassword = userFields[window.COLUMN_NAMES.USER_PASSWORD];
+            const userRoleRaw = userFields[window.COLUMN_NAMES.USER_ROLE];
+
+            console.log('🔐 Authentication data:', {
+                storedPassword: storedPassword ? '***' : '(empty)',
+                userRoleRaw: userRoleRaw,
+                roleType: typeof userRoleRaw
+            });
+
+            // Determine user role (handle both object and string formats)
+            let userRole = null;
+            if (userRoleRaw) {
+                if (typeof userRoleRaw === 'object' && userRoleRaw.value) {
+                    userRole = userRoleRaw.value;
+                } else if (typeof userRoleRaw === 'string') {
+                    userRole = userRoleRaw;
+                }
+            }
+
+            console.log('🏷️ Final user role:', userRole);
+
+            // Password verification
+            if (storedPassword !== password) {
+                throw new Error('Password does not match');
+            }
+
+            // Authentication successful
+            console.log('✅ Authentication successful for:', email, 'with role:', userRole);
+
+            // Set session data
+            sessionStorage.setItem('userEmail', email);
+            sessionStorage.setItem('userRole', userRole || '');
+
+            showMessage('Login successful! Redirecting...', 'success');
+
+            // Redirect based on role
+            setTimeout(() => {
+                const redirectUrl = userRole === 'Administrateur' ? 'admin.html' : 'index.html';
+                console.log('🔀 Redirecting to:', redirectUrl);
+                window.location.href = redirectUrl;
+            }, 1000);
+
         } catch (error) {
-            // console.error('Error during login process:', error); // Original log
-            showMessage(`An error occurred during login: ${error.message || 'Unknown error'}. Please try again.`, 'error');
-        } finally {
-            // Only re-enable button if login failed
-            const currentMessage = loginMessageArea.textContent;
-            if (currentMessage.includes('Invalid email or password') ||
-                currentMessage.includes('An error occurred during login') ||
-                currentMessage.includes('does not have access to any specific page')) {
-                if (submitButton.disabled) {
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Login';
-                }
-            }
+            console.error('❌ Login error:', error.message);
+            showMessage(`Authentication failed: ${error.message}`, 'error');
+
+            // Re-enable form
+            submitButton.disabled = false;
+            submitButton.textContent = 'Login';
         }
     });
 
-    // console.log('Login form event listeners attached.'); // Original log
+
+
+    // === INITIALIZATION ===
+    console.log('✅ Login system initialized');
+    clearFormFields();
 });
