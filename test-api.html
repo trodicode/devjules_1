@@ -70,6 +70,11 @@
             <span style="background: linear-gradient(45deg, #F900F9, #00F0F0); color: #1A1A2E; padding: 6px 12px; border-radius: 15px; font-weight: bold; font-size: 14px;">V.1.02</span>
         </div>
 
+        <!-- Environment Detection Banner -->
+        <div id="environmentBanner" style="background: linear-gradient(45deg, #F900F9, #00F0F0); color: #1A1A2E; padding: 10px; border-radius: 8px; margin-bottom: 15px; text-align: center; font-weight: bold;">
+            🔍 Environnement : <span id="environmentType">Détection...</span>
+        </div>
+
         <div>
             <button onclick="testConfiguration()">1️⃣ Tester la configuration</button>
             <button onclick="testBasicConnection()">2️⃣ Tester la connexion basique</button>
@@ -498,8 +503,33 @@
             log('Logs effacés', 'info');
         }
 
+        // Environment detection function
+        function detectEnvironment() {
+            const hostname = window.location.hostname;
+            const banner = document.getElementById('environmentBanner');
+            const envType = document.getElementById('environmentType');
+
+            if (hostname.includes('netlify')) {
+                envType.textContent = 'Netlify 🌐';
+                banner.style.background = 'linear-gradient(45deg, #F900F9, #00F0F0)';
+                banner.innerHTML += ' <span style="font-size: 12px; opacity: 0.8;">(Production)</span>';
+                log('🌐 Environnement Netlify détecté', 'info');
+            } else if (hostname === 'localhost' || hostname === '127.0.0.1') {
+                envType.textContent = 'Localhost 💻';
+                banner.style.background = 'linear-gradient(45deg, #39FF14, #00F0F0)';
+                banner.innerHTML += ' <span style="font-size: 12px; opacity: 0.8;">(Développement)</span>';
+                log('💻 Environnement local détecté', 'success');
+            } else {
+                envType.textContent = 'Inconnu ❓';
+                banner.style.background = 'linear-gradient(45deg, #FFA500, #F900F9)';
+                banner.innerHTML += ' <span style="font-size: 12px; opacity: 0.8;">(' + hostname + ')</span>';
+                log('❓ Environnement inconnu détecté: ' + hostname, 'warning');
+            }
+        }
+
         // Auto-run configuration test on page load
         window.addEventListener('load', () => {
+            detectEnvironment();
             log('🚀 Page de test chargée. Cliquez sur les boutons pour commencer les tests.', 'info');
             setTimeout(testConfiguration, 500);
         });
