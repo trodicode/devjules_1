@@ -1,2 +1,3 @@
 # Ignore the config file containing the API token
 js/config.js
+.env
